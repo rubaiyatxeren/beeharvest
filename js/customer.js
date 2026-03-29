@@ -321,107 +321,140 @@
      openModal('checkoutModal');
    }
    
-   async function placeOrder(e) {
-     if (e) e.preventDefault();
-   
-     if (cart.length === 0) {
-       showToast('কার্ট খালি!', 'error');
-       return;
-     }
-   
-     // Get values
-     const fullName  = val('checkoutName');
-     const email     = val('checkoutEmail');
-     const phone     = val('checkoutPhone');
-     const address   = val('checkoutAddress');
-     const city      = val('checkoutCity');
-     const zipCode   = val('checkoutZipCode');
-     const notes     = val('checkoutNotes');
-     const payMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD';
-     const accepted  = document.getElementById('acceptTerms')?.checked;
-   
-     // Validation
-     if (!fullName || !email || !phone || !address || !city) {
-       showToast('সব প্রয়োজনীয় তথ্য পূরণ করুন (*)', 'error');
-       return;
-     }
-   
-     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-       showToast('সঠিক ইমেইল ঠিকানা দিন', 'error');
-       return;
-     }
-   
-     if (!/^01[3-9]\d{8}$/.test(phone)) {
-       showToast('সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)', 'error');
-       return;
-     }
-   
-     if (!accepted) {
-       showToast('শর্তাবলী মেনে নিন', 'error');
-       return;
-     }
-   
-     const pmMap = { COD: 'cash_on_delivery', bkash: 'bkash', nagad: 'nagad', card: 'card' };
-   
-     const orderData = {
-       items: cart.map(i => ({ product: i.productId, quantity: i.quantity })),
-       customer: {
-         name: fullName,
-         email,
-         phone,
-         address: {
-           street: address,
-           city, area: city, district: city, division: city,
-           postalCode: zipCode || '',
-         },
-       },
-       paymentMethod: pmMap[payMethod] || 'cash_on_delivery',
-       deliveryCharge: 60,
-       notes: notes || '',
-     };
-   
-     // Show loading
-     showLoadingOverlay();
-     const btn = document.getElementById('confirmOrderBtn');
-     setButtonLoading(btn, true);
-   
-     try {
-       const res = await fetch(`${API_URL}/orders`, {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify(orderData),
-       });
-       const data = await res.json();
-       if (!res.ok) throw new Error(data.message || 'অর্ডার দেওয়া যায়নি');
-       if (!data.success) throw new Error(data.message || 'অর্ডার ব্যর্থ');
-   
-       // Success!
-       cart = [];
-       saveCart();
-       updateCartUI();
-       closeModal('checkoutModal');
-       hideLoadingOverlay();
-   
-       const orderNum = data.data?.orderNumber || data.data?._id?.slice(-8) || 'SUCCESS';
-       setText('orderNumber', `#${orderNum}`);
-   
-       setTimeout(() => {
-         openModal('successModal');
-         startConfetti();
-         setTimeout(stopConfetti, 4000);
-       }, 400);
-   
-       showToast('অর্ডার সফল হয়েছে! 🎉', 'success');
-       document.getElementById('checkoutForm')?.reset();
-   
-     } catch(err) {
-       hideLoadingOverlay();
-       showToast(err.message || 'অর্ডার দেওয়া যায়নি। আবার চেষ্টা করুন।', 'error');
-       console.error('Order error:', err);
-     } finally {
-       setButtonLoading(btn, false);
-     }
-   }
+   /* ════════════════════════════════════════════════════════════
+   UPDATE ORDER PLACEMENT FUNCTION
+   ════════════════════════════════════════════════════════════ */
+
+async function placeOrder(e) {
+  if (e) e.preventDefault();
+  
+  if (cart.length === 0) {
+    showToast('কার্ট খালি!', 'error');
+    return;
+  }
+  
+  // Get values
+  const fullName  = val('checkoutName');
+  const email     = val('checkoutEmail');
+  const phone     = val('checkoutPhone');
+  const address   = val('checkoutAddress');
+  const city      = val('checkoutCity');
+  const zipCode   = val('checkoutZipCode');
+  const notes     = val('checkoutNotes');
+  const payMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD';
+  const accepted  = document.getElementById('acceptTerms')?.checked;
+  
+  // Validation
+  if (!fullName || !email || !phone || !address || !city) {
+    showToast('সব প্রয়োজনীয় তথ্য পূরণ করুন (*)', 'error');
+    return;
+  }
+  
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('সঠিক ইমেইল ঠিকানা দিন', 'error');
+    return;
+  }
+  
+  if (!/^01[3-9]\d{8}$/.test(phone)) {
+    showToast('সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)', 'error');
+    return;
+  }
+  
+  if (!accepted) {
+    showToast('শর্তাবলী মেনে নিন', 'error');
+    return;
+  }
+  
+  const pmMap = { COD: 'cash_on_delivery', bkash: 'bkash', nagad: 'nagad', card: 'card' };
+  
+  const orderData = {
+    items: cart.map(i => ({ 
+      product: i.productId, 
+      name: i.name,
+      price: i.price,
+      quantity: i.quantity 
+    })),
+    customer: {
+      name: fullName,
+      email,
+      phone,
+      address: {
+        street: address,
+        city, area: city, district: city, division: city,
+        postalCode: zipCode || '',
+      },
+    },
+    paymentMethod: pmMap[payMethod] || 'cash_on_delivery',
+    deliveryCharge: 60,
+    notes: notes || '',
+  };
+  
+  // Show loading
+  showLoadingOverlay();
+  const btn = document.getElementById('confirmOrderBtn');
+  setButtonLoading(btn, true);
+  
+  try {
+    const res = await fetch(`${API_URL}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'অর্ডার দেওয়া যায়নি');
+    if (!data.success) throw new Error(data.message || 'অর্ডার ব্যর্থ');
+    
+    // Success!
+    const orderNum = data.data?.orderNumber || data.data?._id?.slice(-8) || 'SUCCESS';
+    const { subtotal, shipping, total } = cartTotals();
+    
+    // Clear cart
+    cart = [];
+    saveCart();
+    updateCartUI();
+    closeModal('checkoutModal');
+    hideLoadingOverlay();
+    
+    // Set order number in success modal
+    setText('orderNumber', `#${orderNum}`);
+    
+    // Store order data for slip generation
+    window.lastOrderData = {
+      orderNumber: orderNum,
+      customer: orderData.customer,
+      items: orderData.items,
+      subtotal,
+      shipping,
+      total,
+      paymentMethod: orderData.paymentMethod
+    };
+    
+    // Setup download button
+    const downloadBtn = document.getElementById('downloadSlipBtn');
+    if (downloadBtn) {
+      downloadBtn.onclick = () => {
+        generateOrderSlipPNG(window.lastOrderData);
+      };
+    }
+    
+    // Show success modal
+    setTimeout(() => {
+      openModal('successModal');
+      startConfetti();
+      setTimeout(stopConfetti, 4000);
+    }, 400);
+    
+    showToast('অর্ডার সফল হয়েছে! 🎉', 'success');
+    document.getElementById('checkoutForm')?.reset();
+    
+  } catch(err) {
+    hideLoadingOverlay();
+    showToast(err.message || 'অর্ডার দেওয়া যায়নি। আবার চেষ্টা করুন।', 'error');
+    console.error('Order error:', err);
+  } finally {
+    setButtonLoading(btn, false);
+  }
+}
    
    /* ════════════════════════════════════════════════════════════
       NAVIGATION
@@ -990,6 +1023,244 @@ const POLICIES = {
       `
     }
   };
+
+  /* ════════════════════════════════════════════════════════════
+   ORDER SLIP GENERATOR
+   ════════════════════════════════════════════════════════════ */
+
+function generateOrderSlipPNG(orderData) {
+  // Create canvas
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Set canvas dimensions
+  canvas.width = 800;
+  canvas.height = 1000;
+  
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Colors
+  const colors = {
+    primary: '#0D1B3E',
+    secondary: '#1A2E5A',
+    accent: '#F5A623',
+    text: '#333333',
+    muted: '#666666',
+    border: '#e0e0e0'
+  };
+  
+  // Helper function to wrap text
+  function wrapText(text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+    let lineY = y;
+    
+    for(let n = 0; n < words.length; n++) {
+      const testLine = line + words[n] + ' ';
+      const metrics = ctx.measureText(testLine);
+      const testWidth = metrics.width;
+      
+      if (testWidth > maxWidth && n > 0) {
+        ctx.fillText(line, x, lineY);
+        line = words[n] + ' ';
+        lineY += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, x, lineY);
+    return lineY + lineHeight;
+  }
+  
+  // Header
+  ctx.fillStyle = colors.primary;
+  ctx.fillRect(0, 0, canvas.width, 120);
+  
+  // Logo/Title
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 28px "Hind Siliguri", sans-serif';
+  ctx.fillText('BeeHarvest', 50, 50);
+  ctx.font = '14px "Hind Siliguri", sans-serif';
+  ctx.fillText('বাংলাদেশের বিশ্বস্ত অনলাইন শপ', 50, 80);
+  
+  // Order Info Section
+  let yPos = 160;
+  
+  // Order Number
+  ctx.fillStyle = colors.accent;
+  ctx.font = 'bold 24px "Hind Siliguri", sans-serif';
+  ctx.fillText(`অর্ডার নম্বর: ${orderData.orderNumber}`, 50, yPos);
+  yPos += 40;
+  
+  // Date
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('bn-BD', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long'
+  });
+  
+  ctx.fillStyle = colors.muted;
+  ctx.font = '16px "Hind Siliguri", sans-serif';
+  ctx.fillText(`তারিখ: ${dateStr}`, 50, yPos);
+  yPos += 30;
+  
+  // Separator
+  ctx.strokeStyle = colors.border;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(50, yPos);
+  ctx.lineTo(canvas.width - 50, yPos);
+  ctx.stroke();
+  yPos += 40;
+  
+  // Customer Info
+  ctx.fillStyle = colors.primary;
+  ctx.font = 'bold 20px "Hind Siliguri", sans-serif';
+  ctx.fillText('গ্রাহক তথ্য', 50, yPos);
+  yPos += 30;
+  
+  ctx.fillStyle = colors.text;
+  ctx.font = '16px "Hind Siliguri", sans-serif';
+  ctx.fillText(`নাম: ${orderData.customer.name}`, 50, yPos);
+  yPos += 25;
+  ctx.fillText(`মোবাইল: ${orderData.customer.phone}`, 50, yPos);
+  yPos += 25;
+  ctx.fillText(`ইমেইল: ${orderData.customer.email}`, 50, yPos);
+  yPos += 25;
+  
+  // Address
+  ctx.font = '15px "Hind Siliguri", sans-serif';
+  yPos = wrapText(`ঠিকানা: ${orderData.customer.address.street}, ${orderData.customer.address.city}`, 50, yPos, 700, 22);
+  yPos += 10;
+  
+  // Separator
+  ctx.strokeStyle = colors.border;
+  ctx.beginPath();
+  ctx.moveTo(50, yPos);
+  ctx.lineTo(canvas.width - 50, yPos);
+  ctx.stroke();
+  yPos += 40;
+  
+  // Order Items Header
+  ctx.fillStyle = colors.primary;
+  ctx.font = 'bold 20px "Hind Siliguri", sans-serif';
+  ctx.fillText('অর্ডার আইটেমসমূহ', 50, yPos);
+  yPos += 40;
+  
+  // Table Header
+  ctx.fillStyle = colors.secondary;
+  ctx.fillRect(50, yPos, 700, 40);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 16px "Hind Siliguri", sans-serif';
+  ctx.fillText('পণ্যের নাম', 70, yPos + 25);
+  ctx.fillText('পরিমাণ', 450, yPos + 25);
+  ctx.fillText('মূল্য', 550, yPos + 25);
+  ctx.fillText('মোট', 650, yPos + 25);
+  yPos += 50;
+  
+  // Order Items
+  ctx.fillStyle = colors.text;
+  ctx.font = '15px "Hind Siliguri", sans-serif';
+  
+  orderData.items.forEach((item, index) => {
+    if (yPos > 750) return; // Prevent overflow
+    
+    // Alternate row colors
+    if (index % 2 === 0) {
+      ctx.fillStyle = '#f9f9f9';
+      ctx.fillRect(50, yPos - 10, 700, 40);
+    }
+    
+    ctx.fillStyle = colors.text;
+    
+    // Product name (truncate if too long)
+    let productName = item.name;
+    if (productName.length > 40) {
+      productName = productName.substring(0, 37) + '...';
+    }
+    ctx.fillText(productName, 70, yPos + 15);
+    
+    // Quantity
+    ctx.fillText(`x${item.quantity}`, 450, yPos + 15);
+    
+    // Price
+    ctx.fillText(`৳${item.price.toLocaleString('bn-BD')}`, 550, yPos + 15);
+    
+    // Total
+    const itemTotal = item.price * item.quantity;
+    ctx.fillText(`৳${itemTotal.toLocaleString('bn-BD')}`, 650, yPos + 15);
+    
+    yPos += 40;
+  });
+  
+  yPos += 20;
+  
+  // Separator
+  ctx.strokeStyle = colors.border;
+  ctx.beginPath();
+  ctx.moveTo(50, yPos);
+  ctx.lineTo(canvas.width - 50, yPos);
+  ctx.stroke();
+  yPos += 40;
+  
+  // Summary
+  ctx.fillStyle = colors.text;
+  ctx.font = '16px "Hind Siliguri", sans-serif';
+  ctx.fillText('সারসংক্ষেপ', 50, yPos);
+  yPos += 30;
+  
+  ctx.fillText('পণ্যের মূল্য:', 100, yPos);
+  ctx.fillText(`৳${orderData.subtotal.toLocaleString('bn-BD')}`, 650, yPos);
+  yPos += 25;
+  
+  ctx.fillText('ডেলিভারি চার্জ:', 100, yPos);
+  ctx.fillText(`৳${orderData.shipping.toLocaleString('bn-BD')}`, 650, yPos);
+  yPos += 25;
+  
+  // Total
+  ctx.fillStyle = colors.primary;
+  ctx.font = 'bold 18px "Hind Siliguri", sans-serif';
+  ctx.fillText('মোট প্রদেয়:', 100, yPos);
+  ctx.fillText(`৳${orderData.total.toLocaleString('bn-BD')}`, 650, yPos);
+  yPos += 40;
+  
+  // Payment Method
+  ctx.fillStyle = colors.text;
+  ctx.font = '16px "Hind Siliguri", sans-serif';
+  const paymentMethodText = {
+    'cash_on_delivery': 'ক্যাশ অন ডেলিভারি',
+    'bkash': 'bKash',
+    'nagad': 'Nagad',
+    'card': 'কার্ড পেমেন্ট'
+  };
+  ctx.fillText(`পেমেন্ট পদ্ধতি: ${paymentMethodText[orderData.paymentMethod] || orderData.paymentMethod}`, 50, yPos);
+  yPos += 30;
+  
+  // Footer
+  ctx.fillStyle = colors.muted;
+  ctx.font = '14px "Hind Siliguri", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('ধন্যবাদ, BeeHarvest এ কেনাকাটা করার জন্য', canvas.width / 2, yPos + 40);
+  ctx.fillText('যেকোনো সহায়তার জন্য কল করুন: 01700-000000', canvas.width / 2, yPos + 65);
+  
+  // Generate PNG and trigger download
+  canvas.toBlob(function(blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `beeharvest_order_${orderData.orderNumber}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('অর্ডার স্লিপ ডাউনলোড হয়েছে!', 'success');
+  });
+}
   
   function showPolicy(key) {
     const policy = POLICIES[key];
