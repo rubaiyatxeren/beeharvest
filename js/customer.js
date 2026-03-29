@@ -3,7 +3,7 @@
    Clean, production-ready. All bugs fixed.
    ═══════════════════════════════════════════════════════════ */
 
-   const API_URL = 'http://localhost:5000/api';
+   const API_URL = 'https://beeyond-harvest-admin.onrender.com/api';
    let cart = [];
    let currentProductsPage = 1;
    let totalProductsPages  = 1;
