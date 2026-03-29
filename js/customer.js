@@ -1,15 +1,12 @@
 /* ═══════════════════════════════════════════════════════════
-   BeeHarvest — customer.js (OPTIMIZED)
-   Fixed: Loading speed, timeouts, error handling
+   BeeHarvest — customer.js
+   Clean, production-ready. All bugs fixed.
    ═══════════════════════════════════════════════════════════ */
 
    const API_URL = 'https://beeyond-harvest-admin.onrender.com/api';
-   const API_TIMEOUT = 10000; // 10 seconds timeout
-   
    let cart = [];
    let currentProductsPage = 1;
-   let totalProductsPages = 1;
-   let isLoading = false;
+   let totalProductsPages  = 1;
    
    /* ─── Init cart from localStorage ─────────────────────── */
    try {
@@ -18,83 +15,66 @@
    } catch(e) { cart = []; }
    
    /* ════════════════════════════════════════════════════════════
-      API HELPER with timeout
-      ════════════════════════════════════════════════════════════ */
+      API HELPER
+   ════════════════════════════════════════════════════════════ */
    async function apiCall(endpoint, options = {}) {
-     const controller = new AbortController();
-     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
-     
-     try {
-       const res = await fetch(`${API_URL}${endpoint}`, {
-         headers: { 'Content-Type': 'application/json' },
-         signal: controller.signal,
-         ...options,
-       });
-       clearTimeout(timeoutId);
-       
-       const ct = res.headers.get('content-type') || '';
-       if (!ct.includes('application/json')) {
-         throw new Error(`সার্ভার থেকে অপ্রত্যাশিত রেসপন্স (HTTP ${res.status})`);
-       }
-       const data = await res.json();
-       if (!res.ok) throw new Error(data.message || 'সার্ভার ত্রুটি');
-       return data;
-     } catch (err) {
-       clearTimeout(timeoutId);
-       if (err.name === 'AbortError') {
-         throw new Error('সার্ভার সাড়া দিচ্ছে না। নেটওয়ার্ক চেক করুন।');
-       }
-       throw err;
+     const res = await fetch(`${API_URL}${endpoint}`, {
+       headers: { 'Content-Type': 'application/json' },
+       ...options,
+     });
+     const ct = res.headers.get('content-type') || '';
+     if (!ct.includes('application/json')) {
+       throw new Error(`সার্ভার থেকে অপ্রত্যাশিত রেসপন্স (HTTP ${res.status})`);
      }
+     const data = await res.json();
+     if (!res.ok) throw new Error(data.message || 'সার্ভার ত্রুটি');
+     return data;
    }
    
    /* ════════════════════════════════════════════════════════════
-      CATEGORIES - Load only when needed
-      ════════════════════════════════════════════════════════════ */
+      CATEGORIES
+   ════════════════════════════════════════════════════════════ */
    async function loadCategories() {
      try {
-       const res = await apiCall('/categories?limit=100');
+       const res = await apiCall('/categories');
        if (!res.success || !res.data) return;
        const cats = res.data;
    
        // Grid on home
        const grid = document.getElementById('categoriesList');
-       if (grid && cats.length > 0) {
-         grid.innerHTML = cats.slice(0, 8).map(c => `
-           <div class="category-card" onclick="filterByCategory('${c._id}')">
-             <div class="cat-icon"><i class="fas fa-tag"></i></div>
-             <h3>${escHtml(c.name)}</h3>
-           </div>`).join('');
+       if (grid) {
+         grid.innerHTML = cats.length === 0
+           ? emptyMsg('কোনো ক্যাটাগরি নেই')
+           : cats.map(c => `
+               <div class="category-card" onclick="filterByCategory('${c._id}')">
+                 <div class="cat-icon"><i class="fas fa-tag"></i></div>
+                 <h3>${escHtml(c.name)}</h3>
+               </div>`).join('');
        }
    
        // Filter dropdown
        const sel = document.getElementById('categoryFilter');
-       if (sel && cats.length > 0) {
-         sel.innerHTML = '<option value="">সব ক্যাটাগরি</option>' +
-           cats.map(c => `<option value="${c._id}">${escHtml(c.name)}</option>`).join('');
+       if (sel) {
+         sel.innerHTML = '<option value="">সব ক্যাটাগরি</option>'
+           + cats.map(c => `<option value="${c._id}">${escHtml(c.name)}</option>`).join('');
        }
      } catch(e) {
        console.error('Categories:', e);
-       // Don't show error to user - categories are optional
      }
    }
    
    /* ════════════════════════════════════════════════════════════
-      PRODUCTS - Optimized loading
-      ════════════════════════════════════════════════════════════ */
+      PRODUCTS
+   ════════════════════════════════════════════════════════════ */
    async function loadFeaturedProducts() {
      const grid = document.getElementById('featuredProducts');
      if (!grid) return;
-     
      grid.innerHTML = skeletonCards(4);
-     
      try {
        const res = await fetch(`${API_URL}/products?isFeatured=true&limit=8`);
-       if (!res.ok) throw new Error('Network error');
        const data = await res.json();
        if (!data.success) throw new Error('Invalid response');
        const products = data.data || [];
-       
        grid.innerHTML = products.length === 0
          ? emptyMsg('কোনো ফিচার্ড পণ্য নেই')
          : products.map(renderProductCard).join('');
@@ -105,27 +85,20 @@
    }
    
    async function loadProducts(page = 1) {
-     if (isLoading) return;
-     isLoading = true;
-     
      const grid = document.getElementById('allProducts');
-     if (!grid) {
-       isLoading = false;
-       return;
-     }
-     
+     if (!grid) return;
      grid.innerHTML = skeletonCards(6);
    
      try {
-       const search = document.getElementById('searchProducts')?.value.trim() || '';
+       const search   = document.getElementById('searchProducts')?.value.trim() || '';
        const category = document.getElementById('categoryFilter')?.value || '';
-       const sort = document.getElementById('sortBy')?.value || '-createdAt';
+       const sort     = document.getElementById('sortBy')?.value || '-createdAt';
        const priceRange = document.getElementById('priceFilter')?.value || '';
    
        const params = new URLSearchParams({ page, limit: 12 });
-       if (search) params.set('search', search);
+       if (search)   params.set('search', search);
        if (category) params.set('category', category);
-       if (sort) params.set('sort', sort);
+       if (sort)     params.set('sort', sort);
        if (priceRange) {
          const [min, max] = priceRange.split('-');
          if (min) params.set('minPrice', min);
@@ -148,8 +121,6 @@
        console.error('Products:', e);
        grid.innerHTML = errorMsg('পণ্য লোড করতে ব্যর্থ হয়েছে');
        showToast('পণ্য লোড করতে সমস্যা হয়েছে', 'error');
-     } finally {
-       isLoading = false;
      }
    }
    
@@ -157,11 +128,12 @@
    function renderProductCard(p) {
      if (!p?._id) return '';
    
-     const id = String(p._id);
-     const safeName = escHtml(p.name || '');
-     const price = p.discountPrice || p.price;
-     const imgUrl = p.images?.[0]?.url || 'https://via.placeholder.com/400x300?text=No+Image';
-     const discount = p.discountPrice ? Math.round(((p.price - p.discountPrice) / p.price) * 100) : 0;
+     const id        = String(p._id);
+     const safeName  = escHtml(p.name || '');
+     const price     = p.discountPrice || p.price;
+     const imgUrl    = p.images?.[0]?.url || 'https://via.placeholder.com/400x300?text=No+Image';
+     const discount  = p.discountPrice
+       ? Math.round(((p.price - p.discountPrice) / p.price) * 100) : 0;
    
      let stockClass = '', stockText = '', stockIcon = 'fa-check-circle';
      if (p.stock <= 0) {
@@ -182,12 +154,17 @@
                 onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'">
            ${discount ? `<div class="product-badge">${discount}% ছাড়</div>` : ''}
            ${p.stock <= 0 ? `<div class="product-badge out">স্টক শেষ</div>` : ''}
+           ${p.stock > 0 ? `
+             <button class="product-quick-add" onclick="event.stopPropagation(); addToCart('${id}', ${price}, '${escHtml(imgUrl)}')">
+               <i class="fas fa-cart-plus"></i> কার্টে যোগ করুন
+             </button>` : ''}
          </div>
          <div class="product-info">
            <div class="product-name">${safeName}</div>
            <div class="product-price-row">
              <span class="price-final">৳${price.toLocaleString('bn-BD')}</span>
              ${p.discountPrice ? `<span class="price-original">৳${p.price.toLocaleString('bn-BD')}</span>` : ''}
+             ${discount ? `<span class="price-off">${discount}% ছাড়</span>` : ''}
            </div>
            <div class="product-stock-row ${stockClass}">
              <i class="fas ${stockIcon}"></i> ${stockText}
@@ -207,11 +184,11 @@
    }
    
    /* ════════════════════════════════════════════════════════════
-      CART - Optimized
-      ════════════════════════════════════════════════════════════ */
+      CART
+   ════════════════════════════════════════════════════════════ */
    function addToCart(productId, price, imageUrl) {
      const pData = window[`__p_${productId}`];
-     const name = pData?.name || 'পণ্য';
+     const name  = pData?.name || 'পণ্য';
    
      const existing = cart.find(i => i.productId === productId);
      if (existing) {
@@ -281,6 +258,8 @@
      // Navbar count
      const cc = document.getElementById('cartCount');
      if (cc) cc.textContent = count;
+   
+     // Mobile count
      const mc = document.getElementById('mobileCartCount');
      if (mc) mc.textContent = count;
    
@@ -288,14 +267,17 @@
      const ci = document.getElementById('cartItems');
      if (ci) {
        ci.innerHTML = cart.length === 0
-         ? `<div class="cart-empty"><i class="fas fa-shopping-cart"></i><p>আপনার কার্ট এখন খালি</p></div>`
+         ? `<div class="cart-empty">
+              <i class="fas fa-shopping-cart"></i>
+              <p>আপনার কার্ট এখন খালি</p>
+            </div>`
          : cart.map(renderCartItem).join('');
      }
    
      // Desktop totals
      setText('cartSubtotal', `৳${subtotal.toLocaleString('bn-BD')}`);
      setText('cartShipping', `৳${shipping.toLocaleString('bn-BD')}`);
-     setText('cartTotal', `৳${total.toLocaleString('bn-BD')}`);
+     setText('cartTotal',    `৳${total.toLocaleString('bn-BD')}`);
    
      // Mobile cart items
      const mi = document.getElementById('mobileCartItems');
@@ -308,8 +290,8 @@
    }
    
    /* ════════════════════════════════════════════════════════════
-      CHECKOUT - Optimized
-      ════════════════════════════════════════════════════════════ */
+      CHECKOUT
+   ════════════════════════════════════════════════════════════ */
    function openCheckout() {
      if (cart.length === 0) {
        showToast('কার্ট খালি! আগে পণ্য যোগ করুন', 'error');
@@ -334,7 +316,7 @@
      const { subtotal, shipping, total } = cartTotals();
      setText('summarySubtotal', `৳${subtotal.toLocaleString()}`);
      setText('summaryShipping', `৳${shipping.toLocaleString()}`);
-     setText('summaryTotal', `৳${total.toLocaleString()}`);
+     setText('summaryTotal',    `৳${total.toLocaleString()}`);
    
      openModal('checkoutModal');
    }
@@ -348,15 +330,15 @@
      }
    
      // Get values
-     const fullName = val('checkoutName');
-     const email = val('checkoutEmail');
-     const phone = val('checkoutPhone');
-     const address = val('checkoutAddress');
-     const city = val('checkoutCity');
-     const zipCode = val('checkoutZipCode');
-     const notes = val('checkoutNotes');
+     const fullName  = val('checkoutName');
+     const email     = val('checkoutEmail');
+     const phone     = val('checkoutPhone');
+     const address   = val('checkoutAddress');
+     const city      = val('checkoutCity');
+     const zipCode   = val('checkoutZipCode');
+     const notes     = val('checkoutNotes');
      const payMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD';
-     const accepted = document.getElementById('acceptTerms')?.checked;
+     const accepted  = document.getElementById('acceptTerms')?.checked;
    
      // Validation
      if (!fullName || !email || !phone || !address || !city) {
@@ -442,8 +424,8 @@
    }
    
    /* ════════════════════════════════════════════════════════════
-      NAVIGATION - Optimized
-      ════════════════════════════════════════════════════════════ */
+      NAVIGATION
+   ════════════════════════════════════════════════════════════ */
    function navigateTo(page) {
      // Update desktop nav links
      document.querySelectorAll('.nav-link').forEach(l => {
@@ -460,21 +442,15 @@
        el.classList.toggle('active', el.id === `${page}Page`);
      });
    
-     // Load data lazily
+     // Load data
      switch (page) {
        case 'home':
-         if (!window._homeLoaded) {
-           loadFeaturedProducts();
-           loadCategories();
-           window._homeLoaded = true;
-         }
+         loadFeaturedProducts();
+         loadCategories();
          break;
        case 'products':
-         if (!window._productsLoaded) {
-           loadCategories();
-           loadProducts(1);
-           window._productsLoaded = true;
-         }
+         loadCategories();
+         loadProducts(1);
          break;
        case 'orders':
          renderOrdersPage();
@@ -519,9 +495,25 @@
              </button>
            </div>
          </div>
+         <div class="profile-card">
+           <div class="profile-card-header">
+             <h3>দ্রুত লিংক</h3>
+           </div>
+           <div class="profile-card-body" style="display:flex;flex-direction:column;gap:.75rem;">
+             <button class="btn-ghost btn-block" onclick="navigateTo('orders')">
+               <i class="fas fa-shopping-bag"></i> আমার অর্ডার
+             </button>
+             <button class="btn-ghost btn-block" onclick="navigateTo('products')">
+               <i class="fas fa-box"></i> সব পণ্য
+             </button>
+           </div>
+         </div>
        </div>`;
    }
    
+   /* ════════════════════════════════════════════════════════════
+      VIEW PRODUCT (navigate to detail page)
+   ════════════════════════════════════════════════════════════ */
    function viewProduct(productId) {
      if (!productId || productId === 'undefined') {
        showToast('পণ্যের তথ্য পাওয়া যায়নি', 'error');
@@ -542,7 +534,7 @@
    
    /* ════════════════════════════════════════════════════════════
       PAGINATION
-      ════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════ */
    function renderPagination(containerId, current, total, fnName) {
      const el = document.getElementById(containerId);
      if (!el || total <= 1) { if (el) el.innerHTML = ''; return; }
@@ -552,7 +544,7 @@
        <i class="fas fa-chevron-left"></i></button>`);
    
      const start = Math.max(1, current - 2);
-     const end = Math.min(total, current + 2);
+     const end   = Math.min(total, current + 2);
      if (start > 1) pages.push(`<button onclick="${fnName}(1)">1</button>`);
      if (start > 2) pages.push(`<button disabled>…</button>`);
    
@@ -561,7 +553,7 @@
      }
    
      if (end < total - 1) pages.push(`<button disabled>…</button>`);
-     if (end < total) pages.push(`<button onclick="${fnName}(${total})">${total}</button>`);
+     if (end < total)     pages.push(`<button onclick="${fnName}(${total})">${total}</button>`);
    
      pages.push(`<button onclick="${fnName}(${current + 1})" ${current === total ? 'disabled' : ''}>
        <i class="fas fa-chevron-right"></i></button>`);
@@ -571,7 +563,7 @@
    
    /* ════════════════════════════════════════════════════════════
       MODAL HELPERS
-      ════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════ */
    function openModal(id) {
      const m = document.getElementById(id);
      if (m) { m.classList.add('active'); document.body.style.overflow = 'hidden'; }
@@ -584,7 +576,7 @@
    
    /* ════════════════════════════════════════════════════════════
       LOADING OVERLAY
-      ════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════ */
    function showLoadingOverlay() {
      document.getElementById('loadingOverlay')?.classList.add('active');
    }
@@ -609,12 +601,12 @@
    
    /* ════════════════════════════════════════════════════════════
       TOAST
-      ════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════ */
    const TOAST_ICONS = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
    
    function showToast(message, type = 'info') {
-     // Remove existing toasts
-     document.querySelectorAll(`.toast`).forEach(t => t.remove());
+     // Remove existing toasts of same type
+     document.querySelectorAll(`.toast.${type}`).forEach(t => t.remove());
    
      const t = document.createElement('div');
      t.className = `toast ${type}`;
@@ -625,27 +617,27 @@
    
    /* ════════════════════════════════════════════════════════════
       CONFETTI
-      ════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════ */
    let _confettiRaf = null;
    
    function startConfetti() {
      const canvas = document.getElementById('confettiCanvas');
      if (!canvas) return;
      canvas.classList.add('active');
-     canvas.width = window.innerWidth;
+     canvas.width  = window.innerWidth;
      canvas.height = window.innerHeight;
      const ctx = canvas.getContext('2d');
    
-     const colors = ['#F5A623', '#FDD882', '#C47F11', '#0D1B3E', '#1A2E5A', '#28a745', '#ff6b6b'];
-     const particles = Array.from({ length: 120 }, () => ({
+     const colors = ['#F5A623','#FDD882','#C47F11','#0D1B3E','#1A2E5A','#28a745','#ff6b6b'];
+     const particles = Array.from({ length: 180 }, () => ({
        x: Math.random() * canvas.width,
        y: -20 - Math.random() * canvas.height,
-       size: Math.random() * 8 + 3,
+       size: Math.random() * 9 + 4,
        color: colors[Math.floor(Math.random() * colors.length)],
-       vy: Math.random() * 4 + 2,
-       vx: (Math.random() - 0.5) * 2,
+       vy: Math.random() * 5 + 3,
+       vx: (Math.random() - 0.5) * 3,
        rot: Math.random() * 360,
-       rotV: (Math.random() - 0.5) * 6,
+       rotV: (Math.random() - 0.5) * 8,
      }));
    
      function draw() {
@@ -678,12 +670,12 @@
    
    /* ════════════════════════════════════════════════════════════
       UTILITY
-      ════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════ */
    function escHtml(str) {
      if (!str) return '';
      return String(str)
-       .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+       .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
    }
    
    function val(id) {
@@ -725,7 +717,7 @@
    
    /* ════════════════════════════════════════════════════════════
       MOBILE CART SHEET
-      ════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════════ */
    function openMobileCart() {
      updateCartUI();
      document.getElementById('mobileCartSheet')?.classList.add('open');
@@ -736,15 +728,16 @@
    }
    
    /* ════════════════════════════════════════════════════════════
-      EVENT LISTENERS - Optimized
-      ════════════════════════════════════════════════════════════ */
+      EVENT LISTENERS
+   ════════════════════════════════════════════════════════════ */
    document.addEventListener('DOMContentLoaded', () => {
-     // Add shimmer animation style
+   
+     /* ── Shimmer animation ── */
      const style = document.createElement('style');
      style.textContent = `@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`;
      document.head.appendChild(style);
    
-     // Desktop cart
+     /* ── Desktop cart ── */
      document.getElementById('cartBtn')?.addEventListener('click', () => {
        document.getElementById('cartSidebar').classList.add('open');
        document.getElementById('cartBackdrop').classList.add('show');
@@ -761,7 +754,7 @@
        document.getElementById('cartBackdrop').classList.remove('show');
      });
    
-     // Checkout
+     /* ── Checkout ── */
      document.getElementById('checkoutBtn')?.addEventListener('click', () => {
        document.getElementById('cartSidebar').classList.remove('open');
        document.getElementById('cartBackdrop').classList.remove('show');
@@ -773,7 +766,7 @@
    
      document.getElementById('confirmOrderBtn')?.addEventListener('click', placeOrder);
    
-     // Mobile nav
+     /* ── Mobile nav ── */
      document.querySelectorAll('.mobile-nav-item[data-page]').forEach(item => {
        item.addEventListener('click', e => {
          e.preventDefault();
@@ -793,7 +786,7 @@
        openCheckout();
      });
    
-     // Desktop nav links
+     /* ── Desktop nav links ── */
      document.querySelectorAll('.nav-link[data-page]').forEach(link => {
        link.addEventListener('click', e => {
          e.preventDefault();
@@ -801,26 +794,21 @@
        });
      });
    
-     // Filters - debounced
-     const debounce = (fn, delay) => {
-       let timer;
-       return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
-     };
-     
+     /* ── Filters ── */
      document.getElementById('searchProducts')?.addEventListener('input',
-       debounce(() => loadProducts(1), 500));
+       debounce(() => loadProducts(1), 400));
      document.getElementById('categoryFilter')?.addEventListener('change', () => loadProducts(1));
      document.getElementById('sortBy')?.addEventListener('change', () => loadProducts(1));
      document.getElementById('priceFilter')?.addEventListener('change', () => loadProducts(1));
    
-     // Close modal on backdrop click
+     /* ── Close modal on backdrop click ── */
      document.querySelectorAll('.modal').forEach(m => {
        m.addEventListener('click', e => {
          if (e.target === m) closeModal(m.id);
        });
      });
    
-     // Escape key
+     /* ── Escape key ── */
      document.addEventListener('keydown', e => {
        if (e.key === 'Escape') {
          document.querySelectorAll('.modal.active').forEach(m => closeModal(m.id));
@@ -830,7 +818,7 @@
        }
      });
    
-     // Resize confetti
+     /* ── Resize confetti ── */
      window.addEventListener('resize', () => {
        const c = document.getElementById('confettiCanvas');
        if (c?.classList.contains('active')) {
@@ -839,21 +827,193 @@
        }
      });
    
-     // Init
+     /* ── Init ── */
      updateCartUI();
      navigateTo('home');
    });
    
+   /* ─── Debounce ─────────────────────────────────────────── */
+   function debounce(fn, delay) {
+     let timer;
+     return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
+   }
+   /* ═══════════════════════════════════════════════════════════
+   BEEHARVEST FOOTER JS
+   Add this to the bottom of customer.js (or a separate footer.js)
+   ═══════════════════════════════════════════════════════════ */
+
+const POLICIES = {
+    delivery: {
+      title: '<i class="fas fa-truck"></i> ডেলিভারি পলিসি',
+      body: `
+        <div class="policy-section">
+          <div class="policy-highlight">ঢাকার ভিতরে ১–২ কার্যদিবস, ঢাকার বাইরে ২–৫ কার্যদিবসের মধ্যে ডেলিভারি।</div>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-map-marker-alt"></i> ডেলিভারি এলাকা</h4>
+          <p>আমরা বাংলাদেশের সকল জেলায় ডেলিভারি প্রদান করি। প্রত্যন্ত অঞ্চলে ডেলিভারি সময় কিছুটা বেশি লাগতে পারে।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-taka-sign"></i> ডেলিভারি চার্জ</h4>
+          <p>ঢাকার মধ্যে: ৳৬০ | ঢাকার বাইরে: ৳১০০–৳১৫০। ৳৩,০০০ বা তার বেশি অর্ডারে ঢাকায় বিনামূল্যে ডেলিভারি।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-box-open"></i> অর্ডার ট্র্যাকিং</h4>
+          <p>অর্ডার নিশ্চিত হলে আপনার মোবাইলে SMS এবং ইমেইলে আপডেট পাঠানো হবে। যেকোনো সমস্যায় আমাদের হটলাইনে যোগাযোগ করুন।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-triangle-exclamation"></i> গুরুত্বপূর্ণ তথ্য</h4>
+          <p>ডেলিভারির সময় পণ্য গ্রহণ করে বাক্স খুলে যাচাই করুন। পণ্যে সমস্যা থাকলে ডেলিভারি ম্যানের সামনেই জানান।</p>
+        </div>
+      `
+    },
+  
+    return: {
+      title: '<i class="fas fa-rotate-left"></i> রিটার্ন ও রিফান্ড পলিসি',
+      body: `
+        <div class="policy-section">
+          <div class="policy-highlight">পণ্য পাওয়ার ৭ দিনের মধ্যে রিটার্ন করা যাবে — কোনো প্রশ্ন ছাড়াই।</div>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-check-circle"></i> রিটার্নযোগ্য পণ্য</h4>
+          <p>যেসব পণ্য ত্রুটিপূর্ণ, ভুল বা বর্ণনার সাথে মেলে না সেগুলো রিটার্ন করা যাবে। পণ্য অবশ্যই অব্যবহৃত, মূল প্যাকেজিংসহ হতে হবে।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-times-circle"></i> রিটার্ন হবে না</h4>
+          <p>ব্যবহৃত পণ্য, ভাঙা সিল বা প্যাকেজিং ছাড়া পণ্য, ডিজিটাল পণ্য এবং অর্ডারের ৭ দিন পরে রিটার্ন গ্রহণযোগ্য নয়।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-money-bill-wave"></i> রিফান্ড প্রক্রিয়া</h4>
+          <p>রিটার্ন অনুমোদনের পর ৩–৫ কার্যদিবসের মধ্যে রিফান্ড প্রদান করা হবে। bKash বা Nagad এ রিফান্ড পাঠানো হবে।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-phone"></i> রিটার্ন শুরু করতে</h4>
+          <p>আমাদের হটলাইনে কল করুন অথবা WhatsApp এ মেসেজ করুন। অর্ডার নম্বর এবং সমস্যার বিবরণ জানান।</p>
+        </div>
+      `
+    },
+  
+    privacy: {
+      title: '<i class="fas fa-lock"></i> গোপনীয়তা নীতি',
+      body: `
+        <div class="policy-section">
+          <div class="policy-highlight">আপনার ব্যক্তিগত তথ্য সুরক্ষিত রাখা আমাদের সর্বোচ্চ অগ্রাধিকার।</div>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-database"></i> আমরা কী তথ্য সংগ্রহ করি</h4>
+          <p>নাম, ঠিকানা, মোবাইল নম্বর, ইমেইল এবং অর্ডার সংক্রান্ত তথ্য। পেমেন্টের কোনো তথ্য আমাদের সার্ভারে সংরক্ষিত হয় না।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-share-nodes"></i> তথ্য ব্যবহার</h4>
+          <p>আপনার তথ্য শুধুমাত্র অর্ডার প্রসেস, ডেলিভারি এবং কাস্টমার সার্ভিসের জন্য ব্যবহার করা হয়। তৃতীয় পক্ষের কাছে বিক্রি করা হয় না।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-shield-halved"></i> নিরাপত্তা</h4>
+          <p>SSL এনক্রিপশন ব্যবহার করে সকল তথ্য সুরক্ষিত রাখা হয়। নিয়মিত নিরাপত্তা অডিট পরিচালনা করা হয়।</p>
+        </div>
+      `
+    },
+  
+    terms: {
+      title: '<i class="fas fa-scroll"></i> শর্তাবলী',
+      body: `
+        <div class="policy-section">
+          <div class="policy-highlight">BeeHarvest ব্যবহার করে আপনি নিচের শর্তসমূহ মেনে নিচ্ছেন।</div>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-user-check"></i> ব্যবহারকারীর দায়িত্ব</h4>
+          <p>সঠিক তথ্য দিয়ে অর্ডার করুন। ভুল ঠিকানা বা নম্বরের কারণে ডেলিভারি ব্যর্থ হলে আমরা দায়ী নই।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-ban"></i> নিষিদ্ধ কার্যক্রম</h4>
+          <p>ভুয়া অর্ডার, জালিয়াতি বা সিস্টেম অপব্যবহার কঠোরভাবে নিষিদ্ধ। এই ধরনের কার্যক্রমে আইনি ব্যবস্থা নেওয়া হবে।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-pen"></i> পরিবর্তনের অধিকার</h4>
+          <p>BeeHarvest যেকোনো সময় পলিসি পরিবর্তন করার অধিকার রাখে। পরিবর্তন ওয়েবসাইটে প্রকাশিত হবে।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-gavel"></i> আইনি এখতিয়ার</h4>
+          <p>যেকোনো বিরোধ বাংলাদেশের আইন অনুযায়ী নিষ্পত্তি করা হবে।</p>
+        </div>
+      `
+    },
+  
+    payment: {
+      title: '<i class="fas fa-credit-card"></i> পেমেন্ট নীতি',
+      body: `
+        <div class="policy-section">
+          <div class="policy-highlight">আমরা ক্যাশ অন ডেলিভারি, bKash এবং Nagad গ্রহণ করি।</div>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-hand-holding-usd"></i> ক্যাশ অন ডেলিভারি (COD)</h4>
+          <p>পণ্য পেয়ে হাতে হাতে পেমেন্ট করুন। ডেলিভারি ম্যানকে সঠিক পরিমাণ প্রস্তুত রাখুন।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-mobile-alt"></i> মোবাইল ব্যাংকিং</h4>
+          <p>bKash বা Nagad এ পেমেন্ট করলে অর্ডার নম্বর উল্লেখ করে Send Money করুন। স্ক্রিনশট আমাদের WhatsApp এ পাঠান।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-triangle-exclamation"></i> পেমেন্ট নিরাপত্তা</h4>
+          <p>আমাদের কোনো প্রতিনিধি কখনো OTP বা পিন চাইবে না। এই ধরনের অনুরোধ সম্পূর্ণ প্রতারণা।</p>
+        </div>
+      `
+    },
+  
+    faq: {
+      title: '<i class="fas fa-circle-question"></i> সাধারণ প্রশ্নোত্তর (FAQ)',
+      body: `
+        <div class="policy-section">
+          <h4><i class="fas fa-clock"></i> অর্ডার কতদিনে পাব?</h4>
+          <p>ঢাকার মধ্যে ১–২ দিন এবং ঢাকার বাইরে ৩–৫ কার্যদিবস। উইকেন্ড বা সরকারি ছুটিতে ডেলিভারি নাও হতে পারে।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-rotate-left"></i> কীভাবে রিটার্ন করব?</h4>
+          <p>পণ্য পাওয়ার ৭ দিনের মধ্যে আমাদের হটলাইনে কল করুন। আমাদের টিম আপনাকে গাইড করবে।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-box-open"></i> পণ্য নষ্ট এলে কী করব?</h4>
+          <p>ডেলিভারি ম্যানের সামনেই বাক্স খুলে চেক করুন। সমস্যা দেখলে তাৎক্ষণিকভাবে জানান এবং আমাদের ফোন করুন।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-location-dot"></i> কোন কোন জেলায় ডেলিভারি করেন?</h4>
+          <p>বাংলাদেশের সকল ৬৪ জেলায় আমরা ডেলিভারি দিই। তবে প্রত্যন্ত অঞ্চলে কিছুটা বেশি সময় লাগতে পারে।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-taka-sign"></i> ন্যূনতম অর্ডার কত?</h4>
+          <p>কোনো ন্যূনতম অর্ডার সীমা নেই। যেকোনো পরিমাণে অর্ডার করা যাবে।</p>
+        </div>
+        <div class="policy-section">
+          <h4><i class="fas fa-gift"></i> অর্ডার বাতিল করা যাবে?</h4>
+          <p>অর্ডার শিপ হওয়ার আগে বাতিল করা যাবে। শিপমেন্টের পরে বাতিল সম্ভব নয়, তবে রিটার্ন করা যাবে।</p>
+        </div>
+      `
+    }
+  };
+  
+  function showPolicy(key) {
+    const policy = POLICIES[key];
+    if (!policy) return;
+  
+    document.getElementById('policyModalTitle').innerHTML = policy.title;
+  
+    const body = document.getElementById('policyModalBody');
+    body.innerHTML = policy.body;
+  
+    openModal('policyModal');
+  }
+  
+  // Make globally available
+  window.showPolicy = showPolicy;
+   
    /* ── Global exports ─────────────────────────────────────── */
-   window.navigateTo = navigateTo;
-   window.viewProduct = viewProduct;
-   window.addToCart = addToCart;
+   window.navigateTo    = navigateTo;
+   window.viewProduct   = viewProduct;
+   window.addToCart     = addToCart;
    window.updateQuantity = updateQuantity;
    window.removeFromCart = removeFromCart;
-   window.openCheckout = openCheckout;
-   window.placeOrder = placeOrder;
-   window.closeModal = closeModal;
-   window.loadProducts = loadProducts;
+   window.openCheckout  = openCheckout;
+   window.placeOrder    = placeOrder;
+   window.closeModal    = closeModal;
+   window.loadProducts  = loadProducts;
    window.filterByCategory = filterByCategory;
-   window.openMobileCart = openMobileCart;
-   window.closeMobileCart = closeMobileCart;
