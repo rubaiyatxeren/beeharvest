@@ -13,16 +13,14 @@
 
 <!-- ═══ LOADING OVERLAY ═══════════════════════════════════ -->
 <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner-ring">
-      <span class="ring-outer"></span>
-      <span class="ring-inner"></span>
-    </div>
-    <p class="loading-main">অর্ডার প্রক্রিয়া চলছে...</p>
-    <p class="loading-sub">দয়া করে অপেক্ষা করুন</p>
-    <div class="loading-dots">
-      <span></span><span></span><span></span>
-    </div>
+  <div class="loading-spinner-ring">
+    <span class="ring-outer"></span>
+    <span class="ring-inner"></span>
   </div>
+  <p class="loading-main">অর্ডার প্রক্রিয়া চলছে...</p>
+  <p class="loading-sub">দয়া করে অপেক্ষা করুন</p>
+  <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
 
 <!-- ═══ CONFETTI ══════════════════════════════════════════ -->
 <canvas id="confettiCanvas"></canvas>
@@ -48,8 +46,9 @@
       <a href="#" class="nav-link" data-page="products">
         <i class="fas fa-box"></i> পণ্য
       </a>
+      <!-- ★ CHANGED: "আমার অর্ডার" → "অর্ডার ট্র্যাক" -->
       <a href="#" class="nav-link" data-page="orders">
-        <i class="fas fa-shopping-bag"></i> আমার অর্ডার
+        <i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক
       </a>
       <a href="#" class="nav-link" data-page="profile">
         <i class="fas fa-user"></i> প্রোফাইল
@@ -74,12 +73,8 @@
 
   <!-- ── HOME PAGE ─────────────────────────────────────── -->
   <div class="page-content active" id="homePage">
-
-    <!-- Hero -->
     <section class="hero-section">
-      <div class="hero-badge">
-        <i class="fas fa-star"></i> বাংলাদেশের #১ অনলাইন শপ
-      </div>
+      <div class="hero-badge"><i class="fas fa-star"></i> বাংলাদেশের #১ অনলাইন শপ</div>
       <div class="hero-content">
         <h1>সেরা পণ্য,<br><span>সেরা দামে</span></h1>
         <p>ঘরে বসে কেনাকাটা করুন। দ্রুত ডেলিভারি, বিশ্বস্ত সেবা, সহজ রিটার্ন।</p>
@@ -93,38 +88,23 @@
         </div>
       </div>
       <div class="hero-stats">
-        <div class="stat-card">
-          <div class="stat-number">৫০০+</div>
-          <div class="stat-label">পণ্য সংগ্রহ</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">১০ক+</div>
-          <div class="stat-label">সন্তুষ্ট গ্রাহক</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">২৪ঘ</div>
-          <div class="stat-label">দ্রুত ডেলিভারি</div>
-        </div>
+        <div class="stat-card"><div class="stat-number">৫০০+</div><div class="stat-label">পণ্য সংগ্রহ</div></div>
+        <div class="stat-card"><div class="stat-number">১০ক+</div><div class="stat-label">সন্তুষ্ট গ্রাহক</div></div>
+        <div class="stat-card"><div class="stat-number">২৪ঘ</div><div class="stat-label">দ্রুত ডেলিভারি</div></div>
       </div>
     </section>
 
-    <!-- Featured Products -->
-    <section class="featured-section" style="margin-bottom: 3rem;">
+    <section class="featured-section" style="margin-bottom:3rem;">
       <div class="section-header">
         <div class="section-title">
           <div class="section-icon"><i class="fas fa-fire"></i></div>
           <h2>ফিচার্ড পণ্য</h2>
         </div>
-        <a href="#" class="view-all" onclick="navigateTo('products'); return false;">
-          সব দেখুন <i class="fas fa-chevron-right"></i>
-        </a>
+        <a href="#" class="view-all" onclick="navigateTo('products');return false;">সব দেখুন <i class="fas fa-chevron-right"></i></a>
       </div>
-      <div class="products-grid" id="featuredProducts">
-        <!-- Loaded by JS -->
-      </div>
+      <div class="products-grid" id="featuredProducts"></div>
     </section>
 
-    <!-- Categories -->
     <section class="categories-section">
       <div class="section-header">
         <div class="section-title">
@@ -132,12 +112,9 @@
           <h2>ক্যাটাগরি</h2>
         </div>
       </div>
-      <div class="categories-grid" id="categoriesList">
-        <!-- Loaded by JS -->
-      </div>
+      <div class="categories-grid" id="categoriesList"></div>
     </section>
-
-  </div><!-- /homePage -->
+  </div>
 
   <!-- ── PRODUCTS PAGE ──────────────────────────────────── -->
   <div class="page-content" id="productsPage">
@@ -148,9 +125,7 @@
           <i class="fas fa-search"></i>
           <input type="text" id="searchProducts" placeholder="পণ্য খুঁজুন...">
         </div>
-        <select id="categoryFilter" class="filter-select">
-          <option value="">সব ক্যাটাগরি</option>
-        </select>
+        <select id="categoryFilter" class="filter-select"><option value="">সব ক্যাটাগরি</option></select>
         <select id="sortBy" class="filter-select">
           <option value="-createdAt">সর্বশেষ</option>
           <option value="price">দাম: কম → বেশি</option>
@@ -173,8 +148,9 @@
 
   <!-- ── ORDERS PAGE ────────────────────────────────────── -->
   <div class="page-content" id="ordersPage">
+    <!-- ★ CHANGED icon and title -->
     <div class="page-header">
-      <h2><i class="fas fa-shopping-bag" style="color:var(--honey);margin-right:10px;"></i>আমার অর্ডারসমূহ</h2>
+      <h2><i class="fas fa-satellite-dish" style="color:var(--honey);margin-right:10px;"></i>অর্ডার ট্র্যাকিং</h2>
     </div>
     <div id="userOrders" class="orders-list"></div>
   </div>
@@ -193,25 +169,14 @@
 <div class="cart-sidebar" id="cartSidebar">
   <div class="cart-header">
     <h3><i class="fas fa-shopping-cart"></i> আমার কার্ট</h3>
-    <button class="close-cart" id="closeCart" aria-label="কার্ট বন্ধ করুন">
-      <i class="fas fa-times"></i>
-    </button>
+    <button class="close-cart" id="closeCart" aria-label="কার্ট বন্ধ করুন"><i class="fas fa-times"></i></button>
   </div>
   <div class="cart-items" id="cartItems"></div>
   <div class="cart-footer">
     <div class="cart-summary">
-      <div class="cart-summary-row">
-        <span>পণ্যের মূল্য</span>
-        <span id="cartSubtotal">৳০</span>
-      </div>
-      <div class="cart-summary-row">
-        <span>ডেলিভারি চার্জ</span>
-        <span id="cartShipping">৳০</span>
-      </div>
-      <div class="cart-summary-row total">
-        <span>মোট</span>
-        <span id="cartTotal">৳০</span>
-      </div>
+      <div class="cart-summary-row"><span>পণ্যের মূল্য</span><span id="cartSubtotal">৳০</span></div>
+      <div class="cart-summary-row"><span>ডেলিভারি চার্জ</span><span id="cartShipping">৳০</span></div>
+      <div class="cart-summary-row total"><span>মোট</span><span id="cartTotal">৳০</span></div>
     </div>
     <button class="btn-primary btn-block btn-large" id="checkoutBtn">
       <i class="fas fa-lock"></i> অর্ডার করুন
@@ -224,137 +189,75 @@
   <div class="modal-content modal-large">
     <div class="modal-header">
       <h3><i class="fas fa-truck"></i> অর্ডার কনফার্মেশন</h3>
-      <button class="close-modal" onclick="closeModal('checkoutModal')">
-        <i class="fas fa-times"></i>
-      </button>
+      <button class="close-modal" onclick="closeModal('checkoutModal')"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body">
       <form id="checkoutForm" novalidate>
         <div class="checkout-grid">
-
-          <!-- Left: Customer Info -->
           <div class="checkout-section">
-            <div class="checkout-section-title">
-              <i class="fas fa-user"></i> প্রাপকের তথ্য
-            </div>
-
-            <div class="form-group">
-              <label>পূর্ণ নাম *</label>
-              <input type="text" id="checkoutName" required placeholder="আপনার পূর্ণ নাম">
-            </div>
-
+            <div class="checkout-section-title"><i class="fas fa-user"></i> প্রাপকের তথ্য</div>
+            <div class="form-group"><label>পূর্ণ নাম *</label><input type="text" id="checkoutName" required placeholder="আপনার পূর্ণ নাম"></div>
             <div class="form-group">
               <label>ইমেইল ঠিকানা *</label>
               <input type="email" id="checkoutEmail" required placeholder="example@email.com">
               <div class="form-hint">অর্ডার কনফার্মেশন ইমেইলে পাবেন</div>
             </div>
-
             <div class="form-group">
               <label>মোবাইল নম্বর *</label>
               <input type="tel" id="checkoutPhone" required placeholder="01XXXXXXXXX">
               <div class="form-hint">বাংলাদেশি নম্বর (01X-XXXXXXXX)</div>
             </div>
-
-            <div class="form-group">
-              <label>বিস্তারিত ঠিকানা *</label>
-              <textarea id="checkoutAddress" rows="3" required placeholder="বাড়ির নম্বর, রাস্তা, এলাকা..."></textarea>
-            </div>
-
+            <div class="form-group"><label>বিস্তারিত ঠিকানা *</label><textarea id="checkoutAddress" rows="3" required placeholder="বাড়ির নম্বর, রাস্তা, এলাকা..."></textarea></div>
             <div class="form-row">
               <div class="form-group">
                 <label>জেলা/শহর *</label>
                 <select id="checkoutCity" required>
                   <option value="">নির্বাচন করুন</option>
-                  <option>ঢাকা</option>
-                  <option>চট্টগ্রাম</option>
-                  <option>রাজশাহী</option>
-                  <option>খুলনা</option>
-                  <option>বরিশাল</option>
-                  <option>সিলেট</option>
-                  <option>রংপুর</option>
-                  <option>ময়মনসিংহ</option>
-                  <option>কুমিল্লা</option>
-                  <option>নারায়ণগঞ্জ</option>
-                  <option>গাজীপুর</option>
-                  <option>টাঙ্গাইল</option>
+                  <option>ঢাকা</option><option>চট্টগ্রাম</option><option>রাজশাহী</option>
+                  <option>খুলনা</option><option>বরিশাল</option><option>সিলেট</option>
+                  <option>রংপুর</option><option>ময়মনসিংহ</option><option>কুমিল্লা</option>
+                  <option>নারায়ণগঞ্জ</option><option>গাজীপুর</option><option>টাঙ্গাইল</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label>জিপ কোড</label>
-                <input type="text" id="checkoutZipCode" placeholder="ঐচ্ছিক">
-              </div>
+              <div class="form-group"><label>জিপ কোড</label><input type="text" id="checkoutZipCode" placeholder="ঐচ্ছিক"></div>
             </div>
-
-            <div class="form-group">
-              <label>বিশেষ নির্দেশনা</label>
-              <textarea id="checkoutNotes" rows="2" placeholder="যেমন: গেটে কল করুন, দুপুরের পর দিন..."></textarea>
-            </div>
+            <div class="form-group"><label>বিশেষ নির্দেশনা</label><textarea id="checkoutNotes" rows="2" placeholder="যেমন: গেটে কল করুন, দুপুরের পর দিন..."></textarea></div>
           </div>
 
-          <!-- Right: Order Summary + Payment -->
           <div class="checkout-section">
-            <div class="checkout-section-title">
-              <i class="fas fa-box"></i> অর্ডার সারসংক্ষেপ
-            </div>
-
+            <div class="checkout-section-title"><i class="fas fa-box"></i> অর্ডার সারসংক্ষেপ</div>
             <div class="checkout-items-list" id="checkoutItems"></div>
-
-            <div class="checkout-section-title" style="margin-top:1.25rem;">
-              <i class="fas fa-wallet"></i> পেমেন্ট পদ্ধতি
-            </div>
-
+            <div class="checkout-section-title" style="margin-top:1.25rem;"><i class="fas fa-wallet"></i> পেমেন্ট পদ্ধতি</div>
             <div class="payment-methods">
               <label class="payment-method">
                 <input type="radio" name="paymentMethod" value="COD" checked>
                 <span class="payment-method-icon pm-cod"><i class="fas fa-hand-holding-usd"></i></span>
-                <div class="payment-method-text">
-                  <span>ক্যাশ অন ডেলিভারি</span>
-                  <small>ডেলিভারির সময় নগদ পরিশোধ</small>
-                </div>
+                <div class="payment-method-text"><span>ক্যাশ অন ডেলিভারি</span><small>ডেলিভারির সময় নগদ পরিশোধ</small></div>
               </label>
               <label class="payment-method">
                 <input type="radio" name="paymentMethod" value="bkash">
                 <span class="payment-method-icon pm-bkash"><i class="fas fa-mobile-alt"></i></span>
-                <div class="payment-method-text">
-                  <span>bKash</span>
-                  <small>মোবাইল ব্যাংকিং</small>
-                </div>
+                <div class="payment-method-text"><span>bKash</span><small>মোবাইল ব্যাংকিং</small></div>
               </label>
               <label class="payment-method">
                 <input type="radio" name="paymentMethod" value="nagad">
                 <span class="payment-method-icon pm-nagad"><i class="fas fa-wallet"></i></span>
-                <div class="payment-method-text">
-                  <span>Nagad</span>
-                  <small>মোবাইল ব্যাংকিং</small>
-                </div>
+                <div class="payment-method-text"><span>Nagad</span><small>মোবাইল ব্যাংকিং</small></div>
               </label>
             </div>
-
             <div class="order-summary-box">
-              <div class="summary-line">
-                <span>পণ্যের মূল্য</span>
-                <span id="summarySubtotal">৳০</span>
-              </div>
-              <div class="summary-line">
-                <span>ডেলিভারি চার্জ</span>
-                <span id="summaryShipping">৳৬০</span>
-              </div>
-              <div class="summary-line total">
-                <span>মোট প্রদেয়</span>
-                <span id="summaryTotal">৳৬০</span>
-              </div>
+              <div class="summary-line"><span>পণ্যের মূল্য</span><span id="summarySubtotal">৳০</span></div>
+              <div class="summary-line"><span>ডেলিভারি চার্জ</span><span id="summaryShipping">৳৬০</span></div>
+              <div class="summary-line total"><span>মোট প্রদেয়</span><span id="summaryTotal">৳৬০</span></div>
             </div>
-
             <div class="terms-row">
               <input type="checkbox" id="acceptTerms">
               <span>আমি <a href="#" onclick="return false;">শর্তাবলী ও নীতিমালা</a> মেনে নিচ্ছি</span>
             </div>
-
             <button type="submit" class="btn-primary btn-block btn-large" id="confirmOrderBtn">
               <i class="fas fa-check-circle"></i> অর্ডার কনফার্ম করুন
             </button>
           </div>
-
         </div>
       </form>
     </div>
@@ -365,33 +268,38 @@
 <div class="modal" id="successModal">
   <div class="modal-content modal-small">
     <div class="success-modal-content">
-      <div class="success-icon">
-        <i class="fas fa-check"></i>
-      </div>
+      <div class="success-icon"><i class="fas fa-check"></i></div>
       <h3>অর্ডার সফল হয়েছে!</h3>
       <p>আপনার অর্ডারটি গ্রহণ করা হয়েছে।<br>শীঘ্রই আপনার সাথে যোগাযোগ করা হবে।</p>
-      
+
       <div class="order-id-chip">
         <i class="fas fa-ticket-alt"></i>
         <span id="orderNumber"></span>
       </div>
-      
-      <!-- Download Order Slip Section -->
-      <div class="download-slip-section" style="margin: 0.75rem 0; padding: 0.875rem; background: var(--light-bg); border-radius: 10px; border: 1px dashed var(--border);">
-        <div class="download-slip-header" style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-          <i class="fas fa-receipt" style="color: var(--honey); margin-right: 6px; font-size: 1rem;"></i>
-          <span style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">অর্ডার স্লিপ ডাউনলোড করুন</span>
+
+      <!-- Download slip -->
+      <div class="download-slip-section" style="margin:0.75rem 0;padding:0.875rem;background:var(--cream);border-radius:10px;border:1px dashed var(--border);">
+        <div style="display:flex;align-items:center;margin-bottom:0.5rem;">
+          <i class="fas fa-receipt" style="color:var(--honey);margin-right:6px;font-size:1rem;"></i>
+          <span style="font-weight:600;color:var(--text-primary);font-size:0.9rem;">অর্ডার স্লিপ ডাউনলোড করুন</span>
         </div>
-        <button class="btn-outline btn-block" id="downloadSlipBtn" style="margin-top: 0.25rem; padding: 0.625rem; font-size: 0.85rem;">
+        <button class="btn-outline btn-block" id="downloadSlipBtn" style="padding:0.625rem;font-size:0.85rem;">
           <i class="fas fa-download"></i> PNG স্লিপ ডাউনলোড করুন
         </button>
       </div>
-      
-      <div class="success-actions" style="margin-top: 0.75rem;">
-        <button class="btn-primary" onclick="closeModal('successModal'); navigateTo('orders');" style="padding: 0.75rem 1rem; font-size: 0.9rem;">
-          <i class="fas fa-shopping-bag"></i> আমার অর্ডার
+
+      <!-- ★ NEW: Track order button -->
+      <div style="margin:0.5rem 0;">
+        <button class="btn-ghost btn-block" id="trackSuccessOrderBtn" style="font-size:0.875rem;padding:0.7rem 1rem;">
+          <i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক করুন
         </button>
-        <button class="btn-ghost" onclick="closeModal('successModal'); navigateTo('products');" style="padding: 0.75rem 1rem; font-size: 0.9rem;">
+      </div>
+
+      <div class="success-actions" style="margin-top:0.75rem;">
+        <button class="btn-primary" onclick="closeModal('successModal');navigateTo('orders');" style="padding:0.75rem 1rem;font-size:0.9rem;">
+          <i class="fas fa-satellite-dish"></i> ট্র্যাক করুন
+        </button>
+        <button class="btn-ghost" onclick="closeModal('successModal');navigateTo('products');" style="padding:0.75rem 1rem;font-size:0.9rem;">
           <i class="fas fa-arrow-right"></i> আরও কেনাকাটা
         </button>
       </div>
@@ -399,184 +307,130 @@
   </div>
 </div>
 
-
-
-<!-- ═══════════════════════════════════════════════════════
-     BEEHARVEST FOOTER
-     Place just before the mobile bottom nav div
-     ═══════════════════════════════════════════════════════ -->
+<!-- ═══ ORDER TRACKING MODAL ════════════════════════════════ -->
+<div class="modal" id="trackingModal">
+  <div class="modal-content modal-tracking">
+    <div class="modal-header">
+      <h3><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাকিং</h3>
+      <button class="close-modal" onclick="closeModal('trackingModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" style="padding:0;">
+      <div class="track-search-zone">
+        <div class="track-search-label">অর্ডার নম্বর দিয়ে ট্র্যাক করুন</div>
+        <div class="track-search-row">
+          <div class="track-input-wrap">
+            <i class="fas fa-hashtag"></i>
+            <input type="text" id="trackOrderInput"
+                   placeholder="ORD-2025XX-00001"
+                   autocomplete="off" spellcheck="false"
+                   onkeydown="if(event.key==='Enter') trackOrder()">
+            <button class="track-clear-btn" id="trackClearBtn" onclick="clearTracking()" style="display:none;">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <button class="track-btn" id="trackBtn" onclick="trackOrder()">
+            <span class="track-btn-text"><i class="fas fa-magnifying-glass"></i> ট্র্যাক করুন</span>
+            <span class="track-btn-loading" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i></span>
+          </button>
+        </div>
+        <div class="track-hint">
+          <i class="fas fa-lightbulb"></i>
+          অর্ডার নম্বর আপনার কনফার্মেশন ইমেইলে পাবেন — যেমন: <strong>ORD-202506-00001</strong>
+        </div>
+      </div>
+      <div id="trackResult" class="track-result-area"></div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ FOOTER ════════════════════════════════════════════ -->
 <footer class="site-footer">
-
-    <!-- Top trust bar -->
-    <div class="footer-trust-bar">
-      <div class="footer-trust-bar-inner">
-        <div class="trust-pill">
-          <i class="fas fa-truck-fast"></i>
-          <span>দ্রুত ডেলিভারি</span>
-        </div>
-        <div class="trust-divider"></div>
-        <div class="trust-pill">
-          <i class="fas fa-shield-halved"></i>
-          <span>নিরাপদ পেমেন্ট</span>
-        </div>
-        <div class="trust-divider"></div>
-        <div class="trust-pill">
-          <i class="fas fa-rotate-left"></i>
-          <span>৭ দিনের রিটার্ন</span>
-        </div>
-        <div class="trust-divider"></div>
-        <div class="trust-pill">
-          <i class="fas fa-headset"></i>
-          <span>২৪/৭ সাপোর্ট</span>
-        </div>
-      </div>
-    </div>
-  
-    <!-- Main footer body -->
-    <div class="footer-body">
-      <div class="footer-grid">
-  
-        <!-- Brand column -->
-        <div class="footer-col footer-brand-col">
-          <div class="footer-logo">
-            <div class="footer-logo-icon">
-              <i class="fa-brands fa-forumbee"></i>
-            </div>
-            <div>
-              <div class="footer-logo-name">BeeHarvest</div>
-              <div class="footer-logo-tag">বাংলাদেশের বিশ্বস্ত অনলাইন শপ</div>
-            </div>
-          </div>
-          <p class="footer-about">
-            বাংলাদেশের গ্রাহকদের কাছে সেরা মানের পণ্য সহজলভ্য করে তোলাই আমাদের লক্ষ্য। ঘরে বসে অর্ডার করুন, দ্রুত পৌঁছে যাবে।
-          </p>
-          <div class="footer-social">
-            <a href="#" class="social-btn" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="social-btn" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-            <a href="#" class="social-btn" title="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="social-btn" title="YouTube"><i class="fab fa-youtube"></i></a>
-          </div>
-        </div>
-  
-        <!-- Policies column -->
-        <div class="footer-col">
-          <div class="footer-col-title">
-            <i class="fas fa-file-lines"></i> পলিসি সমূহ
-          </div>
-          <ul class="footer-links">
-            <li>
-              <a href="#" onclick="showPolicy('delivery'); return false;">
-                <i class="fas fa-truck"></i> ডেলিভারি পলিসি
-              </a>
-            </li>
-            <li>
-              <a href="#" onclick="showPolicy('return'); return false;">
-                <i class="fas fa-rotate-left"></i> রিটার্ন ও রিফান্ড
-              </a>
-            </li>
-            <li>
-              <a href="#" onclick="showPolicy('privacy'); return false;">
-                <i class="fas fa-lock"></i> গোপনীয়তা নীতি
-              </a>
-            </li>
-            <li>
-              <a href="#" onclick="showPolicy('terms'); return false;">
-                <i class="fas fa-scroll"></i> শর্তাবলী
-              </a>
-            </li>
-            <li>
-              <a href="#" onclick="showPolicy('payment'); return false;">
-                <i class="fas fa-credit-card"></i> পেমেন্ট নীতি
-              </a>
-            </li>
-          </ul>
-        </div>
-  
-        <!-- Quick links column -->
-        <div class="footer-col">
-          <div class="footer-col-title">
-            <i class="fas fa-bolt"></i> দ্রুত লিংক
-          </div>
-          <ul class="footer-links">
-            <li><a href="#" onclick="navigateTo('home'); return false;"><i class="fas fa-home"></i> হোম</a></li>
-            <li><a href="#" onclick="navigateTo('products'); return false;"><i class="fas fa-box"></i> সকল পণ্য</a></li>
-            <li><a href="#" onclick="navigateTo('orders'); return false;"><i class="fas fa-shopping-bag"></i> আমার অর্ডার</a></li>
-            <li><a href="#" onclick="navigateTo('profile'); return false;"><i class="fas fa-user"></i> প্রোফাইল</a></li>
-            <li><a href="#" onclick="showPolicy('faq'); return false;"><i class="fas fa-circle-question"></i> সাধারণ প্রশ্নোত্তর</a></li>
-          </ul>
-        </div>
-  
-        <!-- Contact column -->
-        <div class="footer-col">
-          <div class="footer-col-title">
-            <i class="fas fa-phone"></i> যোগাযোগ করুন
-          </div>
-          <ul class="footer-contact-list">
-            <li>
-              <div class="contact-icon"><i class="fas fa-phone-volume"></i></div>
-              <div>
-                <div class="contact-label">হটলাইন</div>
-                <div class="contact-value">01700-000000</div>
-              </div>
-            </li>
-            <li>
-              <div class="contact-icon"><i class="fab fa-whatsapp"></i></div>
-              <div>
-                <div class="contact-label">WhatsApp</div>
-                <div class="contact-value">01700-000001</div>
-              </div>
-            </li>
-            <li>
-              <div class="contact-icon"><i class="fas fa-envelope"></i></div>
-              <div>
-                <div class="contact-label">ইমেইল</div>
-                <div class="contact-value">support@beeharvest.com.bd</div>
-              </div>
-            </li>
-            <li>
-              <div class="contact-icon"><i class="fas fa-clock"></i></div>
-              <div>
-                <div class="contact-label">সাপোর্ট সময়</div>
-                <div class="contact-value">সকাল ৯টা – রাত ১০টা</div>
-              </div>
-            </li>
-          </ul>
-  
-          <!-- Payment logos -->
-          <div class="footer-payments">
-            <span class="payment-logo bkash">bKash</span>
-            <span class="payment-logo nagad">Nagad</span>
-            <span class="payment-logo cod">COD</span>
-          </div>
-        </div>
-  
-      </div>
-    </div>
-  
-    <!-- Footer bottom bar -->
-    <div class="footer-bottom">
-      <div class="footer-bottom-inner">
-        <span>© ২০২৫ BeeHarvest. সর্বস্বত্ব সংরক্ষিত।</span>
-        <span class="footer-made">বাংলাদেশে তৈরি <i class="fas fa-heart" style="color:#F5A623;"></i></span>
-      </div>
-    </div>
-  
-  </footer>
-  
-  <!-- ═══ POLICY MODAL ══════════════════════════════════════ -->
-  <div class="modal" id="policyModal">
-    <div class="modal-content modal-policy">
-      <div class="modal-header">
-        <h3 id="policyModalTitle"><i class="fas fa-file-lines"></i> পলিসি</h3>
-        <button class="close-modal" onclick="closeModal('policyModal')">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="modal-body" id="policyModalBody" style="line-height:1.85; color:var(--text-muted); font-size:0.92rem;"></div>
+  <div class="footer-trust-bar">
+    <div class="footer-trust-bar-inner">
+      <div class="trust-pill"><i class="fas fa-truck-fast"></i><span>দ্রুত ডেলিভারি</span></div>
+      <div class="trust-divider"></div>
+      <div class="trust-pill"><i class="fas fa-shield-halved"></i><span>নিরাপদ পেমেন্ট</span></div>
+      <div class="trust-divider"></div>
+      <div class="trust-pill"><i class="fas fa-rotate-left"></i><span>৭ দিনের রিটার্ন</span></div>
+      <div class="trust-divider"></div>
+      <div class="trust-pill"><i class="fas fa-headset"></i><span>২৪/৭ সাপোর্ট</span></div>
     </div>
   </div>
+
+  <div class="footer-body">
+    <div class="footer-grid">
+      <div class="footer-col footer-brand-col">
+        <div class="footer-logo">
+          <div class="footer-logo-icon"><i class="fa-brands fa-forumbee"></i></div>
+          <div><div class="footer-logo-name">BeeHarvest</div><div class="footer-logo-tag">বাংলাদেশের বিশ্বস্ত অনলাইন শপ</div></div>
+        </div>
+        <p class="footer-about">বাংলাদেশের গ্রাহকদের কাছে সেরা মানের পণ্য সহজলভ্য করে তোলাই আমাদের লক্ষ্য।</p>
+        <div class="footer-social">
+          <a href="#" class="social-btn" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-btn" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" class="social-btn" title="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-btn" title="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-title"><i class="fas fa-file-lines"></i> পলিসি সমূহ</div>
+        <ul class="footer-links">
+          <li><a href="#" onclick="showPolicy('delivery');return false;"><i class="fas fa-truck"></i> ডেলিভারি পলিসি</a></li>
+          <li><a href="#" onclick="showPolicy('return');return false;"><i class="fas fa-rotate-left"></i> রিটার্ন ও রিফান্ড</a></li>
+          <li><a href="#" onclick="showPolicy('privacy');return false;"><i class="fas fa-lock"></i> গোপনীয়তা নীতি</a></li>
+          <li><a href="#" onclick="showPolicy('terms');return false;"><i class="fas fa-scroll"></i> শর্তাবলী</a></li>
+          <li><a href="#" onclick="showPolicy('payment');return false;"><i class="fas fa-credit-card"></i> পেমেন্ট নীতি</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-title"><i class="fas fa-bolt"></i> দ্রুত লিংক</div>
+        <ul class="footer-links">
+          <li><a href="#" onclick="navigateTo('home');return false;"><i class="fas fa-home"></i> হোম</a></li>
+          <li><a href="#" onclick="navigateTo('products');return false;"><i class="fas fa-box"></i> সকল পণ্য</a></li>
+          <!-- ★ CHANGED icon and label -->
+          <li><a href="#" onclick="navigateTo('orders');return false;"><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক</a></li>
+          <li><a href="#" onclick="navigateTo('profile');return false;"><i class="fas fa-user"></i> প্রোফাইল</a></li>
+          <li><a href="#" onclick="showPolicy('faq');return false;"><i class="fas fa-circle-question"></i> সাধারণ প্রশ্নোত্তর</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-title"><i class="fas fa-phone"></i> যোগাযোগ করুন</div>
+        <ul class="footer-contact-list">
+          <li><div class="contact-icon"><i class="fas fa-phone-volume"></i></div><div><div class="contact-label">হটলাইন</div><div class="contact-value">01700-000000</div></div></li>
+          <li><div class="contact-icon"><i class="fab fa-whatsapp"></i></div><div><div class="contact-label">WhatsApp</div><div class="contact-value">01700-000001</div></div></li>
+          <li><div class="contact-icon"><i class="fas fa-envelope"></i></div><div><div class="contact-label">ইমেইল</div><div class="contact-value">support@beeharvest.com.bd</div></div></li>
+          <li><div class="contact-icon"><i class="fas fa-clock"></i></div><div><div class="contact-label">সাপোর্ট সময়</div><div class="contact-value">সকাল ৯টা – রাত ১০টা</div></div></li>
+        </ul>
+        <div class="footer-payments">
+          <span class="payment-logo bkash">bKash</span>
+          <span class="payment-logo nagad">Nagad</span>
+          <span class="payment-logo cod">COD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="footer-bottom-inner">
+      <span>© ২০২৫ BeeHarvest. সর্বস্বত্ব সংরক্ষিত।</span>
+      <span class="footer-made">বাংলাদেশে তৈরি <i class="fas fa-heart" style="color:#F5A623;"></i></span>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ POLICY MODAL ══════════════════════════════════════ -->
+<div class="modal" id="policyModal">
+  <div class="modal-content modal-policy">
+    <div class="modal-header">
+      <h3 id="policyModalTitle"><i class="fas fa-file-lines"></i> পলিসি</h3>
+      <button class="close-modal" onclick="closeModal('policyModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="policyModalBody" style="line-height:1.85;color:var(--text-muted);font-size:0.92rem;"></div>
+  </div>
+</div>
 
 <!-- ═══ MOBILE BOTTOM NAV ════════════════════════════════ -->
 <div class="mobile-bottom-nav">
@@ -592,8 +446,9 @@
       <span class="mobile-cart-badge-dot" id="mobileCartCount">0</span>
       <span>কার্ট</span>
     </a>
+    <!-- ★ CHANGED: "অর্ডার" → "ট্র্যাক" with satellite icon -->
     <a class="mobile-nav-item" data-page="orders">
-      <i class="fas fa-shopping-bag"></i><span>অর্ডার</span>
+      <i class="fas fa-satellite-dish"></i><span>ট্র্যাক</span>
     </a>
     <a class="mobile-nav-item" data-page="profile">
       <i class="fas fa-user"></i><span>প্রোফাইল</span>
@@ -611,10 +466,7 @@
   <div class="bottom-sheet-content" id="mobileCartItems"></div>
   <div class="cart-footer" style="padding:1rem;">
     <div class="cart-summary">
-      <div class="cart-summary-row total">
-        <span>মোট</span>
-        <span id="mobileCartTotal">৳০</span>
-      </div>
+      <div class="cart-summary-row total"><span>মোট</span><span id="mobileCartTotal">৳০</span></div>
     </div>
     <button class="btn-primary btn-block btn-large" id="mobileCheckoutBtn">
       <i class="fas fa-lock"></i> অর্ডার করুন
