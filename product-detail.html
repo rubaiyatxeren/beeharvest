@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>পণ্যের বিবরণ — BeeHarvest</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -245,12 +245,7 @@
     #confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:10000;display:none;}
     #confettiCanvas.active{display:block;}
 
-    /* ── STICKY BUY BAR (mobile) ── */
-    .sticky-buy-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);padding:0.875rem 1.25rem;z-index:800;gap:0.75rem;box-shadow:0 -4px 20px rgba(13,27,62,0.1);}
-    .sticky-price{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--navy);}
-    .sticky-price span{font-size:0.75rem;color:var(--text-muted);font-family:'Hind Siliguri',sans-serif;font-weight:400;display:block;}
-
-    /* ── RESPONSIVE ── */
+    /* ── RESPONSIVE (no sticky bar) ── */
     @media(max-width:1024px){
       .product-gallery{position:static;}
     }
@@ -264,8 +259,7 @@
       .form-row{grid-template-columns:1fr;}
       .logo-tagline{display:none;}
       .btn-back span{display:none;}
-      .toast{bottom:80px;right:12px;left:12px;max-width:100%;}
-      .sticky-buy-bar{display:flex;align-items:center;}
+      .toast{bottom:20px;right:12px;left:12px;max-width:100%;}
     }
     @media(max-width:480px){
       .trust-grid{grid-template-columns:repeat(3,1fr);}
@@ -406,20 +400,6 @@
 
 </div>
 
-<!-- Sticky Buy Bar (mobile) -->
-<div class="sticky-buy-bar" id="stickyBar">
-  <div class="sticky-price">
-    <span>মূল্য</span>
-    <span id="stickyPrice"></span>
-  </div>
-  <button class="btn-cart" style="flex:1;margin-bottom:0;" id="stickyCartBtn" onclick="addToCart()">
-    <i class="fas fa-cart-plus"></i> কার্টে যোগ
-  </button>
-  <button class="btn-buy" style="flex:1;margin-bottom:0;" id="stickyBuyBtn" onclick="buyNow()">
-    <i class="fas fa-bolt"></i> অর্ডার
-  </button>
-</div>
-
 <!-- ═══ CHECKOUT MODAL ════════════════════════════════════ -->
 <div class="modal" id="checkoutModal">
   <div class="modal-content modal-large">
@@ -527,11 +507,10 @@
   const API_URL = 'https://beeyond-harvest-admin.onrender.com/api';
   let currentProduct = null;
   let cart = [];
-  let checkoutItems = []; // items to checkout (either cart or buy-now)
+  let checkoutItems = [];
 
   try { const s = localStorage.getItem('cart'); if (s) cart = JSON.parse(s); } catch(e){}
 
-  /* ── Utils ── */
   function esc(s) {
     if (!s) return '';
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -562,7 +541,6 @@
   function showOverlay() { document.getElementById('loadingOverlay').classList.add('active'); }
   function hideOverlay() { document.getElementById('loadingOverlay').classList.remove('active'); }
 
-  /* ── Navigation ── */
   function goBack() {
     if (document.referrer && document.referrer.includes(window.location.hostname)) {
       window.history.back();
@@ -571,7 +549,6 @@
     }
   }
 
-  /* ── Product ID ── */
   function getProductId() {
     const valid = id => id && id.trim() && id !== 'undefined' && id !== 'null';
     let id = new URLSearchParams(window.location.search).get('id');
@@ -581,7 +558,6 @@
     return null;
   }
 
-  /* ── States ── */
   function showLoading() {
     document.getElementById('loadingState').style.display='flex';
     document.getElementById('errorState').style.display='none';
@@ -599,7 +575,6 @@
     document.getElementById('productDetail').style.display='block';
   }
 
-  /* ── Load Product ── */
   async function loadProduct() {
     showLoading();
     const pid = getProductId();
@@ -617,18 +592,14 @@
     }
   }
 
-  /* ── Render Product ── */
   function renderProduct(p) {
     document.title = `${p.name} — BeeHarvest`;
-
     const finalPrice = p.discountPrice || p.price;
     const discount   = p.discountPrice ? Math.round(((p.price - p.discountPrice) / p.price) * 100) : 0;
     const ph = 'https://via.placeholder.com/600x420?text=BeeHarvest';
 
-    // Breadcrumb
     document.getElementById('breadcrumbName').textContent = p.name.length > 40 ? p.name.slice(0,40)+'…' : p.name;
 
-    // Category tag
     if (p.category?.name || p.category) {
       document.getElementById('categoryTag').innerHTML =
         `<div class="product-category-tag"><i class="fas fa-tag"></i> ${esc(p.category?.name || p.category)}</div>`;
@@ -646,30 +617,24 @@
       offEl.style.display = 'inline-block';
     }
 
-    // Sticky bar
-    document.getElementById('stickyPrice').textContent = `৳${finalPrice.toLocaleString('bn-BD')}`;
-
-    // Stock
     const stock = p.stock || 0;
-    const stockEl = document.getElementById('stockStatus');
     const qtyInput = document.getElementById('qtyInput');
     qtyInput.max = Math.max(1, stock);
 
     if (stock > 10) {
-      stockEl.innerHTML = `<div class="stock-pill in"><i class="fas fa-check-circle"></i> স্টকে আছে (${stock} টি)</div>`;
+      document.getElementById('stockStatus').innerHTML = `<div class="stock-pill in"><i class="fas fa-check-circle"></i> স্টকে আছে (${stock} টি)</div>`;
       setProductBtnsDisabled(false);
       document.getElementById('qtyNote').textContent = `সর্বোচ্চ ${stock} টি`;
     } else if (stock > 0) {
-      stockEl.innerHTML = `<div class="stock-pill low"><i class="fas fa-exclamation-triangle"></i> মাত্র ${stock} টি বাকি</div>`;
+      document.getElementById('stockStatus').innerHTML = `<div class="stock-pill low"><i class="fas fa-exclamation-triangle"></i> মাত্র ${stock} টি বাকি</div>`;
       setProductBtnsDisabled(false);
       document.getElementById('qtyNote').textContent = `সর্বোচ্চ ${stock} টি`;
     } else {
-      stockEl.innerHTML = `<div class="stock-pill out"><i class="fas fa-times-circle"></i> স্টক শেষ</div>`;
+      document.getElementById('stockStatus').innerHTML = `<div class="stock-pill out"><i class="fas fa-times-circle"></i> স্টক শেষ</div>`;
       setProductBtnsDisabled(true);
       document.getElementById('qtyNote').textContent = 'পুনরায় স্টক আসবে শীঘ্রই';
     }
 
-    // Meta tags
     const metas = [];
     if (p.sku)    metas.push(`<span class="meta-tag"><i class="fas fa-barcode"></i> SKU: ${esc(p.sku)}</span>`);
     if (p.brand)  metas.push(`<span class="meta-tag"><i class="fas fa-trademark"></i> ${esc(p.brand)}</span>`);
@@ -677,21 +642,18 @@
     if (p.isFeatured) metas.push(`<span class="meta-tag"><i class="fas fa-star"></i> ফিচার্ড পণ্য</span>`);
     document.getElementById('metaTags').innerHTML = metas.join('');
 
-    // Images
     const imgs = p.images || [];
     const mi = document.getElementById('mainImage');
     mi.src = imgs.length ? imgs[0].url : ph;
     mi.alt = p.name;
     mi.onerror = () => { mi.src = ph; };
 
-    // Image badges
     const badges = [];
     if (discount) badges.push(`<span class="img-badge discount">${discount}% ছাড়</span>`);
     if (stock <= 0) badges.push(`<span class="img-badge out">স্টক শেষ</span>`);
     if (p.isFeatured) badges.push(`<span class="img-badge featured"><i class="fas fa-star"></i> Featured</span>`);
     document.getElementById('imgBadges').innerHTML = badges.join('');
 
-    // Thumbnails
     const strip = document.getElementById('thumbnailStrip');
     if (imgs.length > 1) {
       strip.innerHTML = imgs.map((img,i) => `
@@ -700,7 +662,6 @@
              onerror="this.src='${ph}'">`).join('');
     }
 
-    // Extra cards
     let extras = '';
     if (p.description) {
       extras += `
@@ -733,19 +694,17 @@
   }
 
   function setProductBtnsDisabled(disabled) {
-    ['btnAddCart','btnBuyNow','stickyCartBtn','stickyBuyBtn'].forEach(id => {
+    ['btnAddCart','btnBuyNow'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.disabled = disabled;
     });
   }
 
-  /* ── Gallery ── */
   function setImage(url, idx) {
     document.getElementById('mainImage').src = url;
     document.querySelectorAll('.thumbnail').forEach((t,i) => t.classList.toggle('active', i===idx));
   }
 
-  /* ── Load Related ── */
   async function loadRelated(categoryId, excludeId) {
     if (!categoryId) return;
     try {
@@ -767,7 +726,6 @@
     } catch(e) {}
   }
 
-  /* ── Quantity ── */
   function changeQty(delta) {
     const el = document.getElementById('qtyInput');
     const max = parseInt(el.max) || 99;
@@ -777,7 +735,6 @@
     document.getElementById('qtyPlus').disabled  = newVal >= max;
   }
 
-  /* ── Cart ── */
   function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
 
   function updateCartCount() {
@@ -802,7 +759,6 @@
     showToast(`"${currentProduct.name}" কার্টে যোগ হয়েছে`, 'success');
   }
 
-  /* ── Buy Now (direct checkout) ── */
   function buyNow() {
     if (!currentProduct || currentProduct.stock <= 0) return;
     const qty   = parseInt(document.getElementById('qtyInput').value) || 1;
@@ -813,7 +769,6 @@
     openModal('checkoutModal');
   }
 
-  /* ── Open Checkout with full cart ── */
   function openCheckoutDirect() {
     if (cart.length === 0) { showToast('কার্ট খালি! আগে পণ্য যোগ করুন', 'error'); return; }
     checkoutItems = [...cart];
@@ -821,7 +776,6 @@
     openModal('checkoutModal');
   }
 
-  /* ── Populate Checkout Modal ── */
   function populateCheckoutModal(items) {
     const subtotal = items.reduce((s,i) => s + i.price * i.quantity, 0);
     const shipping = 60;
@@ -843,7 +797,6 @@
     document.getElementById('coTotal').textContent     = `৳${total.toLocaleString()}`;
   }
 
-  /* ── Place Order ── */
   async function placeOrder() {
     const fullName = val('coName');
     const email    = val('coEmail');
@@ -897,7 +850,6 @@
 
       const orderNum = data.data?.orderNumber || data.data?._id?.slice(-8) || 'SUCCESS';
 
-      // Remove ordered items from cart if they came from cart
       const orderedIds = checkoutItems.map(i => i.productId);
       cart = cart.filter(i => !orderedIds.includes(i.productId));
       saveCart();
@@ -925,7 +877,6 @@
     }
   }
 
-  /* ── Confetti ── */
   let _raf = null;
   function startConfetti() {
     const canvas = document.getElementById('confettiCanvas');
@@ -960,7 +911,6 @@
     if (_raf) { cancelAnimationFrame(_raf); _raf=null; }
   }
 
-  /* ── Keyboard / backdrop close ── */
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal.active').forEach(m => closeModal(m.id));
@@ -970,11 +920,9 @@
     m.addEventListener('click', e => { if (e.target===m) closeModal(m.id); });
   });
 
-  /* ── Init ── */
   document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
     loadProduct();
-    // qty minus starts disabled
     document.getElementById('qtyMinus').disabled = true;
   });
 </script>
