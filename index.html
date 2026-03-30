@@ -1,1648 +1,3256 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="BeeHarvest - বাংলাদেশের বিশ্বস্ত অনলাইন শপ">
-  <title>BeeHarvest — বাংলাদেশের বিশ্বস্ত অনলাইন শপ</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* ══════════════════════════════════════════════════════════
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="BeeHarvest - বাংলাদেশের বিশ্বস্ত অনলাইন শপ"
+    />
+    <title>BeeHarvest — বাংলাদেশের বিশ্বস্ত অনলাইন শপ</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ══════════════════════════════════════════════════════════
        ROOT VARIABLES
     ══════════════════════════════════════════════════════════ */
-    :root {
-      --honey:        #F5A623;
-      --honey-light:  #FDD882;
-      --honey-glow:   #FFD166;
-      --honey-dark:   #C47F11;
-      --honey-deep:   #9A5F00;
-      --navy:         #0D1B3E;
-      --navy-mid:     #1A2E5A;
-      --navy-light:   #253F7A;
-      --navy-ultra:   #06112A;
-      --cream:        #FFF9F0;
-      --cream-warm:   #FEF3DC;
-      --cream-dark:   #F0E8D8;
-      --surface:      #FFFFFF;
-      --text-primary: #0D1B3E;
-      --text-muted:   #6B7A99;
-      --text-light:   #A0ABBE;
-      --success:      #1E8A4A;
-      --success-bg:   #E8F5EE;
-      --danger:       #C0392B;
-      --danger-bg:    #FDEDEC;
-      --warning:      #B7770D;
-      --warning-bg:   #FEF3CD;
-      --border:       #E8EBF4;
-      --shadow-sm:    0 2px 8px rgba(13,27,62,0.06);
-      --shadow-md:    0 8px 24px rgba(13,27,62,0.10);
-      --shadow-lg:    0 20px 48px rgba(13,27,62,0.14);
-      --shadow-honey: 0 8px 32px rgba(245,166,35,0.35);
-      --radius-sm:    8px;
-      --radius-md:    14px;
-      --radius-lg:    20px;
-      --radius-xl:    28px;
-      --radius-pill:  999px;
-      --transition:   0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      --spring:       0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
+      :root {
+        --honey: #f5a623;
+        --honey-light: #fdd882;
+        --honey-glow: #ffd166;
+        --honey-dark: #c47f11;
+        --honey-deep: #9a5f00;
+        --navy: #0d1b3e;
+        --navy-mid: #1a2e5a;
+        --navy-light: #253f7a;
+        --navy-ultra: #06112a;
+        --cream: #fff9f0;
+        --cream-warm: #fef3dc;
+        --cream-dark: #f0e8d8;
+        --surface: #ffffff;
+        --text-primary: #0d1b3e;
+        --text-muted: #6b7a99;
+        --text-light: #a0abbe;
+        --success: #1e8a4a;
+        --success-bg: #e8f5ee;
+        --danger: #c0392b;
+        --danger-bg: #fdedec;
+        --warning: #b7770d;
+        --warning-bg: #fef3cd;
+        --border: #e8ebf4;
+        --shadow-sm: 0 2px 8px rgba(13, 27, 62, 0.06);
+        --shadow-md: 0 8px 24px rgba(13, 27, 62, 0.1);
+        --shadow-lg: 0 20px 48px rgba(13, 27, 62, 0.14);
+        --shadow-honey: 0 8px 32px rgba(245, 166, 35, 0.35);
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --radius-xl: 28px;
+        --radius-pill: 999px;
+        --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        --spring: 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
 
-    /* ══════════════════════════════════════════════════════════
+      /* ══════════════════════════════════════════════════════════
        RESET & BASE
     ══════════════════════════════════════════════════════════ */
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Hind Siliguri', 'DM Sans', sans-serif;
-      background: #F7F2EA;
-      color: var(--text-primary);
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--honey); border-radius: 3px; }
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Hind Siliguri", "DM Sans", sans-serif;
+        background: #f7f2ea;
+        color: var(--text-primary);
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+      ::-webkit-scrollbar {
+        width: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--honey);
+        border-radius: 3px;
+      }
 
-    /* ══════════════════════════════════════════════════════════
+      /* ══════════════════════════════════════════════════════════
        AMBIENT GRAIN LAYER
     ══════════════════════════════════════════════════════════ */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.4;
-    }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.4;
+      }
 
-    /* ══════════════════════════════════════════════════════════
+      /* ══════════════════════════════════════════════════════════
        NAV
     ══════════════════════════════════════════════════════════ */
-    .navbar {
-      background: rgba(13,27,62,0.97);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 900;
-      border-bottom: 1px solid rgba(245,166,35,0.12);
-    }
-    .nav-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      height: 68px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
-    }
-    .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; }
-    .logo-icon {
-      width: 40px; height: 40px;
-      background: linear-gradient(135deg, var(--honey) 0%, var(--honey-dark) 100%);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; color: white; flex-shrink: 0;
-      box-shadow: 0 0 20px rgba(245,166,35,0.4);
-    }
-    .logo-name {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.4rem; color: white; letter-spacing: 0.5px; line-height: 1.1;
-    }
-    .logo-tagline { font-size: 0.62rem; color: var(--honey-light); letter-spacing: 0.3px; }
-    .nav-links { display: flex; align-items: center; gap: 0.25rem; flex: 1; justify-content: center; }
-    .nav-link {
-      color: rgba(255,255,255,0.65);
-      text-decoration: none;
-      font-size: 0.88rem; font-weight: 500;
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius-sm);
-      transition: all var(--transition);
-      display: flex; align-items: center; gap: 6px;
-      position: relative;
-    }
-    .nav-link::after {
-      content: ''; position: absolute;
-      bottom: 4px; left: 50%; right: 50%;
-      height: 2px; background: var(--honey);
-      border-radius: 1px; transition: all var(--transition);
-    }
-    .nav-link:hover { color: white; background: rgba(255,255,255,0.08); }
-    .nav-link.active { color: var(--honey); }
-    .nav-link.active::after { left: 16px; right: 16px; }
-    .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
-    .cart-btn {
-      position: relative; background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12); color: white;
-      padding: 0.5rem 1rem; border-radius: var(--radius-sm);
-      cursor: pointer; display: flex; align-items: center; gap: 8px;
-      font-size: 0.88rem; font-family: inherit; transition: all var(--transition);
-    }
-    .cart-btn:hover { background: rgba(245,166,35,0.2); border-color: var(--honey); color: var(--honey); }
-    .cart-count {
-      position: absolute; top: -8px; right: -8px;
-      background: var(--honey); color: var(--navy);
-      border-radius: 50%; min-width: 20px; height: 20px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem; font-weight: 700; padding: 0 4px;
-      animation: cartBounce 0.4s var(--spring);
-    }
-    @keyframes cartBounce { 0%{transform:scale(0)} 60%{transform:scale(1.3)} 100%{transform:scale(1)} }
-    .user-avatar-btn {
-      width: 38px; height: 38px; border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.15);
-      overflow: hidden; cursor: pointer; transition: border-color var(--transition);
-    }
-    .user-avatar-btn:hover { border-color: var(--honey); }
-    .user-avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
-
-    /* ══════════════════════════════════════════════════════════
-       MAIN CONTENT WRAPPER
-    ══════════════════════════════════════════════════════════ */
-    .main-content {
-      margin-top: 68px;
-      padding: 0;
-      max-width: 1400px;
-      margin-left: auto; margin-right: auto;
-      position: relative; z-index: 1;
-    }
-    .page-content { display: none; }
-    .page-content.active { display: block; animation: pageIn 0.4s ease; }
-    @keyframes pageIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-
-    /* ══════════════════════════════════════════════════════════
-       ★ HERO — TOTAL REDESIGN
-    ══════════════════════════════════════════════════════════ */
-    .hero-wrapper {
-  position: relative;
-  overflow: hidden;
-  padding: 0 1.5rem 0;
-  margin-bottom: 0;
-  border-radius: 32px 32px 0 0;
-  margin-top: 0.5rem;
-}
-
-    /* Animated gradient mesh background */
-    .hero-bg {
-      position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(245,166,35,0.18) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 80% 70%, rgba(26,46,90,0.35) 0%, transparent 60%),
-        linear-gradient(160deg, #0D1B3E 0%, #1A2E5A 45%, #0D1B3E 100%);
-      z-index: -1;
-      animation: heroBgPulse 8s ease-in-out infinite alternate;
-    }
-    @keyframes heroBgPulse {
-      0%  { background-position: 0% 0%; }
-      100%{ background-position: 100% 100%; }
-    }
-
-    /* Floating orbs */
-    .hero-orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(60px);
-      pointer-events: none;
-      animation: orbFloat 6s ease-in-out infinite;
-    }
-    .hero-orb-1 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(245,166,35,0.25) 0%, transparent 70%);
-      top: -100px; right: 10%;
-      animation-delay: 0s; animation-duration: 7s;
-    }
-    .hero-orb-2 {
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(37,63,122,0.4) 0%, transparent 70%);
-      bottom: -50px; left: 5%;
-      animation-delay: 2s; animation-duration: 9s;
-    }
-    .hero-orb-3 {
-      width: 200px; height: 200px;
-      background: radial-gradient(circle, rgba(253,216,130,0.2) 0%, transparent 70%);
-      top: 40%; left: 40%;
-      animation-delay: 4s; animation-duration: 6s;
-    }
-    @keyframes orbFloat {
-      0%,100% { transform: translateY(0) scale(1); }
-      50%      { transform: translateY(-30px) scale(1.05); }
-    }
-
-    .hero-inner {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      min-height: 560px;
-      gap: 2rem;
-      padding: 4rem 2rem 3.5rem;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Left side */
-    .hero-left {}
-    .hero-eyebrow {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(245,166,35,0.15);
-      border: 1px solid rgba(245,166,35,0.3);
-      backdrop-filter: blur(8px);
-      color: var(--honey-light);
-      padding: 7px 16px; border-radius: var(--radius-pill);
-      font-size: 0.75rem; font-weight: 600;
-      letter-spacing: 0.8px; text-transform: uppercase;
-      margin-bottom: 1.5rem;
-      animation: fadeSlideUp 0.6s ease 0.1s both;
-    }
-    .hero-eyebrow span {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--honey); display: inline-block;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.5)} }
-
-    .hero-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(2.2rem, 4vw, 3.6rem);
-      line-height: 1.1;
-      color: white;
-      margin-bottom: 1.25rem;
-      animation: fadeSlideUp 0.6s ease 0.2s both;
-    }
-    .hero-title em {
-      font-style: italic;
-      background: linear-gradient(135deg, var(--honey) 0%, var(--honey-light) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero-title .line2 { display: block; margin-top: 0.2em; }
-
-    .hero-desc {
-      color: rgba(255,255,255,0.65);
-      font-size: 1rem; line-height: 1.8;
-      max-width: 420px;
-      margin-bottom: 2rem;
-      animation: fadeSlideUp 0.6s ease 0.3s both;
-    }
-
-    .hero-cta-group {
-      display: flex; gap: 1rem; flex-wrap: wrap;
-      animation: fadeSlideUp 0.6s ease 0.4s both;
-    }
-    .btn-hero-primary {
-      background: linear-gradient(135deg, var(--honey) 0%, var(--honey-dark) 100%);
-      color: var(--navy);
-      border: none; padding: 14px 28px;
-      border-radius: var(--radius-md);
-      cursor: pointer; font-weight: 700; font-size: 0.95rem;
-      font-family: inherit;
-      display: inline-flex; align-items: center; gap: 9px;
-      transition: all var(--transition);
-      box-shadow: var(--shadow-honey);
-    }
-    .btn-hero-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 40px rgba(245,166,35,0.5);
-    }
-    .btn-hero-ghost {
-      background: rgba(255,255,255,0.08);
-      border: 1.5px solid rgba(255,255,255,0.2);
-      color: white; padding: 14px 24px;
-      border-radius: var(--radius-md);
-      cursor: pointer; font-weight: 600; font-size: 0.95rem;
-      font-family: inherit; backdrop-filter: blur(8px);
-      display: inline-flex; align-items: center; gap: 8px;
-      transition: all var(--transition);
-    }
-    .btn-hero-ghost:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
-
-    /* Trust badges */
-    .hero-trust {
-      display: flex; gap: 1.5rem; margin-top: 2rem; flex-wrap: wrap;
-      animation: fadeSlideUp 0.6s ease 0.5s both;
-    }
-    .trust-item {
-      display: flex; align-items: center; gap: 7px;
-      font-size: 0.78rem; color: rgba(255,255,255,0.5);
-    }
-    .trust-item i { color: var(--honey); font-size: 0.9rem; }
-
-    /* Right side — floating product showcase card */
-    .hero-right {
-      display: flex; justify-content: center; align-items: center;
-      animation: heroRightIn 0.8s var(--spring) 0.2s both;
-    }
-    @keyframes heroRightIn {
-      from { opacity: 0; transform: translateX(40px) scale(0.95); }
-      to   { opacity: 1; transform: translateX(0) scale(1); }
-    }
-
-    .hero-card {
-      background: rgba(255,255,255,0.07);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: var(--radius-xl);
-      padding: 1.75rem;
-      width: 100%;
-      max-width: 380px;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--honey), transparent);
-    }
-    .hero-card-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(245,166,35,0.2);
-      border: 1px solid rgba(245,166,35,0.3);
-      color: var(--honey-light);
-      padding: 5px 12px; border-radius: var(--radius-pill);
-      font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 1.25rem;
-    }
-    .hero-card-product-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem;
-      margin-bottom: 1.25rem;
-    }
-    .hc-product {
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: var(--radius-md);
-      padding: 0.875rem;
-      transition: all var(--transition);
-      cursor: pointer;
-    }
-    .hc-product:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
-    .hc-product-emoji { font-size: 1.8rem; margin-bottom: 0.4rem; display: block; }
-    .hc-product-name { color: white; font-size: 0.8rem; font-weight: 600; line-height: 1.3; margin-bottom: 3px; }
-    .hc-product-price { color: var(--honey); font-size: 0.88rem; font-weight: 700; }
-
-    .hero-card-offer {
-      background: linear-gradient(135deg, rgba(245,166,35,0.15), rgba(197,127,17,0.1));
-      border: 1px solid rgba(245,166,35,0.25);
-      border-radius: var(--radius-md);
-      padding: 0.875rem;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .offer-icon {
-      width: 40px; height: 40px;
-      background: linear-gradient(135deg, var(--honey), var(--honey-dark));
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; color: var(--navy); flex-shrink: 0;
-    }
-    .offer-text-main { color: white; font-size: 0.875rem; font-weight: 600; }
-    .offer-text-sub { color: rgba(255,255,255,0.5); font-size: 0.72rem; margin-top: 2px; }
-
-    /* Floating badges on the card */
-    .float-badge {
-      position: absolute;
-      background: white;
-      border-radius: var(--radius-md);
-      padding: 8px 12px;
-      display: flex; align-items: center; gap: 7px;
-      box-shadow: 0 8px 24px rgba(13,27,62,0.2);
-      font-size: 0.78rem; font-weight: 600;
-      color: var(--text-primary);
-      animation: floatBadge 3s ease-in-out infinite;
-    }
-    .float-badge.f1 { top: -16px; right: 20px; animation-delay: 0s; }
-    .float-badge.f2 { bottom: -12px; left: 20px; animation-delay: 1.5s; }
-    .float-badge i { font-size: 1rem; }
-    .float-badge .f-honey { color: var(--honey); }
-    .float-badge .f-green { color: var(--success); }
-    @keyframes floatBadge {
-      0%,100% { transform: translateY(0); }
-      50%      { transform: translateY(-6px); }
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       TICKER / MARQUEE
-    ══════════════════════════════════════════════════════════ */
-    .ticker-bar {
-      background: var(--honey);
-      overflow: hidden;
-      padding: 10px 0;
-      position: relative; z-index: 2;
-    }
-    .ticker-track {
-      display: flex; gap: 0; align-items: center;
-      animation: tickerScroll 25s linear infinite;
-      width: max-content;
-    }
-    .ticker-bar:hover .ticker-track { animation-play-state: paused; }
-    @keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-    .ticker-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 0 2.5rem;
-      font-size: 0.78rem; font-weight: 700;
-      color: var(--navy); letter-spacing: 0.3px;
-      white-space: nowrap;
-    }
-    .ticker-item i { font-size: 0.85rem; opacity: 0.7; }
-    .ticker-dot {
-      width: 4px; height: 4px; border-radius: 50%;
-      background: rgba(13,27,62,0.35); flex-shrink: 0;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       STATS STRIP
-    ══════════════════════════════════════════════════════════ */
-    .stats-strip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      position: relative; z-index: 1;
-    }
-    .stat-cell {
-      padding: 1.5rem 1rem;
-      text-align: center;
-      border-right: 1px solid var(--border);
-      transition: background var(--transition);
-      position: relative; overflow: hidden;
-    }
-    .stat-cell:last-child { border-right: none; }
-    .stat-cell::before {
-      content: '';
-      position: absolute; bottom: 0; left: 50%; right: 50%;
-      height: 3px; background: var(--honey);
-      transition: all 0.3s ease; border-radius: 2px 2px 0 0;
-    }
-    .stat-cell:hover::before { left: 0; right: 0; }
-    .stat-cell:hover { background: var(--cream); }
-    .stat-num {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.9rem; color: var(--navy);
-      line-height: 1; margin-bottom: 4px;
-    }
-    .stat-label {
-      font-size: 0.75rem; color: var(--text-muted);
-      font-weight: 500;
-    }
-    .stat-cell i {
-      display: block; font-size: 1rem;
-      color: var(--honey); margin-bottom: 6px;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       SECTIONS
-    ══════════════════════════════════════════════════════════ */
-    .home-sections {
-      padding: 0 2rem 4rem;
-    }
-
-    /* Section header */
-    .sec-head {
-      display: flex; align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 1.75rem;
-      padding-top: 3.5rem;
-    }
-    .sec-eyebrow {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 0.7rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 1.2px;
-      color: var(--honey-dark); margin-bottom: 6px;
-    }
-    .sec-eyebrow::before {
-      content: '';
-      width: 20px; height: 2px;
-      background: var(--honey); border-radius: 1px;
-    }
-    .sec-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.8rem; color: var(--navy); line-height: 1.2;
-    }
-    .sec-title em { font-style: italic; color: var(--honey-dark); }
-    .see-all {
-      display: inline-flex; align-items: center; gap: 6px;
-      color: var(--honey-dark); font-weight: 700; font-size: 0.82rem;
-      text-decoration: none; cursor: pointer;
-      padding: 8px 16px; border-radius: var(--radius-pill);
-      background: var(--cream-warm);
-      border: 1px solid rgba(245,166,35,0.2);
-      transition: all var(--transition);
-    }
-    .see-all:hover { background: var(--honey); color: var(--navy); transform: translateY(-1px); }
-    .see-all i { font-size: 0.75rem; transition: transform var(--transition); }
-    .see-all:hover i { transform: translateX(3px); }
-
-    /* ══════════════════════════════════════════════════════════
-       FEATURED BANNER GRID
-    ══════════════════════════════════════════════════════════ */
-    .banner-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      grid-template-rows: auto auto;
-      gap: 1rem;
-      margin-bottom: 3.5rem;
-    }
-    .banner-main {
-      grid-row: 1 / 3;
-      background: linear-gradient(135deg, #0D1B3E 0%, #1A3A6B 60%, #253F7A 100%);
-      border-radius: var(--radius-xl);
-      overflow: hidden; position: relative;
-      min-height: 320px; cursor: pointer;
-      transition: transform var(--transition), box-shadow var(--transition);
-    }
-    .banner-main:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-    .banner-main .bm-bg {
-      position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse at 80% 50%, rgba(245,166,35,0.22) 0%, transparent 60%),
-        radial-gradient(ellipse at 20% 80%, rgba(37,63,122,0.5) 0%, transparent 50%);
-    }
-    .banner-main .bm-deco {
-      position: absolute;
-      right: -30px; top: 50%; transform: translateY(-50%);
-      font-size: 9rem; opacity: 0.08;
-      pointer-events: none; user-select: none;
-    }
-    .banner-main .bm-content {
-      position: relative; z-index: 1;
-      padding: 2.5rem 2.5rem;
-      height: 100%;
-      display: flex; flex-direction: column; justify-content: center;
-    }
-    .bm-tag {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(245,166,35,0.2); border: 1px solid rgba(245,166,35,0.35);
-      color: var(--honey-light); padding: 5px 14px; border-radius: var(--radius-pill);
-      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.6px; margin-bottom: 1.1rem; width: fit-content;
-    }
-    .bm-heading {
-      font-family: 'DM Serif Display', serif;
-      font-size: 2rem; color: white; line-height: 1.2;
-      margin-bottom: 0.75rem;
-    }
-    .bm-heading em { font-style: italic; color: var(--honey); }
-    .bm-sub { color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1.5rem; max-width: 360px; }
-    .bm-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: linear-gradient(135deg, var(--honey), var(--honey-dark));
-      color: var(--navy); padding: 11px 24px;
-      border-radius: var(--radius-md); border: none;
-      font-family: inherit; font-weight: 700; font-size: 0.875rem;
-      cursor: pointer; transition: all var(--transition);
-      width: fit-content; box-shadow: var(--shadow-honey);
-    }
-    .bm-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,166,35,0.45); }
-
-    .banner-sm {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      overflow: hidden; position: relative;
-      min-height: 148px; cursor: pointer;
-      border: 1px solid var(--border);
-      transition: all var(--transition);
-      padding: 1.5rem;
-      display: flex; flex-direction: column; justify-content: space-between;
-    }
-    .banner-sm:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--honey-light); }
-    .banner-sm-1 {
-      background: linear-gradient(135deg, #FFF0D9 0%, #FFEDC0 100%);
-      border-color: rgba(245,166,35,0.25);
-    }
-    .banner-sm-2 {
-      background: linear-gradient(135deg, #EEF4FF 0%, #E0EAFF 100%);
-      border-color: rgba(37,63,122,0.15);
-    }
-    .bs-icon {
-      font-size: 2.2rem; margin-bottom: 0.5rem; display: block;
-    }
-    .bs-title { font-weight: 700; font-size: 0.92rem; color: var(--navy); margin-bottom: 3px; }
-    .bs-sub { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
-    .bs-cta {
-      font-size: 0.75rem; font-weight: 700;
-      color: var(--honey-dark); display: flex; align-items: center; gap: 4px;
-      margin-top: 0.75rem;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       PRODUCT CARDS — COMPLETELY REDESIGNED
-    ══════════════════════════════════════════════════════════ */
-    .products-showcase { margin-bottom: 0; }
-
-    .products-grid-home {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .pcard {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex; flex-direction: column;
-      position: relative;
-    }
-    .pcard:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 24px 48px rgba(13,27,62,0.13);
-      border-color: rgba(245,166,35,0.3);
-    }
-
-    .pcard-img-wrap {
-      position: relative; overflow: hidden;
-      background: var(--cream-dark);
-      aspect-ratio: 4/3;
-    }
-    .pcard-img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-      display: block;
-    }
-    .pcard:hover .pcard-img { transform: scale(1.08); }
-
-    .pcard-badge {
-      position: absolute; top: 10px; left: 10px;
-      background: linear-gradient(135deg, var(--honey), var(--honey-dark));
-      color: var(--navy); font-size: 0.68rem; font-weight: 800;
-      padding: 4px 10px; border-radius: var(--radius-pill);
-      letter-spacing: 0.3px; box-shadow: 0 2px 8px rgba(245,166,35,0.4);
-    }
-    .pcard-badge.out {
-      background: var(--danger); color: white; box-shadow: none;
-    }
-    .pcard-wishlist {
-      position: absolute; top: 10px; right: 10px;
-      width: 32px; height: 32px;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(8px);
-      border: none; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 0.85rem;
-      color: var(--text-light); transition: all var(--transition);
-      opacity: 0; transform: scale(0.8);
-    }
-    .pcard:hover .pcard-wishlist { opacity: 1; transform: scale(1); }
-    .pcard-wishlist:hover { color: var(--danger); background: white; }
-
-    .pcard-quick-add {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      background: linear-gradient(0deg, rgba(13,27,62,0.95) 0%, rgba(13,27,62,0.7) 100%);
-      backdrop-filter: blur(4px);
-      color: white; text-align: center;
-      padding: 12px; font-size: 0.82rem; font-weight: 700;
-      border: none; width: 100%; font-family: inherit; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 7px;
-      transform: translateY(100%);
-      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .pcard:hover .pcard-quick-add { transform: translateY(0); }
-    .pcard-quick-add:hover { background: var(--honey); color: var(--navy); }
-
-    .pcard-body { padding: 1.1rem; flex: 1; display: flex; flex-direction: column; }
-    .pcard-cat {
-      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.8px; color: var(--honey-dark); margin-bottom: 5px;
-    }
-    .pcard-name {
-      font-weight: 600; font-size: 0.92rem; color: var(--text-primary);
-      line-height: 1.45; margin-bottom: 0.75rem;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .pcard-footer { margin-top: auto; }
-    .pcard-price-row { display: flex; align-items: baseline; gap: 7px; margin-bottom: 0.75rem; flex-wrap: wrap; }
-    .pcard-price {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.35rem; color: var(--navy);
-    }
-    .pcard-orig { font-size: 0.8rem; color: var(--text-light); text-decoration: line-through; }
-    .pcard-off {
-      background: var(--success-bg); color: var(--success);
-      font-size: 0.68rem; font-weight: 700;
-      padding: 2px 7px; border-radius: var(--radius-pill);
-    }
-    .pcard-stock {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 0.72rem; font-weight: 600;
-      color: var(--success); margin-bottom: 0.75rem;
-    }
-    .pcard-stock.low { color: var(--warning); }
-    .pcard-stock.out { color: var(--danger); }
-    .pcard-stock i { font-size: 0.65rem; }
-    .pcard-add-btn {
-      width: 100%; padding: 9px;
-      background: linear-gradient(135deg, var(--navy), var(--navy-mid));
-      color: white; border: none;
-      border-radius: var(--radius-sm);
-      font-family: inherit; font-weight: 700; font-size: 0.82rem;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 7px;
-      transition: all var(--transition);
-    }
-    .pcard-add-btn:hover {
-      background: linear-gradient(135deg, var(--honey), var(--honey-dark));
-      color: var(--navy);
-      transform: translateY(-1px);
-    }
-    .pcard-add-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-
-    /* Skeleton */
-    .pcard-skeleton { pointer-events: none; }
-    .skel-img { aspect-ratio: 4/3; background: linear-gradient(90deg,#eee 25%,#f7f7f7 50%,#eee 75%); background-size: 400%; animation: skel 1.5s ease infinite; }
-    .skel-line { height: 13px; background: linear-gradient(90deg,#eee 25%,#f7f7f7 50%,#eee 75%); background-size: 400%; border-radius: 6px; animation: skel 1.5s ease infinite; margin: 8px 0; }
-    .skel-line.w60 { width: 60%; }
-    .skel-line.w40 { width: 40%; }
-    @keyframes skel { 0%{background-position:100%} 100%{background-position:-100%} }
-
-    /* ══════════════════════════════════════════════════════════
-       CATEGORIES — REDESIGNED
-    ══════════════════════════════════════════════════════════ */
-    .cats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 0.875rem;
-    }
-    .cat-card {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      padding: 1.4rem 0.75rem;
-      text-align: center;
-      cursor: pointer;
-      border: 2px solid transparent;
-      transition: all var(--spring);
-      box-shadow: var(--shadow-sm);
-      position: relative; overflow: hidden;
-    }
-    .cat-card::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(245,166,35,0.05), transparent);
-      opacity: 0; transition: opacity var(--transition);
-    }
-    .cat-card:hover { border-color: var(--honey); transform: translateY(-5px) scale(1.02); box-shadow: var(--shadow-md); }
-    .cat-card:hover::before { opacity: 1; }
-    .cat-icon-wrap {
-      width: 56px; height: 56px;
-      background: linear-gradient(135deg, rgba(245,166,35,0.12), rgba(245,166,35,0.05));
-      border-radius: 14px; margin: 0 auto 0.8rem;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.5rem; color: var(--honey-dark);
-      transition: all var(--spring);
-    }
-    .cat-card:hover .cat-icon-wrap {
-      background: linear-gradient(135deg, var(--honey), var(--honey-dark));
-      color: white; transform: rotate(-5deg) scale(1.1);
-    }
-    .cat-name { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
-    .cat-count { font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; }
-
-    /* ══════════════════════════════════════════════════════════
-       WHY US STRIP
-    ══════════════════════════════════════════════════════════ */
-    .why-strip {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
-      border-radius: var(--radius-xl);
-      padding: 3rem 2.5rem;
-      margin: 3.5rem 0 0;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 2rem;
-      position: relative; overflow: hidden;
-    }
-    .why-strip::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(245,166,35,0.08), transparent);
-    }
-    .why-item { text-align: center; position: relative; z-index: 1; }
-    .why-icon {
-      width: 56px; height: 56px;
-      background: rgba(245,166,35,0.12);
-      border: 1px solid rgba(245,166,35,0.2);
-      border-radius: var(--radius-md); margin: 0 auto 1rem;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; color: var(--honey);
-      transition: all var(--transition);
-    }
-    .why-item:hover .why-icon {
-      background: var(--honey); color: var(--navy);
-      transform: scale(1.1);
-    }
-    .why-title { color: white; font-weight: 700; font-size: 0.92rem; margin-bottom: 5px; }
-    .why-desc { color: rgba(255,255,255,0.5); font-size: 0.78rem; line-height: 1.6; }
-
-    /* ══════════════════════════════════════════════════════════
-       TOAST, MODALS, CART etc — keeping from original
-    ══════════════════════════════════════════════════════════ */
-    /* (all reused from customer.css, added here for the demo page) */
-
-    /* ══════════════════════════════════════════════════════════
-       FLOATING CART BUTTON (mobile)
-    ══════════════════════════════════════════════════════════ */
-    .fab-cart {
-      display: none;
-      position: fixed;
-      bottom: 85px; right: 1.5rem;
-      width: 56px; height: 56px;
-      background: linear-gradient(135deg, var(--honey), var(--honey-dark));
-      border: none; border-radius: 50%;
-      box-shadow: 0 8px 24px rgba(245,166,35,0.45);
-      color: var(--navy); font-size: 1.3rem;
-      cursor: pointer; z-index: 700;
-      display: none; align-items: center; justify-content: center;
-      transition: all var(--transition);
-    }
-    .fab-cart:hover { transform: scale(1.1); }
-    .fab-count {
-      position: absolute; top: -4px; right: -4px;
-      background: var(--danger); color: white;
-      border-radius: 50%; width: 20px; height: 20px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.65rem; font-weight: 700; border: 2px solid var(--surface);
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       MOBILE BOTTOM NAV
-    ══════════════════════════════════════════════════════════ */
-    .mobile-bottom-nav {
-      display: none;
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: rgba(255,255,255,0.97);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 -1px 0 var(--border), 0 -8px 24px rgba(13,27,62,0.08);
-      z-index: 800;
-      padding: 6px 0 env(safe-area-inset-bottom, 6px);
-    }
-    .mobile-nav-items { display: flex; align-items: center; }
-    .mobile-nav-item {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; gap: 3px;
-      text-decoration: none; color: var(--text-light);
-      font-size: 9px; font-weight: 600;
-      padding: 7px 4px; cursor: pointer;
-      transition: all var(--transition); position: relative;
-    }
-    .mobile-nav-item i { font-size: 1.3rem; transition: transform var(--transition); }
-    .mobile-nav-item.active { color: var(--navy); }
-    .mobile-nav-item.active i { transform: scale(1.15); color: var(--navy); }
-    .mobile-nav-item.active::before {
-      content: ''; position: absolute; top: 0; left: 20%; right: 20%;
-      height: 3px; background: var(--honey); border-radius: 0 0 4px 4px;
-    }
-    .mobile-cart-badge {
-      position: absolute; top: 2px; right: 18%;
-      background: var(--honey); color: var(--navy);
-      border-radius: 50%; min-width: 17px; height: 17px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 9px; font-weight: 700; padding: 0 3px;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       ANIMATIONS KEYFRAMES
-    ══════════════════════════════════════════════════════════ */
-    @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       RESPONSIVE — TABLET & MOBILE
-    ══════════════════════════════════════════════════════════ */
-    @media (max-width: 1024px) {
-      .hero-right { display: none; }
-      .hero-inner { grid-template-columns: 1fr; max-width: 600px; }
-      .hero-title { font-size: 2.6rem; }
-      .why-strip { grid-template-columns: repeat(2, 1fr); }
-      .stats-strip { grid-template-columns: repeat(4, 1fr); }
-    }
-
-    @media (max-width: 768px) {
-      body { padding-bottom: 68px; }
-      .nav-links, .nav-actions { display: none; }
-      .mobile-bottom-nav { display: block; }
-
-      .hero-wrapper { padding: 0; }
-      .hero-inner {
-        padding: 2.5rem 1.5rem 2rem;
-        min-height: unset;
+      .navbar {
+        background: rgba(13, 27, 62, 0.97);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 900;
+        border-bottom: 1px solid rgba(245, 166, 35, 0.12);
       }
-      .hero-title { font-size: 2rem; }
-      .hero-desc { font-size: 0.88rem; }
-      .hero-cta-group { flex-direction: column; }
-      .btn-hero-primary, .btn-hero-ghost { justify-content: center; }
-      .hero-trust { gap: 1rem; }
-
-      .ticker-bar { padding: 8px 0; }
-      .ticker-item { font-size: 0.72rem; padding: 0 1.5rem; }
-
-      .stats-strip { grid-template-columns: repeat(2, 1fr); }
-      .stat-cell:nth-child(2) { border-right: none; }
-      .stat-cell:nth-child(3) { border-top: 1px solid var(--border); }
-      .stat-num { font-size: 1.5rem; }
-
-      .home-sections { padding: 0 0rem 3rem; }
-      .sec-head { padding-top: 2.5rem; }
-      .sec-title { font-size: 1.4rem; }
-
-      .banner-grid { grid-template-columns: 1fr; }
-      .banner-main { min-height: 240px; }
-      .bm-heading { font-size: 1.5rem; }
-      .bm-content { padding: 1.75rem; }
-
-      .products-grid-home {
-        grid-template-columns: repeat(2, 1fr);
+      .nav-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(
+          135deg,
+          var(--honey) 0%,
+          var(--honey-dark) 100%
+        );
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: white;
+        flex-shrink: 0;
+        box-shadow: 0 0 20px rgba(245, 166, 35, 0.4);
+      }
+      .logo-name {
+        font-family: "DM Serif Display", serif;
+        font-size: 1.4rem;
+        color: white;
+        letter-spacing: 0.5px;
+        line-height: 1.1;
+      }
+      .logo-tagline {
+        font-size: 0.62rem;
+        color: var(--honey-light);
+        letter-spacing: 0.3px;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        flex: 1;
+        justify-content: center;
+      }
+      .nav-link {
+        color: rgba(255, 255, 255, 0.65);
+        text-decoration: none;
+        font-size: 0.88rem;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-sm);
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        position: relative;
+      }
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        bottom: 4px;
+        left: 50%;
+        right: 50%;
+        height: 2px;
+        background: var(--honey);
+        border-radius: 1px;
+        transition: all var(--transition);
+      }
+      .nav-link:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .nav-link.active {
+        color: var(--honey);
+      }
+      .nav-link.active::after {
+        left: 16px;
+        right: 16px;
+      }
+      .nav-actions {
+        display: flex;
+        align-items: center;
         gap: 0.75rem;
       }
-      .pcard-body { padding: 0.875rem; }
-      .pcard-price { font-size: 1.1rem; }
+      .cart-btn {
+        position: relative;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.88rem;
+        font-family: inherit;
+        transition: all var(--transition);
+      }
+      .cart-btn:hover {
+        background: rgba(245, 166, 35, 0.2);
+        border-color: var(--honey);
+        color: var(--honey);
+      }
+      .cart-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: var(--honey);
+        color: var(--navy);
+        border-radius: 50%;
+        min-width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0 4px;
+        animation: cartBounce 0.4s var(--spring);
+      }
+      @keyframes cartBounce {
+        0% {
+          transform: scale(0);
+        }
+        60% {
+          transform: scale(1.3);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      .user-avatar-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        overflow: hidden;
+        cursor: pointer;
+        transition: border-color var(--transition);
+      }
+      .user-avatar-btn:hover {
+        border-color: var(--honey);
+      }
+      .user-avatar-btn img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
 
-      .cats-grid { grid-template-columns: repeat(3, 1fr); gap: 0.625rem; }
-      .cat-icon-wrap { width: 46px; height: 46px; font-size: 1.2rem; }
+      /* ══════════════════════════════════════════════════════════
+       MAIN CONTENT WRAPPER
+    ══════════════════════════════════════════════════════════ */
+      .main-content {
+        margin-top: 68px;
+        padding: 0;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+        position: relative;
+        z-index: 1;
+      }
+      .page-content {
+        display: none;
+      }
+      .page-content.active {
+        display: block;
+        animation: pageIn 0.4s ease;
+      }
+      @keyframes pageIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-      .why-strip { grid-template-columns: 1fr 1fr; padding: 2rem 1.5rem; gap: 1.5rem; }
-    }
+      /* ══════════════════════════════════════════════════════════
+       ★ HERO — TOTAL REDESIGN
+    ══════════════════════════════════════════════════════════ */
+      .hero-wrapper {
+        position: relative;
+        overflow: hidden;
+        padding: 0 1.5rem 0;
+        margin-bottom: 0;
+        border-radius: 32px 32px 0 0;
+        margin-top: 0.5rem;
+      }
 
-    @media (max-width: 480px) {
-      .hero-title { font-size: 1.7rem; }
-      .stats-strip { grid-template-columns: repeat(2, 1fr); }
-      .stat-num { font-size: 1.3rem; }
-      .cats-grid { grid-template-columns: repeat(2, 1fr); }
-      .why-strip { grid-template-columns: 1fr; }
-      .hero-trust { display: none; }
-    }
-  </style>
-  <link rel="stylesheet" href="css/customer.css">
-</head>
-<body>
+      /* Animated gradient mesh background */
+      .hero-bg {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 80% 60% at 20% 30%,
+            rgba(245, 166, 35, 0.18) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 60% 50% at 80% 70%,
+            rgba(26, 46, 90, 0.35) 0%,
+            transparent 60%
+          ),
+          linear-gradient(160deg, #0d1b3e 0%, #1a2e5a 45%, #0d1b3e 100%);
+        z-index: -1;
+        animation: heroBgPulse 8s ease-in-out infinite alternate;
+      }
+      @keyframes heroBgPulse {
+        0% {
+          background-position: 0% 0%;
+        }
+        100% {
+          background-position: 100% 100%;
+        }
+      }
 
-<!-- ═══ LOADING OVERLAY ═══════════════════════════════════ -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-spinner-ring">
-    <span class="ring-outer"></span>
-    <span class="ring-inner"></span>
-  </div>
-  <p class="loading-main">অর্ডার প্রক্রিয়া চলছে...</p>
-  <p class="loading-sub">দয়া করে অপেক্ষা করুন</p>
-  <div class="loading-dots"><span></span><span></span><span></span></div>
-</div>
+      /* Floating orbs */
+      .hero-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        pointer-events: none;
+        animation: orbFloat 6s ease-in-out infinite;
+      }
+      .hero-orb-1 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(
+          circle,
+          rgba(245, 166, 35, 0.25) 0%,
+          transparent 70%
+        );
+        top: -100px;
+        right: 10%;
+        animation-delay: 0s;
+        animation-duration: 7s;
+      }
+      .hero-orb-2 {
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(
+          circle,
+          rgba(37, 63, 122, 0.4) 0%,
+          transparent 70%
+        );
+        bottom: -50px;
+        left: 5%;
+        animation-delay: 2s;
+        animation-duration: 9s;
+      }
+      .hero-orb-3 {
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(
+          circle,
+          rgba(253, 216, 130, 0.2) 0%,
+          transparent 70%
+        );
+        top: 40%;
+        left: 40%;
+        animation-delay: 4s;
+        animation-duration: 6s;
+      }
+      @keyframes orbFloat {
+        0%,
+        100% {
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          transform: translateY(-30px) scale(1.05);
+        }
+      }
 
-<!-- ═══ CONFETTI ══════════════════════════════════════════ -->
-<canvas id="confettiCanvas"></canvas>
+      .hero-inner {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        min-height: 560px;
+        gap: 2rem;
+        padding: 4rem 2rem 3.5rem;
+        position: relative;
+        z-index: 1;
+      }
 
-<!-- ═══ CART BACKDROP ════════════════════════════════════ -->
-<div class="cart-backdrop" id="cartBackdrop"></div>
+      /* Left side */
+      .hero-left {
+      }
+      .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(245, 166, 35, 0.15);
+        border: 1px solid rgba(245, 166, 35, 0.3);
+        backdrop-filter: blur(8px);
+        color: var(--honey-light);
+        padding: 7px 16px;
+        border-radius: var(--radius-pill);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+        animation: fadeSlideUp 0.6s ease 0.1s both;
+      }
+      .hero-eyebrow span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--honey);
+        display: inline-block;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.5;
+          transform: scale(1.5);
+        }
+      }
 
-<!-- ═══ NAVBAR ═══════════════════════════════════════════ -->
-<nav class="navbar">
-  <div class="nav-container">
-    <div class="logo" onclick="navigateTo('home')">
-      <div class="logo-icon"><i class="fa-brands fa-forumbee"></i></div>
-      <div>
-        <div class="logo-name">BeeHarvest</div>
-        <div class="logo-tagline">বাংলাদেশের বিশ্বস্ত অনলাইন শপ</div>
+      .hero-title {
+        font-family: "DM Serif Display", serif;
+        font-size: clamp(2.2rem, 4vw, 3.6rem);
+        line-height: 1.1;
+        color: white;
+        margin-bottom: 1.25rem;
+        animation: fadeSlideUp 0.6s ease 0.2s both;
+      }
+      .hero-title em {
+        font-style: italic;
+        background: linear-gradient(
+          135deg,
+          var(--honey) 0%,
+          var(--honey-light) 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .hero-title .line2 {
+        display: block;
+        margin-top: 0.2em;
+      }
+
+      .hero-desc {
+        color: rgba(255, 255, 255, 0.65);
+        font-size: 1rem;
+        line-height: 1.8;
+        max-width: 420px;
+        margin-bottom: 2rem;
+        animation: fadeSlideUp 0.6s ease 0.3s both;
+      }
+
+      .hero-cta-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        animation: fadeSlideUp 0.6s ease 0.4s both;
+      }
+      .btn-hero-primary {
+        background: linear-gradient(
+          135deg,
+          var(--honey) 0%,
+          var(--honey-dark) 100%
+        );
+        color: var(--navy);
+        border: none;
+        padding: 14px 28px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.95rem;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        transition: all var(--transition);
+        box-shadow: var(--shadow-honey);
+      }
+      .btn-hero-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(245, 166, 35, 0.5);
+      }
+      .btn-hero-ghost {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1.5px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 14px 24px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+        font-family: inherit;
+        backdrop-filter: blur(8px);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all var(--transition);
+      }
+      .btn-hero-ghost:hover {
+        background: rgba(255, 255, 255, 0.14);
+        transform: translateY(-2px);
+      }
+
+      /* Trust badges */
+      .hero-trust {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+        animation: fadeSlideUp 0.6s ease 0.5s both;
+      }
+      .trust-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.5);
+      }
+      .trust-item i {
+        color: var(--honey);
+        font-size: 0.9rem;
+      }
+
+      /* Right side — floating product showcase card */
+      .hero-right {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: heroRightIn 0.8s var(--spring) 0.2s both;
+      }
+      @keyframes heroRightIn {
+        from {
+          opacity: 0;
+          transform: translateX(40px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0) scale(1);
+        }
+      }
+
+      .hero-card {
+        background: rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: var(--radius-xl);
+        padding: 1.75rem;
+        width: 100%;
+        max-width: 380px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--honey),
+          transparent
+        );
+      }
+      .hero-card-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(245, 166, 35, 0.2);
+        border: 1px solid rgba(245, 166, 35, 0.3);
+        color: var(--honey-light);
+        padding: 5px 12px;
+        border-radius: var(--radius-pill);
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1.25rem;
+      }
+      .hero-card-product-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.875rem;
+        margin-bottom: 1.25rem;
+      }
+      .hc-product {
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-md);
+        padding: 0.875rem;
+        transition: all var(--transition);
+        cursor: pointer;
+      }
+      .hc-product:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: translateY(-2px);
+      }
+      .hc-product-emoji {
+        font-size: 1.8rem;
+        margin-bottom: 0.4rem;
+        display: block;
+      }
+      .hc-product-name {
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1.3;
+        margin-bottom: 3px;
+      }
+      .hc-product-price {
+        color: var(--honey);
+        font-size: 0.88rem;
+        font-weight: 700;
+      }
+
+      .hero-card-offer {
+        background: linear-gradient(
+          135deg,
+          rgba(245, 166, 35, 0.15),
+          rgba(197, 127, 17, 0.1)
+        );
+        border: 1px solid rgba(245, 166, 35, 0.25);
+        border-radius: var(--radius-md);
+        padding: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .offer-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--honey), var(--honey-dark));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: var(--navy);
+        flex-shrink: 0;
+      }
+      .offer-text-main {
+        color: white;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+      .offer-text-sub {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.72rem;
+        margin-top: 2px;
+      }
+
+      /* Floating badges on the card */
+      .float-badge {
+        position: absolute;
+        background: white;
+        border-radius: var(--radius-md);
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        box-shadow: 0 8px 24px rgba(13, 27, 62, 0.2);
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        animation: floatBadge 3s ease-in-out infinite;
+      }
+      .float-badge.f1 {
+        top: -16px;
+        right: 20px;
+        animation-delay: 0s;
+      }
+      .float-badge.f2 {
+        bottom: -12px;
+        left: 20px;
+        animation-delay: 1.5s;
+      }
+      .float-badge i {
+        font-size: 1rem;
+      }
+      .float-badge .f-honey {
+        color: var(--honey);
+      }
+      .float-badge .f-green {
+        color: var(--success);
+      }
+      @keyframes floatBadge {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+
+      /* ══════════════════════════════════════════════════════════
+       TICKER / MARQUEE
+    ══════════════════════════════════════════════════════════ */
+      .ticker-bar {
+        background: var(--honey);
+        overflow: hidden;
+        padding: 10px 0;
+        position: relative;
+        z-index: 2;
+      }
+      .ticker-track {
+        display: flex;
+        gap: 0;
+        align-items: center;
+        animation: tickerScroll 25s linear infinite;
+        width: max-content;
+      }
+      .ticker-bar:hover .ticker-track {
+        animation-play-state: paused;
+      }
+      @keyframes tickerScroll {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+      .ticker-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 2.5rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--navy);
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+      }
+      .ticker-item i {
+        font-size: 0.85rem;
+        opacity: 0.7;
+      }
+      .ticker-dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: rgba(13, 27, 62, 0.35);
+        flex-shrink: 0;
+      }
+
+      /* ══════════════════════════════════════════════════════════
+   STATS STRIP - COMPACT ELEGANT DESIGN
+══════════════════════════════════════════════════════════ */
+      .stats-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+        padding: 1.25rem 1.5rem;
+        background: linear-gradient(135deg, #fff 0%, #fef9f0 100%);
+        border-radius: 20px;
+        margin: 1.5rem 0;
+        box-shadow: 0 4px 12px rgba(13, 27, 62, 0.06);
+        border: 1px solid rgba(245, 166, 35, 0.15);
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Subtle honey accent border top */
+      .stats-strip::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--honey),
+          var(--honey-light),
+          transparent
+        );
+      }
+
+      .stat-cell {
+        text-align: center;
+        padding: 0.5rem 0.25rem;
+        position: relative;
+        transition: all 0.2s ease;
+      }
+
+      /* Vertical divider - thinner and lighter */
+      .stat-cell:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        right: -0.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1px;
+        height: 35px;
+        background: linear-gradient(
+          180deg,
+          transparent,
+          var(--border),
+          transparent
+        );
+      }
+
+      .stat-cell i {
+        font-size: 1.3rem;
+        color: var(--honey);
+        margin-bottom: 0.35rem;
+        display: inline-block;
+        transition: transform 0.2s ease;
+      }
+
+      .stat-cell:hover i {
+        transform: scale(1.1);
+      }
+
+      .stat-num {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--navy);
+        line-height: 1.2;
+        margin-bottom: 0.15rem;
+        letter-spacing: -0.3px;
+      }
+
+      .stat-label {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+
+      /* Small hover effect */
+      .stat-cell:hover {
+        background: rgba(245, 166, 35, 0.05);
+        border-radius: 12px;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .stats-strip {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.75rem;
+          padding: 1rem 1.25rem;
+          margin: 1rem 0;
+        }
+
+        .stat-cell:not(:last-child)::after {
+          display: none;
+        }
+
+        .stat-cell i {
+          font-size: 1.1rem;
+        }
+
+        .stat-num {
+          font-size: 1.2rem;
+        }
+
+        .stat-label {
+          font-size: 0.6rem;
+          letter-spacing: 0.5px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .stats-strip {
+          gap: 0.5rem;
+          padding: 0.875rem;
+        }
+
+        .stat-num {
+          font-size: 1rem;
+        }
+
+        .stat-label {
+          font-size: 0.55rem;
+        }
+      }
+      /* ══════════════════════════════════════════════════════════
+       SECTIONS
+    ══════════════════════════════════════════════════════════ */
+      .home-sections {
+        padding: 0 2rem 4rem;
+      }
+
+      /* Section header */
+      .sec-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 1.75rem;
+        padding-top: 3.5rem;
+      }
+      .sec-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: var(--honey-dark);
+        margin-bottom: 6px;
+      }
+      .sec-eyebrow::before {
+        content: "";
+        width: 20px;
+        height: 2px;
+        background: var(--honey);
+        border-radius: 1px;
+      }
+      .sec-title {
+        font-family: "DM Serif Display", serif;
+        font-size: 1.8rem;
+        color: var(--navy);
+        line-height: 1.2;
+      }
+      .sec-title em {
+        font-style: italic;
+        color: var(--honey-dark);
+      }
+      .see-all {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--honey-dark);
+        font-weight: 700;
+        font-size: 0.82rem;
+        text-decoration: none;
+        cursor: pointer;
+        padding: 8px 16px;
+        border-radius: var(--radius-pill);
+        background: var(--cream-warm);
+        border: 1px solid rgba(245, 166, 35, 0.2);
+        transition: all var(--transition);
+      }
+      .see-all:hover {
+        background: var(--honey);
+        color: var(--navy);
+        transform: translateY(-1px);
+      }
+      .see-all i {
+        font-size: 0.75rem;
+        transition: transform var(--transition);
+      }
+      .see-all:hover i {
+        transform: translateX(3px);
+      }
+
+      /* ══════════════════════════════════════════════════════════
+       FEATURED BANNER GRID
+    ══════════════════════════════════════════════════════════ */
+      .banner-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 1rem;
+        margin-bottom: 3.5rem;
+      }
+      .banner-main {
+        grid-row: 1 / 3;
+        background: linear-gradient(
+          135deg,
+          #0d1b3e 0%,
+          #1a3a6b 60%,
+          #253f7a 100%
+        );
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        position: relative;
+        min-height: 320px;
+        cursor: pointer;
+        transition:
+          transform var(--transition),
+          box-shadow var(--transition);
+      }
+      .banner-main:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+      }
+      .banner-main .bm-bg {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse at 80% 50%,
+            rgba(245, 166, 35, 0.22) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 20% 80%,
+            rgba(37, 63, 122, 0.5) 0%,
+            transparent 50%
+          );
+      }
+      .banner-main .bm-deco {
+        position: absolute;
+        right: -30px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 9rem;
+        opacity: 0.08;
+        pointer-events: none;
+        user-select: none;
+      }
+      .banner-main .bm-content {
+        position: relative;
+        z-index: 1;
+        padding: 2.5rem 2.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .bm-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(245, 166, 35, 0.2);
+        border: 1px solid rgba(245, 166, 35, 0.35);
+        color: var(--honey-light);
+        padding: 5px 14px;
+        border-radius: var(--radius-pill);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 1.1rem;
+        width: fit-content;
+      }
+      .bm-heading {
+        font-family: "DM Serif Display", serif;
+        font-size: 2rem;
+        color: white;
+        line-height: 1.2;
+        margin-bottom: 0.75rem;
+      }
+      .bm-heading em {
+        font-style: italic;
+        color: var(--honey);
+      }
+      .bm-sub {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+        max-width: 360px;
+      }
+      .bm-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, var(--honey), var(--honey-dark));
+        color: var(--navy);
+        padding: 11px 24px;
+        border-radius: var(--radius-md);
+        border: none;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all var(--transition);
+        width: fit-content;
+        box-shadow: var(--shadow-honey);
+      }
+      .bm-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(245, 166, 35, 0.45);
+      }
+
+      .banner-sm {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        position: relative;
+        min-height: 148px;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        transition: all var(--transition);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .banner-sm:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--honey-light);
+      }
+      .banner-sm-1 {
+        background: linear-gradient(135deg, #fff0d9 0%, #ffedc0 100%);
+        border-color: rgba(245, 166, 35, 0.25);
+      }
+      .banner-sm-2 {
+        background: linear-gradient(135deg, #eef4ff 0%, #e0eaff 100%);
+        border-color: rgba(37, 63, 122, 0.15);
+      }
+      .bs-icon {
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      .bs-title {
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: var(--navy);
+        margin-bottom: 3px;
+      }
+      .bs-sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .bs-cta {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--honey-dark);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 0.75rem;
+      }
+
+      /* ══════════════════════════════════════════════════════════
+       PRODUCT CARDS — COMPLETELY REDESIGNED
+    ══════════════════════════════════════════════════════════ */
+      .products-showcase {
+        margin-bottom: 0;
+      }
+
+      .products-grid-home {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1.25rem;
+      }
+
+      .pcard {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+      .pcard:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 24px 48px rgba(13, 27, 62, 0.13);
+        border-color: rgba(245, 166, 35, 0.3);
+      }
+
+      .pcard-img-wrap {
+        position: relative;
+        overflow: hidden;
+        background: var(--cream-dark);
+        aspect-ratio: 4/3;
+      }
+      .pcard-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+        display: block;
+      }
+      .pcard:hover .pcard-img {
+        transform: scale(1.08);
+      }
+
+      .pcard-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: linear-gradient(135deg, var(--honey), var(--honey-dark));
+        color: var(--navy);
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: var(--radius-pill);
+        letter-spacing: 0.3px;
+        box-shadow: 0 2px 8px rgba(245, 166, 35, 0.4);
+      }
+      .pcard-badge.out {
+        background: var(--danger);
+        color: white;
+        box-shadow: none;
+      }
+      .pcard-wishlist {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--text-light);
+        transition: all var(--transition);
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      .pcard:hover .pcard-wishlist {
+        opacity: 1;
+        transform: scale(1);
+      }
+      .pcard-wishlist:hover {
+        color: var(--danger);
+        background: white;
+      }
+
+      .pcard-quick-add {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(
+          0deg,
+          rgba(13, 27, 62, 0.95) 0%,
+          rgba(13, 27, 62, 0.7) 100%
+        );
+        backdrop-filter: blur(4px);
+        color: white;
+        text-align: center;
+        padding: 12px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        border: none;
+        width: 100%;
+        font-family: inherit;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        transform: translateY(100%);
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .pcard:hover .pcard-quick-add {
+        transform: translateY(0);
+      }
+      .pcard-quick-add:hover {
+        background: var(--honey);
+        color: var(--navy);
+      }
+
+      .pcard-body {
+        padding: 1.1rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .pcard-cat {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--honey-dark);
+        margin-bottom: 5px;
+      }
+      .pcard-name {
+        font-weight: 600;
+        font-size: 0.92rem;
+        color: var(--text-primary);
+        line-height: 1.45;
+        margin-bottom: 0.75rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .pcard-footer {
+        margin-top: auto;
+      }
+      .pcard-price-row {
+        display: flex;
+        align-items: baseline;
+        gap: 7px;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .pcard-price {
+        font-family: "DM Serif Display", serif;
+        font-size: 1.35rem;
+        color: var(--navy);
+      }
+      .pcard-orig {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        text-decoration: line-through;
+      }
+      .pcard-off {
+        background: var(--success-bg);
+        color: var(--success);
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: var(--radius-pill);
+      }
+      .pcard-stock {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--success);
+        margin-bottom: 0.75rem;
+      }
+      .pcard-stock.low {
+        color: var(--warning);
+      }
+      .pcard-stock.out {
+        color: var(--danger);
+      }
+      .pcard-stock i {
+        font-size: 0.65rem;
+      }
+      .pcard-add-btn {
+        width: 100%;
+        padding: 9px;
+        background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 0.82rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        transition: all var(--transition);
+      }
+      .pcard-add-btn:hover {
+        background: linear-gradient(135deg, var(--honey), var(--honey-dark));
+        color: var(--navy);
+        transform: translateY(-1px);
+      }
+      .pcard-add-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Skeleton */
+      .pcard-skeleton {
+        pointer-events: none;
+      }
+      .skel-img {
+        aspect-ratio: 4/3;
+        background: linear-gradient(90deg, #eee 25%, #f7f7f7 50%, #eee 75%);
+        background-size: 400%;
+        animation: skel 1.5s ease infinite;
+      }
+      .skel-line {
+        height: 13px;
+        background: linear-gradient(90deg, #eee 25%, #f7f7f7 50%, #eee 75%);
+        background-size: 400%;
+        border-radius: 6px;
+        animation: skel 1.5s ease infinite;
+        margin: 8px 0;
+      }
+      .skel-line.w60 {
+        width: 60%;
+      }
+      .skel-line.w40 {
+        width: 40%;
+      }
+      @keyframes skel {
+        0% {
+          background-position: 100%;
+        }
+        100% {
+          background-position: -100%;
+        }
+      }
+
+      /* ══════════════════════════════════════════════════════════
+       CATEGORIES — REDESIGNED
+    ══════════════════════════════════════════════════════════ */
+      .cats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.875rem;
+      }
+      .cat-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 1.4rem 0.75rem;
+        text-align: center;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all var(--spring);
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
+      }
+      .cat-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(245, 166, 35, 0.05),
+          transparent
+        );
+        opacity: 0;
+        transition: opacity var(--transition);
+      }
+      .cat-card:hover {
+        border-color: var(--honey);
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: var(--shadow-md);
+      }
+      .cat-card:hover::before {
+        opacity: 1;
+      }
+      .cat-icon-wrap {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(
+          135deg,
+          rgba(245, 166, 35, 0.12),
+          rgba(245, 166, 35, 0.05)
+        );
+        border-radius: 14px;
+        margin: 0 auto 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--honey-dark);
+        transition: all var(--spring);
+      }
+      .cat-card:hover .cat-icon-wrap {
+        background: linear-gradient(135deg, var(--honey), var(--honey-dark));
+        color: white;
+        transform: rotate(-5deg) scale(1.1);
+      }
+      .cat-name {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.4;
+      }
+      .cat-count {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: 3px;
+      }
+
+      /* ══════════════════════════════════════════════════════════
+       WHY US STRIP
+    ══════════════════════════════════════════════════════════ */
+      .why-strip {
+        background: linear-gradient(
+          135deg,
+          var(--navy) 0%,
+          var(--navy-mid) 100%
+        );
+        border-radius: var(--radius-xl);
+        padding: 3rem 2.5rem;
+        margin: 3.5rem 0 0;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .why-strip::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse 60% 80% at 50% 50%,
+          rgba(245, 166, 35, 0.08),
+          transparent
+        );
+      }
+      .why-item {
+        text-align: center;
+        position: relative;
+        z-index: 1;
+      }
+      .why-icon {
+        width: 56px;
+        height: 56px;
+        background: rgba(245, 166, 35, 0.12);
+        border: 1px solid rgba(245, 166, 35, 0.2);
+        border-radius: var(--radius-md);
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: var(--honey);
+        transition: all var(--transition);
+      }
+      .why-item:hover .why-icon {
+        background: var(--honey);
+        color: var(--navy);
+        transform: scale(1.1);
+      }
+      .why-title {
+        color: white;
+        font-weight: 700;
+        font-size: 0.92rem;
+        margin-bottom: 5px;
+      }
+      .why-desc {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.78rem;
+        line-height: 1.6;
+      }
+
+      /* ══════════════════════════════════════════════════════════
+       TOAST, MODALS, CART etc — keeping from original
+    ══════════════════════════════════════════════════════════ */
+      /* (all reused from customer.css, added here for the demo page) */
+
+      /* ══════════════════════════════════════════════════════════
+       FLOATING CART BUTTON (mobile)
+    ══════════════════════════════════════════════════════════ */
+      .fab-cart {
+        display: none;
+        position: fixed;
+        bottom: 85px;
+        right: 1.5rem;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--honey), var(--honey-dark));
+        border: none;
+        border-radius: 50%;
+        box-shadow: 0 8px 24px rgba(245, 166, 35, 0.45);
+        color: var(--navy);
+        font-size: 1.3rem;
+        cursor: pointer;
+        z-index: 700;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition);
+      }
+      .fab-cart:hover {
+        transform: scale(1.1);
+      }
+      .fab-count {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background: var(--danger);
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+        border: 2px solid var(--surface);
+      }
+
+      /* ══════════════════════════════════════════════════════════
+       MOBILE BOTTOM NAV
+    ══════════════════════════════════════════════════════════ */
+      .mobile-bottom-nav {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow:
+          0 -1px 0 var(--border),
+          0 -8px 24px rgba(13, 27, 62, 0.08);
+        z-index: 800;
+        padding: 6px 0 env(safe-area-inset-bottom, 6px);
+      }
+      .mobile-nav-items {
+        display: flex;
+        align-items: center;
+      }
+      .mobile-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        text-decoration: none;
+        color: var(--text-light);
+        font-size: 9px;
+        font-weight: 600;
+        padding: 7px 4px;
+        cursor: pointer;
+        transition: all var(--transition);
+        position: relative;
+      }
+      .mobile-nav-item i {
+        font-size: 1.3rem;
+        transition: transform var(--transition);
+      }
+      .mobile-nav-item.active {
+        color: var(--navy);
+      }
+      .mobile-nav-item.active i {
+        transform: scale(1.15);
+        color: var(--navy);
+      }
+      .mobile-nav-item.active::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 20%;
+        right: 20%;
+        height: 3px;
+        background: var(--honey);
+        border-radius: 0 0 4px 4px;
+      }
+      .mobile-cart-badge {
+        position: absolute;
+        top: 2px;
+        right: 18%;
+        background: var(--honey);
+        color: var(--navy);
+        border-radius: 50%;
+        min-width: 17px;
+        height: 17px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 0 3px;
+      }
+
+      /* ══════════════════════════════════════════════════════════
+       ANIMATIONS KEYFRAMES
+    ══════════════════════════════════════════════════════════ */
+      @keyframes fadeSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ══════════════════════════════════════════════════════════
+       RESPONSIVE — TABLET & MOBILE
+    ══════════════════════════════════════════════════════════ */
+      @media (max-width: 1024px) {
+        .hero-right {
+          display: none;
+        }
+        .hero-inner {
+          grid-template-columns: 1fr;
+          max-width: 600px;
+        }
+        .hero-title {
+          font-size: 2.6rem;
+        }
+        .why-strip {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .stats-strip {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding-bottom: 68px;
+        }
+        .nav-links,
+        .nav-actions {
+          display: none;
+        }
+        .mobile-bottom-nav {
+          display: block;
+        }
+
+        .hero-wrapper {
+          padding: 0;
+        }
+        .hero-inner {
+          padding: 2.5rem 1.5rem 2rem;
+          min-height: unset;
+        }
+        .hero-title {
+          font-size: 2rem;
+        }
+        .hero-desc {
+          font-size: 0.88rem;
+        }
+        .hero-cta-group {
+          flex-direction: column;
+        }
+        .btn-hero-primary,
+        .btn-hero-ghost {
+          justify-content: center;
+        }
+        .hero-trust {
+          gap: 1rem;
+        }
+
+        .ticker-bar {
+          padding: 8px 0;
+        }
+        .ticker-item {
+          font-size: 0.72rem;
+          padding: 0 1.5rem;
+        }
+
+        .stats-strip {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .stat-cell:nth-child(2) {
+          border-right: none;
+        }
+        .stat-cell:nth-child(3) {
+          border-top: 1px solid var(--border);
+        }
+        .stat-num {
+          font-size: 1.5rem;
+        }
+
+        .home-sections {
+          padding: 0 0rem 3rem;
+        }
+        .sec-head {
+          padding-top: 2.5rem;
+        }
+        .sec-title {
+          font-size: 1.4rem;
+        }
+
+        .banner-grid {
+          grid-template-columns: 1fr;
+        }
+        .banner-main {
+          min-height: 240px;
+        }
+        .bm-heading {
+          font-size: 1.5rem;
+        }
+        .bm-content {
+          padding: 1.75rem;
+        }
+
+        .products-grid-home {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.75rem;
+        }
+        .pcard-body {
+          padding: 0.875rem;
+        }
+        .pcard-price {
+          font-size: 1.1rem;
+        }
+
+        .cats-grid {
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.625rem;
+        }
+        .cat-icon-wrap {
+          width: 46px;
+          height: 46px;
+          font-size: 1.2rem;
+        }
+
+        .why-strip {
+          grid-template-columns: 1fr 1fr;
+          padding: 2rem 1.5rem;
+          gap: 1.5rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .hero-title {
+          font-size: 1.7rem;
+        }
+        .stats-strip {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .stat-num {
+          font-size: 1.3rem;
+        }
+        .cats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .why-strip {
+          grid-template-columns: 1fr;
+        }
+        .hero-trust {
+          display: none;
+        }
+      }
+      /* ═══════════════════════════════════════════════════════════
+   MY ORDERS BY MOBILE NUMBER SECTION
+═══════════════════════════════════════════════════════════ */
+      .mobile-orders-section {
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+      }
+
+      .mobile-orders-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--honey);
+      }
+
+      .mobile-orders-header i {
+        font-size: 1.6rem;
+        color: var(--honey);
+      }
+
+      .mobile-orders-header h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--navy);
+      }
+
+      .mobile-input-group {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .mobile-input-group input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all var(--transition);
+      }
+
+      .mobile-input-group input:focus {
+        outline: none;
+        border-color: var(--honey);
+        box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.1);
+      }
+
+      .mobile-input-group button {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, var(--honey), var(--honey-dark));
+        border: none;
+        border-radius: var(--radius-md);
+        color: var(--navy);
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all var(--transition);
+      }
+
+      .mobile-input-group button:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-honey);
+      }
+
+      .stored-numbers {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 12px 0;
+        padding: 8px 0;
+      }
+
+      .stored-number-badge {
+        background: var(--cream-warm);
+        border: 1px solid rgba(245, 166, 35, 0.3);
+        border-radius: var(--radius-pill);
+        padding: 5px 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .stored-number-badge:hover {
+        background: var(--honey);
+        color: var(--navy);
+        transform: translateY(-2px);
+      }
+
+      .stored-number-badge .remove-num {
+        opacity: 0.6;
+        font-size: 0.7rem;
+        transition: opacity var(--transition);
+      }
+
+      .stored-number-badge:hover .remove-num {
+        opacity: 1;
+      }
+
+      .orders-list-by-mobile {
+        margin-top: 1.5rem;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+
+      .order-item-mini {
+        background: var(--cream);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 3px solid var(--honey);
+        cursor: pointer;
+        transition: all var(--transition);
+      }
+
+      .order-item-mini:hover {
+        transform: translateX(4px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .order-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .order-num-mini {
+        font-weight: 700;
+        color: var(--navy);
+        font-size: 0.85rem;
+      }
+
+      .order-status-mini {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: var(--radius-pill);
+        font-weight: 600;
+      }
+
+      .order-status-mini.delivered {
+        background: #e8f5ee;
+        color: #1e8a4a;
+      }
+      .order-status-mini.shipped {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+      .order-status-mini.processing {
+        background: #eef2ff;
+        color: #4338ca;
+      }
+      .order-status-mini.pending {
+        background: #fef3cd;
+        color: #b7770d;
+      }
+      .order-status-mini.cancelled {
+        background: #fdedec;
+        color: #c0392b;
+      }
+
+      .order-date-mini {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+      }
+
+      .order-total-mini {
+        font-weight: 700;
+        color: var(--navy);
+        font-size: 0.85rem;
+      }
+
+      .clear-stored-btn {
+        background: transparent;
+        border: 1px solid var(--danger);
+        color: var(--danger);
+        padding: 6px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 0.7rem;
+        cursor: pointer;
+        margin-left: auto;
+        transition: all var(--transition);
+      }
+
+      .clear-stored-btn:hover {
+        background: var(--danger);
+        color: white;
+      }
+
+      .mobile-orders-empty {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+      }
+
+      .mobile-orders-empty i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+    </style>
+    <link rel="stylesheet" href="css/customer.css" />
+  </head>
+  <body>
+    <!-- ═══ LOADING OVERLAY ═══════════════════════════════════ -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-spinner-ring">
+        <span class="ring-outer"></span>
+        <span class="ring-inner"></span>
       </div>
+      <p class="loading-main">অর্ডার প্রক্রিয়া চলছে...</p>
+      <p class="loading-sub">দয়া করে অপেক্ষা করুন</p>
+      <div class="loading-dots"><span></span><span></span><span></span></div>
     </div>
 
-    <div class="nav-links">
-      <a href="#" class="nav-link active" data-page="home"><i class="fas fa-home"></i> হোম</a>
-      <a href="#" class="nav-link" data-page="products"><i class="fas fa-box"></i> পণ্য</a>
-      <a href="#" class="nav-link" data-page="orders"><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক</a>
-      <a href="#" class="nav-link" data-page="profile"><i class="fas fa-user"></i> প্রোফাইল</a>
-    </div>
+    <!-- ═══ CONFETTI ══════════════════════════════════════════ -->
+    <canvas id="confettiCanvas"></canvas>
 
-    <div class="nav-actions">
-      <button class="cart-btn" id="cartBtn" aria-label="কার্ট খুলুন">
-        <i class="fas fa-shopping-cart"></i>
-        <span>কার্ট</span>
-        <span class="cart-count" id="cartCount">0</span>
-      </button>
-      <div class="user-avatar-btn">
-        <img src="https://icons.veryicon.com/png/o/miscellaneous/user-avatar/user-avatar-male-5.png" alt="ব্যবহারকারী" id="userAvatar">
-      </div>
-    </div>
-  </div>
-</nav>
+    <!-- ═══ CART BACKDROP ════════════════════════════════════ -->
+    <div class="cart-backdrop" id="cartBackdrop"></div>
 
-<!-- ═══ MAIN CONTENT ══════════════════════════════════════ -->
-<main class="main-content">
-
-  <!-- ── HOME PAGE ─────────────────────────────────────── -->
-  <div class="page-content active" id="homePage">
-
-    <!-- ★ HERO ────────────────────────────────────────── -->
-    <div class="hero-wrapper">
-      <div class="hero-bg"></div>
-      <div class="hero-orb hero-orb-1"></div>
-      <div class="hero-orb hero-orb-2"></div>
-      <div class="hero-orb hero-orb-3"></div>
-
-      <div class="hero-inner">
-        <div class="hero-left">
-          <div class="hero-eyebrow">
-            <span></span>
-            বাংলাদেশের #১ অনলাইন শপ
+    <!-- ═══ NAVBAR ═══════════════════════════════════════════ -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="logo" onclick="navigateTo('home')">
+          <div class="logo-icon"><i class="fa-brands fa-forumbee"></i></div>
+          <div>
+            <div class="logo-name">BeeHarvest</div>
+            <div class="logo-tagline">বাংলাদেশের বিশ্বস্ত অনলাইন শপ</div>
           </div>
-          <h1 class="hero-title">
-            সেরা পণ্য,
-            <em class="line2">সেরা দামে।</em>
-          </h1>
-          <p class="hero-desc">ঘরে বসে কেনাকাটা করুন। দ্রুত ডেলিভারি, বিশ্বস্ত সেবা, সহজ রিটার্ন — প্রতিটি পদক্ষেপে আমরা আপনার পাশে।</p>
+        </div>
 
-          <div class="hero-cta-group">
-            <button class="btn-hero-primary" onclick="navigateTo('products')">
-              <i class="fas fa-shopping-bag"></i> এখনই কেনাকাটা করুন
+        <div class="nav-links">
+          <a href="#" class="nav-link active" data-page="home"
+            ><i class="fas fa-home"></i> হোম</a
+          >
+          <a href="#" class="nav-link" data-page="products"
+            ><i class="fas fa-box"></i> পণ্য</a
+          >
+          <a href="#" class="nav-link" data-page="orders"
+            ><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক</a
+          >
+          <a href="#" class="nav-link" data-page="profile"
+            ><i class="fas fa-user"></i> প্রোফাইল</a
+          >
+        </div>
+
+        <div class="nav-actions">
+          <button class="cart-btn" id="cartBtn" aria-label="কার্ট খুলুন">
+            <i class="fas fa-shopping-cart"></i>
+            <span>কার্ট</span>
+            <span class="cart-count" id="cartCount">0</span>
+          </button>
+          <div class="user-avatar-btn">
+            <img
+              src="https://icons.veryicon.com/png/o/miscellaneous/user-avatar/user-avatar-male-5.png"
+              alt="ব্যবহারকারী"
+              id="userAvatar"
+            />
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ═══ MAIN CONTENT ══════════════════════════════════════ -->
+    <main class="main-content">
+      <!-- ── HOME PAGE ─────────────────────────────────────── -->
+      <div class="page-content active" id="homePage">
+        <!-- ★ HERO ────────────────────────────────────────── -->
+        <div class="hero-wrapper">
+          <div class="hero-bg"></div>
+          <div class="hero-orb hero-orb-1"></div>
+          <div class="hero-orb hero-orb-2"></div>
+          <div class="hero-orb hero-orb-3"></div>
+
+          <div class="hero-inner">
+            <div class="hero-left">
+              <div class="hero-eyebrow">
+                <span></span>
+                বাংলাদেশের #১ অনলাইন শপ
+              </div>
+              <h1 class="hero-title">
+                সেরা পণ্য,
+                <em class="line2">সেরা দামে।</em>
+              </h1>
+              <p class="hero-desc">
+                ঘরে বসে কেনাকাটা করুন। দ্রুত ডেলিভারি, বিশ্বস্ত সেবা, সহজ
+                রিটার্ন — প্রতিটি পদক্ষেপে আমরা আপনার পাশে।
+              </p>
+
+              <div class="hero-cta-group">
+                <button
+                  class="btn-hero-primary"
+                  onclick="navigateTo('products')"
+                >
+                  <i class="fas fa-shopping-bag"></i> এখনই কেনাকাটা করুন
+                </button>
+                <button class="btn-hero-ghost" onclick="openTrackingModal()">
+                  <i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক করুন
+                </button>
+              </div>
+
+              <div class="hero-trust">
+                <div class="trust-item">
+                  <i class="fas fa-shield-halved"></i> নিরাপদ পেমেন্ট
+                </div>
+                <div class="trust-item">
+                  <i class="fas fa-truck-fast"></i> দ্রুত ডেলিভারি
+                </div>
+                <div class="trust-item">
+                  <i class="fas fa-rotate-left"></i> ৭ দিনের রিটার্ন
+                </div>
+                <div class="trust-item">
+                  <i class="fas fa-headset"></i> ২৪/৭ সাপোর্ট
+                </div>
+              </div>
+            </div>
+
+            <!-- HERO RIGHT CARD -->
+            <div class="hero-right">
+              <div style="position: relative">
+                <div class="float-badge f1">
+                  <i class="fas fa-bolt f-honey"></i> আজকের অফার সীমিত!
+                </div>
+                <div class="hero-card">
+                  <div class="hero-card-badge">
+                    <i class="fas fa-fire"></i> ট্রেন্ডিং পণ্য
+                  </div>
+                  <div class="hero-card-product-grid">
+                    <div class="hc-product" onclick="navigateTo('products')">
+                      <span class="hc-product-emoji">🍯</span>
+                      <div class="hc-product-name">খাঁটি মধু</div>
+                      <div class="hc-product-price">৳৩৫০</div>
+                    </div>
+                    <div class="hc-product" onclick="navigateTo('products')">
+                      <span class="hc-product-emoji">🌿</span>
+                      <div class="hc-product-name">অর্গানিক চা</div>
+                      <div class="hc-product-price">৳২২০</div>
+                    </div>
+                    <div class="hc-product" onclick="navigateTo('products')">
+                      <span class="hc-product-emoji">🫙</span>
+                      <div class="hc-product-name">দেশি ঘি</div>
+                      <div class="hc-product-price">৳৫৮০</div>
+                    </div>
+                    <div class="hc-product" onclick="navigateTo('products')">
+                      <span class="hc-product-emoji">🌾</span>
+                      <div class="hc-product-name">কালো জিরা</div>
+                      <div class="hc-product-price">৳১৮০</div>
+                    </div>
+                  </div>
+                  <div class="hero-card-offer">
+                    <div class="offer-icon"><i class="fas fa-tag"></i></div>
+                    <div>
+                      <div class="offer-text-main">প্রথম অর্ডারে ১০% ছাড়!</div>
+                      <div class="offer-text-sub">
+                        কোড: FIRST10 — সীমিত সময়ের অফার
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="float-badge f2">
+                  <i class="fas fa-star f-honey"></i>
+                  <span
+                    >৪.৯
+                    <span style="color: var(--text-muted); font-weight: 400"
+                      >(১০ক+ রিভিউ)</span
+                    ></span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ★ TICKER ──────────────────────────────────────── -->
+        <div class="ticker-bar">
+          <div class="ticker-track" id="tickerTrack">
+            <div class="ticker-item">
+              <i class="fas fa-truck-fast"></i> ঢাকায় ১–২ দিনে ডেলিভারি
+            </div>
+            <div class="ticker-dot"></div>
+            <div class="ticker-item">
+              <i class="fas fa-shield-halved"></i> ১০০% অরিজিনাল পণ্যের
+              গ্যারান্টি
+            </div>
+            <div class="ticker-dot"></div>
+            <div class="ticker-item">
+              <i class="fas fa-gift"></i> ৳৫০০+ অর্ডারে ফ্রি ডেলিভারি
+            </div>
+            <div class="ticker-dot"></div>
+            <div class="ticker-item">
+              <i class="fas fa-headset"></i> ২৪/৭ কাস্টমার সাপোর্ট
+            </div>
+            <div class="ticker-dot"></div>
+            <div class="ticker-item">
+              <i class="fas fa-rotate-left"></i> ৭ দিনের রিটার্ন পলিসি
+            </div>
+            <div class="ticker-dot"></div>
+            <div class="ticker-item">
+              <i class="fas fa-mobile-alt"></i> bKash ও Nagad পেমেন্ট
+            </div>
+            <div class="ticker-dot"></div>
+            <!-- Duplicate for seamless loop -->
+            <div class="ticker-item">
+              <i class="fas fa-truck-fast"></i> ঢাকায় ১–২ দিনে ডেলিভারি
+            </div>
+            <div class="ticker-dot"></div>
+            <div class="ticker-item">
+              <i class="fas fa-shield-halved"></i> ১০০% অরিজিনাল পণ্যের
+              গ্যারান্টি
+            </div>
+            <div class="ticker-dot"></div>
+            <div class="ticker-item">
+              <i class="fas fa-gift"></i> ৳৫০০+ অর্ডারে ফ্রি ডেলিভারি
+            </div>
+            <div class="ticker-dot"></div>
+            <div class="ticker-item">
+              <i class="fas fa-headset"></i> ২৪/৭ কাস্টমার সাপোর্ট
+            </div>
+            <div class="ticker-dot"></div>
+            <div class="ticker-item">
+              <i class="fas fa-rotate-left"></i> ৭ দিনের রিটার্ন পলিসি
+            </div>
+            <div class="ticker-dot"></div>
+            <div class="ticker-item">
+              <i class="fas fa-mobile-alt"></i> bKash ও Nagad পেমেন্ট
+            </div>
+            <div class="ticker-dot"></div>
+          </div>
+        </div>
+
+        <!-- ★ STATS ───────────────────────────────────────── -->
+        <div class="stats-strip">
+          <div class="stat-cell">
+            <i class="fas fa-box"></i>
+            <div class="stat-num" id="statProducts">৫০০+</div>
+            <div class="stat-label">পণ্য সংগ্রহ</div>
+          </div>
+          <div class="stat-cell">
+            <i class="fas fa-users"></i>
+            <div class="stat-num">১০ক+</div>
+            <div class="stat-label">সন্তুষ্ট গ্রাহক</div>
+          </div>
+          <div class="stat-cell">
+            <i class="fas fa-truck-fast"></i>
+            <div class="stat-num">২৪ঘ</div>
+            <div class="stat-label">দ্রুত ডেলিভারি</div>
+          </div>
+          <div class="stat-cell">
+            <i class="fas fa-star"></i>
+            <div class="stat-num">৪.৯★</div>
+            <div class="stat-label">গড় রেটিং</div>
+          </div>
+        </div>
+
+        <!-- ★ SECTIONS ────────────────────────────────────── -->
+        <div class="home-sections">
+          <!-- Banner Grid -->
+          <div class="banner-grid">
+            <div class="banner-main" onclick="navigateTo('products')">
+              <div class="bm-bg"></div>
+              <div class="bm-deco">🍯</div>
+              <div class="bm-content">
+                <div class="bm-tag">
+                  <i class="fas fa-fire"></i> সীমিত সময়ের অফার
+                </div>
+                <div class="bm-heading">
+                  প্রকৃতির সেরা<br /><em>অর্গানিক পণ্য</em>
+                </div>
+                <p class="bm-sub">
+                  খাঁটি হোমমেড পিনাট বাটার — স্বাস্থ্যসম্মত, পুষ্টিকর, সরাসরি
+                  আপনার দরজায়।
+                </p>
+                <button class="bm-btn">
+                  <i class="fas fa-shopping-bag"></i> এখনই কিনুন
+                </button>
+              </div>
+            </div>
+            <div class="banner-sm banner-sm-1" onclick="navigateTo('products')">
+              <div>
+                <span class="bs-icon">🚀</span>
+                <div class="bs-title">দ্রুত ডেলিভারি</div>
+                <div class="bs-sub">
+                  ঢাকার মধ্যে মাত্র ১–২ কার্যদিবসে আপনার দরজায়
+                </div>
+              </div>
+              <div class="bs-cta">
+                আরও জানুন <i class="fas fa-arrow-right"></i>
+              </div>
+            </div>
+            <div class="banner-sm banner-sm-2" onclick="showPolicy('return')">
+              <div>
+                <span class="bs-icon">🔄</span>
+                <div class="bs-title">৭ দিনের রিটার্ন</div>
+                <div class="bs-sub">
+                  পণ্যে সমস্যা হলে ৭ দিনের মধ্যে ফেরত নিন
+                </div>
+              </div>
+              <div class="bs-cta">
+                পলিসি দেখুন <i class="fas fa-arrow-right"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Featured Products -->
+          <div class="products-showcase">
+            <div class="sec-head">
+              <div>
+                <div class="sec-eyebrow">ফিচার্ড</div>
+                <h2 class="sec-title">বেস্টসেলার <em>পণ্যসমূহ</em></h2>
+              </div>
+              <a
+                class="see-all"
+                onclick="
+                  navigateTo('products');
+                  return false;
+                "
+              >
+                সব দেখুন <i class="fas fa-arrow-right"></i>
+              </a>
+            </div>
+            <div class="products-grid-home" id="featuredProducts"></div>
+          </div>
+
+          <!-- Categories -->
+          <div class="sec-head">
+            <div>
+              <div class="sec-eyebrow">ব্রাউজ করুন</div>
+              <h2 class="sec-title">পণ্যের <em>ক্যাটাগরি</em></h2>
+            </div>
+          </div>
+          <div class="cats-grid" id="categoriesList"></div>
+
+          <!-- Why Us -->
+          <div class="why-strip">
+            <div class="why-item">
+              <div class="why-icon"><i class="fas fa-shield-halved"></i></div>
+              <div class="why-title">১০০% অরিজিনাল</div>
+              <div class="why-desc">প্রতিটি পণ্য যাচাই করা এবং মানসম্পন্ন</div>
+            </div>
+            <div class="why-item">
+              <div class="why-icon"><i class="fas fa-truck-fast"></i></div>
+              <div class="why-title">দ্রুত ডেলিভারি</div>
+              <div class="why-desc">ঢাকায় ১–২ দিন, সারাদেশে ২–৫ দিন</div>
+            </div>
+            <div class="why-item">
+              <div class="why-icon">
+                <i class="fas fa-hand-holding-usd"></i>
+              </div>
+              <div class="why-title">সহজ রিটার্ন</div>
+              <div class="why-desc">পণ্যে সমস্যা হলে ৭ দিনের মধ্যে ফেরত</div>
+            </div>
+            <div class="why-item">
+              <div class="why-icon"><i class="fas fa-headset"></i></div>
+              <div class="why-title">২৪/৭ সাপোর্ট</div>
+              <div class="why-desc">যেকোনো সমস্যায় আমরা সবসময় পাশে</div>
+            </div>
+          </div>
+        </div>
+        <!-- end home-sections -->
+      </div>
+      <!-- end homePage -->
+
+      <!-- ── PRODUCTS PAGE ──────────────────────────────────── -->
+      <div class="page-content" id="productsPage">
+        <div class="page-header">
+          <h2>
+            <i
+              class="fas fa-box"
+              style="color: var(--honey); margin-right: 10px"
+            ></i
+            >সকল পণ্য
+          </h2>
+          <div class="filters-bar">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="searchProducts"
+                placeholder="পণ্য খুঁজুন..."
+              />
+            </div>
+            <select id="categoryFilter" class="filter-select">
+              <option value="">সব ক্যাটাগরি</option>
+            </select>
+            <select id="sortBy" class="filter-select">
+              <option value="-createdAt">সর্বশেষ</option>
+              <option value="price">দাম: কম → বেশি</option>
+              <option value="-price">দাম: বেশি → কম</option>
+              <option value="name">নাম অনুযায়ী</option>
+            </select>
+            <select id="priceFilter" class="filter-select">
+              <option value="">সব দাম</option>
+              <option value="0-500">৳০ – ৳৫০০</option>
+              <option value="500-1000">৳৫০০ – ৳১,০০০</option>
+              <option value="1000-2000">৳১,০০০ – ৳২,০০০</option>
+              <option value="2000-5000">৳২,০০০ – ৳৫,০০০</option>
+              <option value="5000-100000">৳৫,০০০+</option>
+            </select>
+          </div>
+        </div>
+        <div class="products-grid" id="allProducts"></div>
+        <div class="pagination" id="productsPagination"></div>
+      </div>
+
+      <!-- ── ORDERS PAGE ────────────────────────────────────── -->
+      <div class="page-content" id="ordersPage">
+        <div class="page-header">
+          <h2>
+            <i
+              class="fas fa-satellite-dish"
+              style="color: var(--honey); margin-right: 10px"
+            ></i
+            >অর্ডার ট্র্যাকিং
+          </h2>
+        </div>
+        <div id="userOrders" class="orders-list"></div>
+      </div>
+
+      <!-- ── PROFILE PAGE ───────────────────────────────────── -->
+      <div class="page-content" id="profilePage">
+        <div class="page-header">
+          <h2>
+            <i
+              class="fas fa-user"
+              style="color: var(--honey); margin-right: 10px"
+            ></i
+            >প্রোফাইল
+          </h2>
+        </div>
+        <div id="profileContainer"></div>
+      </div>
+    </main>
+
+    <!-- ═══ CART SIDEBAR ═════════════════════════════════════ -->
+    <div class="cart-sidebar" id="cartSidebar">
+      <div class="cart-header">
+        <h3><i class="fas fa-shopping-cart"></i> আমার কার্ট</h3>
+        <button class="close-cart" id="closeCart" aria-label="কার্ট বন্ধ করুন">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-footer">
+        <div class="cart-summary">
+          <div class="cart-summary-row">
+            <span>পণ্যের মূল্য</span><span id="cartSubtotal">৳০</span>
+          </div>
+          <div class="cart-summary-row">
+            <span>ডেলিভারি চার্জ</span><span id="cartShipping">৳০</span>
+          </div>
+          <div class="cart-summary-row total">
+            <span>মোট</span><span id="cartTotal">৳০</span>
+          </div>
+        </div>
+        <button class="btn-primary btn-block btn-large" id="checkoutBtn">
+          <i class="fas fa-lock"></i> অর্ডার করুন
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ CHECKOUT MODAL ════════════════════════════════════ -->
+    <div class="modal" id="checkoutModal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3><i class="fas fa-truck"></i> অর্ডার কনফার্মেশন</h3>
+          <button class="close-modal" onclick="closeModal('checkoutModal')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="checkoutForm" novalidate>
+            <div class="checkout-grid">
+              <div class="checkout-section">
+                <div class="checkout-section-title">
+                  <i class="fas fa-user"></i> প্রাপকের তথ্য
+                </div>
+                <div class="form-group">
+                  <label>পূর্ণ নাম *</label
+                  ><input
+                    type="text"
+                    id="checkoutName"
+                    required
+                    placeholder="আপনার পূর্ণ নাম"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>ইমেইল ঠিকানা *</label
+                  ><input
+                    type="email"
+                    id="checkoutEmail"
+                    required
+                    placeholder="example@email.com"
+                  />
+                  <div class="form-hint">অর্ডার কনফার্মেশন ইমেইলে পাবেন</div>
+                </div>
+                <div class="form-group">
+                  <label>মোবাইল নম্বর *</label
+                  ><input
+                    type="tel"
+                    id="checkoutPhone"
+                    required
+                    placeholder="01XXXXXXXXX"
+                  />
+                  <div class="form-hint">বাংলাদেশি নম্বর (01X-XXXXXXXX)</div>
+                </div>
+                <div class="form-group">
+                  <label>বিস্তারিত ঠিকানা *</label
+                  ><textarea
+                    id="checkoutAddress"
+                    rows="3"
+                    required
+                    placeholder="বাড়ির নম্বর, রাস্তা, এলাকা..."
+                  ></textarea>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>জেলা/শহর *</label>
+                    <select id="checkoutCity" required>
+                      <option value="">নির্বাচন করুন</option>
+                      <option>ঢাকা</option>
+                      <option>চট্টগ্রাম</option>
+                      <option>রাজশাহী</option>
+                      <option>খুলনা</option>
+                      <option>বরিশাল</option>
+                      <option>সিলেট</option>
+                      <option>রংপুর</option>
+                      <option>ময়মনসিংহ</option>
+                      <option>কুমিল্লা</option>
+                      <option>নারায়ণগঞ্জ</option>
+                      <option>গাজীপুর</option>
+                      <option>টাঙ্গাইল</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>জিপ কোড</label
+                    ><input
+                      type="text"
+                      id="checkoutZipCode"
+                      placeholder="ঐচ্ছিক"
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>বিশেষ নির্দেশনা</label
+                  ><textarea
+                    id="checkoutNotes"
+                    rows="2"
+                    placeholder="যেমন: গেটে কল করুন, দুপুরের পর দিন..."
+                  ></textarea>
+                </div>
+              </div>
+              <div class="checkout-section">
+                <div class="checkout-section-title">
+                  <i class="fas fa-box"></i> অর্ডার সারসংক্ষেপ
+                </div>
+                <div class="checkout-items-list" id="checkoutItems"></div>
+                <div class="checkout-section-title" style="margin-top: 1.25rem">
+                  <i class="fas fa-wallet"></i> পেমেন্ট পদ্ধতি
+                </div>
+                <div class="payment-methods">
+                  <label class="payment-method"
+                    ><input
+                      type="radio"
+                      name="paymentMethod"
+                      value="COD"
+                      checked
+                    /><span class="payment-method-icon pm-cod"
+                      ><i class="fas fa-hand-holding-usd"></i
+                    ></span>
+                    <div class="payment-method-text">
+                      <span>ক্যাশ অন ডেলিভারি</span
+                      ><small>ডেলিভারির সময় নগদ পরিশোধ</small>
+                    </div></label
+                  >
+                  <label class="payment-method"
+                    ><input
+                      type="radio"
+                      name="paymentMethod"
+                      value="bkash"
+                    /><span class="payment-method-icon pm-bkash"
+                      ><i class="fas fa-mobile-alt"></i
+                    ></span>
+                    <div class="payment-method-text">
+                      <span>bKash</span><small>মোবাইল ব্যাংকিং</small>
+                    </div></label
+                  >
+                  <label class="payment-method"
+                    ><input
+                      type="radio"
+                      name="paymentMethod"
+                      value="nagad"
+                    /><span class="payment-method-icon pm-nagad"
+                      ><i class="fas fa-wallet"></i
+                    ></span>
+                    <div class="payment-method-text">
+                      <span>Nagad</span><small>মোবাইল ব্যাংকিং</small>
+                    </div></label
+                  >
+                </div>
+                <div class="order-summary-box">
+                  <div class="summary-line">
+                    <span>পণ্যের মূল্য</span
+                    ><span id="summarySubtotal">৳০</span>
+                  </div>
+                  <div class="summary-line">
+                    <span>ডেলিভারি চার্জ</span
+                    ><span id="summaryShipping">৳৬০</span>
+                  </div>
+                  <div class="summary-line total">
+                    <span>মোট প্রদেয়</span><span id="summaryTotal">৳৬০</span>
+                  </div>
+                </div>
+                <div class="terms-row">
+                  <input type="checkbox" id="acceptTerms" /><span
+                    >আমি
+                    <a href="#" onclick="return false;">শর্তাবলী ও নীতিমালা</a>
+                    মেনে নিচ্ছি</span
+                  >
+                </div>
+                <button
+                  type="submit"
+                  class="btn-primary btn-block btn-large"
+                  id="confirmOrderBtn"
+                >
+                  <i class="fas fa-check-circle"></i> অর্ডার কনফার্ম করুন
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SUCCESS MODAL ═════════════════════════════════════ -->
+    <div class="modal" id="successModal">
+      <div class="modal-content modal-small">
+        <div class="success-modal-content">
+          <div class="success-icon"><i class="fas fa-check"></i></div>
+          <h3>অর্ডার সফল হয়েছে!</h3>
+          <p>
+            আপনার অর্ডারটি গ্রহণ করা হয়েছে।<br />শীঘ্রই আপনার সাথে যোগাযোগ করা
+            হবে।
+          </p>
+          <div class="order-id-chip">
+            <i class="fas fa-ticket-alt"></i><span id="orderNumber"></span>
+          </div>
+          <div
+            class="download-slip-section"
+            style="
+              margin: 0.75rem 0;
+              padding: 0.875rem;
+              background: var(--cream);
+              border-radius: 10px;
+              border: 1px dashed var(--border);
+            "
+          >
+            <div
+              style="display: flex; align-items: center; margin-bottom: 0.5rem"
+            >
+              <i
+                class="fas fa-receipt"
+                style="color: var(--honey); margin-right: 6px; font-size: 1rem"
+              ></i
+              ><span
+                style="
+                  font-weight: 600;
+                  color: var(--text-primary);
+                  font-size: 0.9rem;
+                "
+                >অর্ডার স্লিপ ডাউনলোড করুন</span
+              >
+            </div>
+            <button
+              class="btn-outline btn-block"
+              id="downloadSlipBtn"
+              style="padding: 0.625rem; font-size: 0.85rem"
+            >
+              <i class="fas fa-download"></i> PNG স্লিপ ডাউনলোড করুন
             </button>
-            <button class="btn-hero-ghost" onclick="openTrackingModal()">
+          </div>
+          <div style="margin: 0.5rem 0">
+            <button
+              class="btn-ghost btn-block"
+              id="trackSuccessOrderBtn"
+              style="font-size: 0.875rem; padding: 0.7rem 1rem"
+            >
               <i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক করুন
             </button>
           </div>
-
-          <div class="hero-trust">
-            <div class="trust-item"><i class="fas fa-shield-halved"></i> নিরাপদ পেমেন্ট</div>
-            <div class="trust-item"><i class="fas fa-truck-fast"></i> দ্রুত ডেলিভারি</div>
-            <div class="trust-item"><i class="fas fa-rotate-left"></i> ৭ দিনের রিটার্ন</div>
-            <div class="trust-item"><i class="fas fa-headset"></i> ২৪/৭ সাপোর্ট</div>
-          </div>
-        </div>
-
-        <!-- HERO RIGHT CARD -->
-        <div class="hero-right">
-          <div style="position:relative;">
-            <div class="float-badge f1">
-              <i class="fas fa-bolt f-honey"></i> আজকের অফার সীমিত!
-            </div>
-            <div class="hero-card">
-              <div class="hero-card-badge"><i class="fas fa-fire"></i> ট্রেন্ডিং পণ্য</div>
-              <div class="hero-card-product-grid">
-                <div class="hc-product" onclick="navigateTo('products')">
-                  <span class="hc-product-emoji">🍯</span>
-                  <div class="hc-product-name">খাঁটি মধু</div>
-                  <div class="hc-product-price">৳৩৫০</div>
-                </div>
-                <div class="hc-product" onclick="navigateTo('products')">
-                  <span class="hc-product-emoji">🌿</span>
-                  <div class="hc-product-name">অর্গানিক চা</div>
-                  <div class="hc-product-price">৳২২০</div>
-                </div>
-                <div class="hc-product" onclick="navigateTo('products')">
-                  <span class="hc-product-emoji">🫙</span>
-                  <div class="hc-product-name">দেশি ঘি</div>
-                  <div class="hc-product-price">৳৫৮০</div>
-                </div>
-                <div class="hc-product" onclick="navigateTo('products')">
-                  <span class="hc-product-emoji">🌾</span>
-                  <div class="hc-product-name">কালো জিরা</div>
-                  <div class="hc-product-price">৳১৮০</div>
-                </div>
-              </div>
-              <div class="hero-card-offer">
-                <div class="offer-icon"><i class="fas fa-tag"></i></div>
-                <div>
-                  <div class="offer-text-main">প্রথম অর্ডারে ১০% ছাড়!</div>
-                  <div class="offer-text-sub">কোড: FIRST10 — সীমিত সময়ের অফার</div>
-                </div>
-              </div>
-            </div>
-            <div class="float-badge f2">
-              <i class="fas fa-star f-honey"></i>
-              <span>৪.৯ <span style="color:var(--text-muted);font-weight:400;">(১০ক+ রিভিউ)</span></span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ★ TICKER ──────────────────────────────────────── -->
-    <div class="ticker-bar">
-      <div class="ticker-track" id="tickerTrack">
-        <div class="ticker-item"><i class="fas fa-truck-fast"></i> ঢাকায় ১–২ দিনে ডেলিভারি</div>
-        <div class="ticker-dot"></div>
-        <div class="ticker-item"><i class="fas fa-shield-halved"></i> ১০০% অরিজিনাল পণ্যের গ্যারান্টি</div>
-        <div class="ticker-dot"></div>
-        <div class="ticker-item"><i class="fas fa-gift"></i> ৳৫০০+ অর্ডারে ফ্রি ডেলিভারি</div>
-        <div class="ticker-dot"></div>
-        <div class="ticker-item"><i class="fas fa-headset"></i> ২৪/৭ কাস্টমার সাপোর্ট</div>
-        <div class="ticker-dot"></div>
-        <div class="ticker-item"><i class="fas fa-rotate-left"></i> ৭ দিনের রিটার্ন পলিসি</div>
-        <div class="ticker-dot"></div>
-        <div class="ticker-item"><i class="fas fa-mobile-alt"></i> bKash ও Nagad পেমেন্ট</div>
-        <div class="ticker-dot"></div>
-        <!-- Duplicate for seamless loop -->
-        <div class="ticker-item"><i class="fas fa-truck-fast"></i> ঢাকায় ১–২ দিনে ডেলিভারি</div>
-        <div class="ticker-dot"></div>
-        <div class="ticker-item"><i class="fas fa-shield-halved"></i> ১০০% অরিজিনাল পণ্যের গ্যারান্টি</div>
-        <div class="ticker-dot"></div>
-        <div class="ticker-item"><i class="fas fa-gift"></i> ৳৫০০+ অর্ডারে ফ্রি ডেলিভারি</div>
-        <div class="ticker-dot"></div>
-        <div class="ticker-item"><i class="fas fa-headset"></i> ২৪/৭ কাস্টমার সাপোর্ট</div>
-        <div class="ticker-dot"></div>
-        <div class="ticker-item"><i class="fas fa-rotate-left"></i> ৭ দিনের রিটার্ন পলিসি</div>
-        <div class="ticker-dot"></div>
-        <div class="ticker-item"><i class="fas fa-mobile-alt"></i> bKash ও Nagad পেমেন্ট</div>
-        <div class="ticker-dot"></div>
-      </div>
-    </div>
-
-    <!-- ★ STATS ───────────────────────────────────────── -->
-    <div class="stats-strip">
-      <div class="stat-cell">
-        <i class="fas fa-box"></i>
-        <div class="stat-num" id="statProducts">৫০০+</div>
-        <div class="stat-label">পণ্য সংগ্রহ</div>
-      </div>
-      <div class="stat-cell">
-        <i class="fas fa-users"></i>
-        <div class="stat-num">১০ক+</div>
-        <div class="stat-label">সন্তুষ্ট গ্রাহক</div>
-      </div>
-      <div class="stat-cell">
-        <i class="fas fa-truck-fast"></i>
-        <div class="stat-num">২৪ঘ</div>
-        <div class="stat-label">দ্রুত ডেলিভারি</div>
-      </div>
-      <div class="stat-cell">
-        <i class="fas fa-star"></i>
-        <div class="stat-num">৪.৯★</div>
-        <div class="stat-label">গড় রেটিং</div>
-      </div>
-    </div>
-
-    <!-- ★ SECTIONS ────────────────────────────────────── -->
-    <div class="home-sections">
-
-      <!-- Banner Grid -->
-      <div class="banner-grid">
-        <div class="banner-main" onclick="navigateTo('products')">
-          <div class="bm-bg"></div>
-          <div class="bm-deco">🍯</div>
-          <div class="bm-content">
-            <div class="bm-tag"><i class="fas fa-fire"></i> সীমিত সময়ের অফার</div>
-            <div class="bm-heading">প্রকৃতির সেরা<br><em>অর্গানিক পণ্য</em></div>
-            <p class="bm-sub">খাঁটি হোমমেড পিনাট বাটার — স্বাস্থ্যসম্মত, পুষ্টিকর, সরাসরি আপনার দরজায়।</p>
-            <button class="bm-btn">
-              <i class="fas fa-shopping-bag"></i> এখনই কিনুন
+          <div class="success-actions" style="margin-top: 0.75rem">
+            <button
+              class="btn-primary"
+              onclick="
+                closeModal('successModal');
+                navigateTo('orders');
+              "
+              style="padding: 0.75rem 1rem; font-size: 0.9rem"
+            >
+              <i class="fas fa-satellite-dish"></i> ট্র্যাক করুন
+            </button>
+            <button
+              class="btn-ghost"
+              onclick="
+                closeModal('successModal');
+                navigateTo('products');
+              "
+              style="padding: 0.75rem 1rem; font-size: 0.9rem"
+            >
+              <i class="fas fa-arrow-right"></i> আরও কেনাকাটা
             </button>
           </div>
         </div>
-        <div class="banner-sm banner-sm-1" onclick="navigateTo('products')">
-          <div>
-            <span class="bs-icon">🚀</span>
-            <div class="bs-title">দ্রুত ডেলিভারি</div>
-            <div class="bs-sub">ঢাকার মধ্যে মাত্র ১–২ কার্যদিবসে আপনার দরজায়</div>
-          </div>
-          <div class="bs-cta">আরও জানুন <i class="fas fa-arrow-right"></i></div>
-        </div>
-        <div class="banner-sm banner-sm-2" onclick="showPolicy('return')">
-          <div>
-            <span class="bs-icon">🔄</span>
-            <div class="bs-title">৭ দিনের রিটার্ন</div>
-            <div class="bs-sub">পণ্যে সমস্যা হলে ৭ দিনের মধ্যে ফেরত নিন</div>
-          </div>
-          <div class="bs-cta">পলিসি দেখুন <i class="fas fa-arrow-right"></i></div>
-        </div>
-      </div>
-
-      <!-- Featured Products -->
-      <div class="products-showcase">
-        <div class="sec-head">
-          <div>
-            <div class="sec-eyebrow">ফিচার্ড</div>
-            <h2 class="sec-title">বেস্টসেলার <em>পণ্যসমূহ</em></h2>
-          </div>
-          <a class="see-all" onclick="navigateTo('products');return false;">
-            সব দেখুন <i class="fas fa-arrow-right"></i>
-          </a>
-        </div>
-        <div class="products-grid-home" id="featuredProducts"></div>
-      </div>
-
-      <!-- Categories -->
-      <div class="sec-head">
-        <div>
-          <div class="sec-eyebrow">ব্রাউজ করুন</div>
-          <h2 class="sec-title">পণ্যের <em>ক্যাটাগরি</em></h2>
-        </div>
-      </div>
-      <div class="cats-grid" id="categoriesList"></div>
-
-      <!-- Why Us -->
-      <div class="why-strip">
-        <div class="why-item">
-          <div class="why-icon"><i class="fas fa-shield-halved"></i></div>
-          <div class="why-title">১০০% অরিজিনাল</div>
-          <div class="why-desc">প্রতিটি পণ্য যাচাই করা এবং মানসম্পন্ন</div>
-        </div>
-        <div class="why-item">
-          <div class="why-icon"><i class="fas fa-truck-fast"></i></div>
-          <div class="why-title">দ্রুত ডেলিভারি</div>
-          <div class="why-desc">ঢাকায় ১–২ দিন, সারাদেশে ২–৫ দিন</div>
-        </div>
-        <div class="why-item">
-          <div class="why-icon"><i class="fas fa-hand-holding-usd"></i></div>
-          <div class="why-title">সহজ রিটার্ন</div>
-          <div class="why-desc">পণ্যে সমস্যা হলে ৭ দিনের মধ্যে ফেরত</div>
-        </div>
-        <div class="why-item">
-          <div class="why-icon"><i class="fas fa-headset"></i></div>
-          <div class="why-title">২৪/৭ সাপোর্ট</div>
-          <div class="why-desc">যেকোনো সমস্যায় আমরা সবসময় পাশে</div>
-        </div>
-      </div>
-
-    </div><!-- end home-sections -->
-  </div><!-- end homePage -->
-
-  <!-- ── PRODUCTS PAGE ──────────────────────────────────── -->
-  <div class="page-content" id="productsPage">
-    <div class="page-header">
-      <h2><i class="fas fa-box" style="color:var(--honey);margin-right:10px;"></i>সকল পণ্য</h2>
-      <div class="filters-bar">
-        <div class="search-box">
-          <i class="fas fa-search"></i>
-          <input type="text" id="searchProducts" placeholder="পণ্য খুঁজুন...">
-        </div>
-        <select id="categoryFilter" class="filter-select"><option value="">সব ক্যাটাগরি</option></select>
-        <select id="sortBy" class="filter-select">
-          <option value="-createdAt">সর্বশেষ</option>
-          <option value="price">দাম: কম → বেশি</option>
-          <option value="-price">দাম: বেশি → কম</option>
-          <option value="name">নাম অনুযায়ী</option>
-        </select>
-        <select id="priceFilter" class="filter-select">
-          <option value="">সব দাম</option>
-          <option value="0-500">৳০ – ৳৫০০</option>
-          <option value="500-1000">৳৫০০ – ৳১,০০০</option>
-          <option value="1000-2000">৳১,০০০ – ৳২,০০০</option>
-          <option value="2000-5000">৳২,০০০ – ৳৫,০০০</option>
-          <option value="5000-100000">৳৫,০০০+</option>
-        </select>
       </div>
     </div>
-    <div class="products-grid" id="allProducts"></div>
-    <div class="pagination" id="productsPagination"></div>
-  </div>
 
-  <!-- ── ORDERS PAGE ────────────────────────────────────── -->
-  <div class="page-content" id="ordersPage">
-    <div class="page-header">
-      <h2><i class="fas fa-satellite-dish" style="color:var(--honey);margin-right:10px;"></i>অর্ডার ট্র্যাকিং</h2>
-    </div>
-    <div id="userOrders" class="orders-list"></div>
-  </div>
-
-  <!-- ── PROFILE PAGE ───────────────────────────────────── -->
-  <div class="page-content" id="profilePage">
-    <div class="page-header">
-      <h2><i class="fas fa-user" style="color:var(--honey);margin-right:10px;"></i>প্রোফাইল</h2>
-    </div>
-    <div id="profileContainer"></div>
-  </div>
-
-</main>
-
-<!-- ═══ CART SIDEBAR ═════════════════════════════════════ -->
-<div class="cart-sidebar" id="cartSidebar">
-  <div class="cart-header">
-    <h3><i class="fas fa-shopping-cart"></i> আমার কার্ট</h3>
-    <button class="close-cart" id="closeCart" aria-label="কার্ট বন্ধ করুন"><i class="fas fa-times"></i></button>
-  </div>
-  <div class="cart-items" id="cartItems"></div>
-  <div class="cart-footer">
-    <div class="cart-summary">
-      <div class="cart-summary-row"><span>পণ্যের মূল্য</span><span id="cartSubtotal">৳০</span></div>
-      <div class="cart-summary-row"><span>ডেলিভারি চার্জ</span><span id="cartShipping">৳০</span></div>
-      <div class="cart-summary-row total"><span>মোট</span><span id="cartTotal">৳০</span></div>
-    </div>
-    <button class="btn-primary btn-block btn-large" id="checkoutBtn">
-      <i class="fas fa-lock"></i> অর্ডার করুন
-    </button>
-  </div>
-</div>
-
-<!-- ═══ CHECKOUT MODAL ════════════════════════════════════ -->
-<div class="modal" id="checkoutModal">
-  <div class="modal-content modal-large">
-    <div class="modal-header">
-      <h3><i class="fas fa-truck"></i> অর্ডার কনফার্মেশন</h3>
-      <button class="close-modal" onclick="closeModal('checkoutModal')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <form id="checkoutForm" novalidate>
-        <div class="checkout-grid">
-          <div class="checkout-section">
-            <div class="checkout-section-title"><i class="fas fa-user"></i> প্রাপকের তথ্য</div>
-            <div class="form-group"><label>পূর্ণ নাম *</label><input type="text" id="checkoutName" required placeholder="আপনার পূর্ণ নাম"></div>
-            <div class="form-group"><label>ইমেইল ঠিকানা *</label><input type="email" id="checkoutEmail" required placeholder="example@email.com"><div class="form-hint">অর্ডার কনফার্মেশন ইমেইলে পাবেন</div></div>
-            <div class="form-group"><label>মোবাইল নম্বর *</label><input type="tel" id="checkoutPhone" required placeholder="01XXXXXXXXX"><div class="form-hint">বাংলাদেশি নম্বর (01X-XXXXXXXX)</div></div>
-            <div class="form-group"><label>বিস্তারিত ঠিকানা *</label><textarea id="checkoutAddress" rows="3" required placeholder="বাড়ির নম্বর, রাস্তা, এলাকা..."></textarea></div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>জেলা/শহর *</label>
-                <select id="checkoutCity" required>
-                  <option value="">নির্বাচন করুন</option>
-                  <option>ঢাকা</option><option>চট্টগ্রাম</option><option>রাজশাহী</option>
-                  <option>খুলনা</option><option>বরিশাল</option><option>সিলেট</option>
-                  <option>রংপুর</option><option>ময়মনসিংহ</option><option>কুমিল্লা</option>
-                  <option>নারায়ণগঞ্জ</option><option>গাজীপুর</option><option>টাঙ্গাইল</option>
-                </select>
-              </div>
-              <div class="form-group"><label>জিপ কোড</label><input type="text" id="checkoutZipCode" placeholder="ঐচ্ছিক"></div>
-            </div>
-            <div class="form-group"><label>বিশেষ নির্দেশনা</label><textarea id="checkoutNotes" rows="2" placeholder="যেমন: গেটে কল করুন, দুপুরের পর দিন..."></textarea></div>
-          </div>
-          <div class="checkout-section">
-            <div class="checkout-section-title"><i class="fas fa-box"></i> অর্ডার সারসংক্ষেপ</div>
-            <div class="checkout-items-list" id="checkoutItems"></div>
-            <div class="checkout-section-title" style="margin-top:1.25rem;"><i class="fas fa-wallet"></i> পেমেন্ট পদ্ধতি</div>
-            <div class="payment-methods">
-              <label class="payment-method"><input type="radio" name="paymentMethod" value="COD" checked><span class="payment-method-icon pm-cod"><i class="fas fa-hand-holding-usd"></i></span><div class="payment-method-text"><span>ক্যাশ অন ডেলিভারি</span><small>ডেলিভারির সময় নগদ পরিশোধ</small></div></label>
-              <label class="payment-method"><input type="radio" name="paymentMethod" value="bkash"><span class="payment-method-icon pm-bkash"><i class="fas fa-mobile-alt"></i></span><div class="payment-method-text"><span>bKash</span><small>মোবাইল ব্যাংকিং</small></div></label>
-              <label class="payment-method"><input type="radio" name="paymentMethod" value="nagad"><span class="payment-method-icon pm-nagad"><i class="fas fa-wallet"></i></span><div class="payment-method-text"><span>Nagad</span><small>মোবাইল ব্যাংকিং</small></div></label>
-            </div>
-            <div class="order-summary-box">
-              <div class="summary-line"><span>পণ্যের মূল্য</span><span id="summarySubtotal">৳০</span></div>
-              <div class="summary-line"><span>ডেলিভারি চার্জ</span><span id="summaryShipping">৳৬০</span></div>
-              <div class="summary-line total"><span>মোট প্রদেয়</span><span id="summaryTotal">৳৬০</span></div>
-            </div>
-            <div class="terms-row"><input type="checkbox" id="acceptTerms"><span>আমি <a href="#" onclick="return false;">শর্তাবলী ও নীতিমালা</a> মেনে নিচ্ছি</span></div>
-            <button type="submit" class="btn-primary btn-block btn-large" id="confirmOrderBtn"><i class="fas fa-check-circle"></i> অর্ডার কনফার্ম করুন</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ SUCCESS MODAL ═════════════════════════════════════ -->
-<div class="modal" id="successModal">
-  <div class="modal-content modal-small">
-    <div class="success-modal-content">
-      <div class="success-icon"><i class="fas fa-check"></i></div>
-      <h3>অর্ডার সফল হয়েছে!</h3>
-      <p>আপনার অর্ডারটি গ্রহণ করা হয়েছে।<br>শীঘ্রই আপনার সাথে যোগাযোগ করা হবে।</p>
-      <div class="order-id-chip"><i class="fas fa-ticket-alt"></i><span id="orderNumber"></span></div>
-      <div class="download-slip-section" style="margin:0.75rem 0;padding:0.875rem;background:var(--cream);border-radius:10px;border:1px dashed var(--border);">
-        <div style="display:flex;align-items:center;margin-bottom:0.5rem;"><i class="fas fa-receipt" style="color:var(--honey);margin-right:6px;font-size:1rem;"></i><span style="font-weight:600;color:var(--text-primary);font-size:0.9rem;">অর্ডার স্লিপ ডাউনলোড করুন</span></div>
-        <button class="btn-outline btn-block" id="downloadSlipBtn" style="padding:0.625rem;font-size:0.85rem;"><i class="fas fa-download"></i> PNG স্লিপ ডাউনলোড করুন</button>
-      </div>
-      <div style="margin:0.5rem 0;"><button class="btn-ghost btn-block" id="trackSuccessOrderBtn" style="font-size:0.875rem;padding:0.7rem 1rem;"><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক করুন</button></div>
-      <div class="success-actions" style="margin-top:0.75rem;">
-        <button class="btn-primary" onclick="closeModal('successModal');navigateTo('orders');" style="padding:0.75rem 1rem;font-size:0.9rem;"><i class="fas fa-satellite-dish"></i> ট্র্যাক করুন</button>
-        <button class="btn-ghost" onclick="closeModal('successModal');navigateTo('products');" style="padding:0.75rem 1rem;font-size:0.9rem;"><i class="fas fa-arrow-right"></i> আরও কেনাকাটা</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ ORDER TRACKING MODAL ════════════════════════════════ -->
-<div class="modal" id="trackingModal">
-  <div class="modal-content modal-tracking">
-    <div class="modal-header">
-      <h3><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাকিং</h3>
-      <button class="close-modal" onclick="closeModal('trackingModal')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body" style="padding:0;">
-      <div class="track-search-zone">
-        <div class="track-search-label">অর্ডার নম্বর দিয়ে ট্র্যাক করুন</div>
-        <div class="track-search-row">
-          <div class="track-input-wrap">
-            <i class="fas fa-hashtag"></i>
-            <input type="text" id="trackOrderInput" placeholder="ORD-2025XX-00001" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter') trackOrder()">
-            <button class="track-clear-btn" id="trackClearBtn" onclick="clearTracking()" style="display:none;"><i class="fas fa-times"></i></button>
-          </div>
-          <button class="track-btn" id="trackBtn" onclick="trackOrder()">
-            <span class="track-btn-text"><i class="fas fa-magnifying-glass"></i> ট্র্যাক করুন</span>
-            <span class="track-btn-loading" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i></span>
+    <!-- ═══ ORDER TRACKING MODAL ════════════════════════════════ -->
+    <div class="modal" id="trackingModal">
+      <div class="modal-content modal-tracking">
+        <div class="modal-header">
+          <h3><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাকিং</h3>
+          <button class="close-modal" onclick="closeModal('trackingModal')">
+            <i class="fas fa-times"></i>
           </button>
         </div>
-        <div class="track-hint"><i class="fas fa-lightbulb"></i> অর্ডার নম্বর আপনার কনফার্মেশন ইমেইলে পাবেন — যেমন: <strong>ORD-202506-00001</strong></div>
-      </div>
-      <div id="trackResult" class="track-result-area"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ FOOTER ════════════════════════════════════════════ -->
-<footer class="site-footer">
-  <div class="footer-trust-bar">
-    <div class="footer-trust-bar-inner">
-      <div class="trust-pill"><i class="fas fa-truck-fast"></i><span>দ্রুত ডেলিভারি</span></div>
-      <div class="trust-divider"></div>
-      <div class="trust-pill"><i class="fas fa-shield-halved"></i><span>নিরাপদ পেমেন্ট</span></div>
-      <div class="trust-divider"></div>
-      <div class="trust-pill"><i class="fas fa-rotate-left"></i><span>৭ দিনের রিটার্ন</span></div>
-      <div class="trust-divider"></div>
-      <div class="trust-pill"><i class="fas fa-headset"></i><span>২৪/৭ সাপোর্ট</span></div>
-    </div>
-  </div>
-  <div class="footer-body">
-    <div class="footer-grid">
-      <div class="footer-col footer-brand-col">
-        <div class="footer-logo">
-          <div class="footer-logo-icon"><i class="fa-brands fa-forumbee"></i></div>
-          <div><div class="footer-logo-name">BeeHarvest</div><div class="footer-logo-tag">বাংলাদেশের বিশ্বস্ত অনলাইন শপ</div></div>
-        </div>
-        <p class="footer-about">বাংলাদেশের গ্রাহকদের কাছে সেরা মানের পণ্য সহজলভ্য করে তোলাই আমাদের লক্ষ্য।</p>
-        <div class="footer-social">
-          <a href="#" class="social-btn" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" class="social-btn" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-          <a href="#" class="social-btn" title="Instagram"><i class="fab fa-instagram"></i></a>
-          <a href="#" class="social-btn" title="YouTube"><i class="fab fa-youtube"></i></a>
-        </div>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-title"><i class="fas fa-file-lines"></i> পলিসি সমূহ</div>
-        <ul class="footer-links">
-          <li><a href="#" onclick="showPolicy('delivery');return false;"><i class="fas fa-truck"></i> ডেলিভারি পলিসি</a></li>
-          <li><a href="#" onclick="showPolicy('return');return false;"><i class="fas fa-rotate-left"></i> রিটার্ন ও রিফান্ড</a></li>
-          <li><a href="#" onclick="showPolicy('privacy');return false;"><i class="fas fa-lock"></i> গোপনীয়তা নীতি</a></li>
-          <li><a href="#" onclick="showPolicy('terms');return false;"><i class="fas fa-scroll"></i> শর্তাবলী</a></li>
-          <li><a href="#" onclick="showPolicy('payment');return false;"><i class="fas fa-credit-card"></i> পেমেন্ট নীতি</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-title"><i class="fas fa-bolt"></i> দ্রুত লিংক</div>
-        <ul class="footer-links">
-          <li><a href="#" onclick="navigateTo('home');return false;"><i class="fas fa-home"></i> হোম</a></li>
-          <li><a href="#" onclick="navigateTo('products');return false;"><i class="fas fa-box"></i> সকল পণ্য</a></li>
-          <li><a href="#" onclick="navigateTo('orders');return false;"><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক</a></li>
-          <li><a href="#" onclick="navigateTo('profile');return false;"><i class="fas fa-user"></i> প্রোফাইল</a></li>
-          <li><a href="#" onclick="showPolicy('faq');return false;"><i class="fas fa-circle-question"></i> সাধারণ প্রশ্নোত্তর</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-title"><i class="fas fa-phone"></i> যোগাযোগ করুন</div>
-        <ul class="footer-contact-list">
-          <li><div class="contact-icon"><i class="fas fa-phone-volume"></i></div><div><div class="contact-label">হটলাইন</div><div class="contact-value">01700-000000</div></div></li>
-          <li><div class="contact-icon"><i class="fab fa-whatsapp"></i></div><div><div class="contact-label">WhatsApp</div><div class="contact-value">01700-000001</div></div></li>
-          <li><div class="contact-icon"><i class="fas fa-envelope"></i></div><div><div class="contact-label">ইমেইল</div><div class="contact-value">support@beeharvest.com.bd</div></div></li>
-          <li><div class="contact-icon"><i class="fas fa-clock"></i></div><div><div class="contact-label">সাপোর্ট সময়</div><div class="contact-value">সকাল ৯টা – রাত ১০টা</div></div></li>
-        </ul>
-        <div class="footer-payments">
-          <span class="payment-logo bkash">bKash</span>
-          <span class="payment-logo nagad">Nagad</span>
-          <span class="payment-logo cod">COD</span>
+        <div class="modal-body" style="padding: 0">
+          <div class="track-search-zone">
+            <div class="track-search-label">
+              অর্ডার নম্বর দিয়ে ট্র্যাক করুন
+            </div>
+            <div class="track-search-row">
+              <div class="track-input-wrap">
+                <i class="fas fa-hashtag"></i>
+                <input
+                  type="text"
+                  id="trackOrderInput"
+                  placeholder="ORD-2025XX-00001"
+                  autocomplete="off"
+                  spellcheck="false"
+                  onkeydown="if (event.key === 'Enter') trackOrder();"
+                />
+                <button
+                  class="track-clear-btn"
+                  id="trackClearBtn"
+                  onclick="clearTracking()"
+                  style="display: none"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <button class="track-btn" id="trackBtn" onclick="trackOrder()">
+                <span class="track-btn-text"
+                  ><i class="fas fa-magnifying-glass"></i> ট্র্যাক করুন</span
+                >
+                <span class="track-btn-loading" style="display: none"
+                  ><i class="fas fa-circle-notch fa-spin"></i
+                ></span>
+              </button>
+            </div>
+            <div class="track-hint">
+              <i class="fas fa-lightbulb"></i> অর্ডার নম্বর আপনার কনফার্মেশন
+              ইমেইলে পাবেন — যেমন: <strong>ORD-202506-00001</strong>
+            </div>
+          </div>
+          <div id="trackResult" class="track-result-area"></div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="footer-bottom">
-    <div class="footer-bottom-inner">
-      <span>© ২০২৫ BeeHarvest. সর্বস্বত্ব সংরক্ষিত।</span>
-      <span class="footer-made">বাংলাদেশে তৈরি <i class="fas fa-heart" style="color:#F5A623;"></i></span>
-    </div>
-  </div>
-</footer>
 
-<!-- ═══ POLICY MODAL ══════════════════════════════════════ -->
-<div class="modal" id="policyModal">
-  <div class="modal-content modal-policy">
-    <div class="modal-header">
-      <h3 id="policyModalTitle"><i class="fas fa-file-lines"></i> পলিসি</h3>
-      <button class="close-modal" onclick="closeModal('policyModal')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body" id="policyModalBody" style="line-height:1.85;color:var(--text-muted);font-size:0.92rem;"></div>
-  </div>
-</div>
+    <!-- ═══ FOOTER ════════════════════════════════════════════ -->
+    <footer class="site-footer">
+      <div class="footer-trust-bar">
+        <div class="footer-trust-bar-inner">
+          <div class="trust-pill">
+            <i class="fas fa-truck-fast"></i><span>দ্রুত ডেলিভারি</span>
+          </div>
+          <div class="trust-divider"></div>
+          <div class="trust-pill">
+            <i class="fas fa-shield-halved"></i><span>নিরাপদ পেমেন্ট</span>
+          </div>
+          <div class="trust-divider"></div>
+          <div class="trust-pill">
+            <i class="fas fa-rotate-left"></i><span>৭ দিনের রিটার্ন</span>
+          </div>
+          <div class="trust-divider"></div>
+          <div class="trust-pill">
+            <i class="fas fa-headset"></i><span>২৪/৭ সাপোর্ট</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-body">
+        <div class="footer-grid">
+          <div class="footer-col footer-brand-col">
+            <div class="footer-logo">
+              <div class="footer-logo-icon">
+                <i class="fa-brands fa-forumbee"></i>
+              </div>
+              <div>
+                <div class="footer-logo-name">BeeHarvest</div>
+                <div class="footer-logo-tag">বাংলাদেশের বিশ্বস্ত অনলাইন শপ</div>
+              </div>
+            </div>
+            <p class="footer-about">
+              বাংলাদেশের গ্রাহকদের কাছে সেরা মানের পণ্য সহজলভ্য করে তোলাই আমাদের
+              লক্ষ্য।
+            </p>
+            <div class="footer-social">
+              <a href="#" class="social-btn" title="Facebook"
+                ><i class="fab fa-facebook-f"></i
+              ></a>
+              <a href="#" class="social-btn" title="WhatsApp"
+                ><i class="fab fa-whatsapp"></i
+              ></a>
+              <a href="#" class="social-btn" title="Instagram"
+                ><i class="fab fa-instagram"></i
+              ></a>
+              <a href="#" class="social-btn" title="YouTube"
+                ><i class="fab fa-youtube"></i
+              ></a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <div class="footer-col-title">
+              <i class="fas fa-file-lines"></i> পলিসি সমূহ
+            </div>
+            <ul class="footer-links">
+              <li>
+                <a
+                  href="#"
+                  onclick="
+                    showPolicy('delivery');
+                    return false;
+                  "
+                  ><i class="fas fa-truck"></i> ডেলিভারি পলিসি</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onclick="
+                    showPolicy('return');
+                    return false;
+                  "
+                  ><i class="fas fa-rotate-left"></i> রিটার্ন ও রিফান্ড</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onclick="
+                    showPolicy('privacy');
+                    return false;
+                  "
+                  ><i class="fas fa-lock"></i> গোপনীয়তা নীতি</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onclick="
+                    showPolicy('terms');
+                    return false;
+                  "
+                  ><i class="fas fa-scroll"></i> শর্তাবলী</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onclick="
+                    showPolicy('payment');
+                    return false;
+                  "
+                  ><i class="fas fa-credit-card"></i> পেমেন্ট নীতি</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <div class="footer-col-title">
+              <i class="fas fa-bolt"></i> দ্রুত লিংক
+            </div>
+            <ul class="footer-links">
+              <li>
+                <a
+                  href="#"
+                  onclick="
+                    navigateTo('home');
+                    return false;
+                  "
+                  ><i class="fas fa-home"></i> হোম</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onclick="
+                    navigateTo('products');
+                    return false;
+                  "
+                  ><i class="fas fa-box"></i> সকল পণ্য</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onclick="
+                    navigateTo('orders');
+                    return false;
+                  "
+                  ><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onclick="
+                    navigateTo('profile');
+                    return false;
+                  "
+                  ><i class="fas fa-user"></i> প্রোফাইল</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onclick="
+                    showPolicy('faq');
+                    return false;
+                  "
+                  ><i class="fas fa-circle-question"></i> সাধারণ প্রশ্নোত্তর</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <div class="footer-col-title">
+              <i class="fas fa-phone"></i> যোগাযোগ করুন
+            </div>
+            <ul class="footer-contact-list">
+              <li>
+                <div class="contact-icon">
+                  <i class="fas fa-phone-volume"></i>
+                </div>
+                <div>
+                  <div class="contact-label">হটলাইন</div>
+                  <div class="contact-value">01700-000000</div>
+                </div>
+              </li>
+              <li>
+                <div class="contact-icon"><i class="fab fa-whatsapp"></i></div>
+                <div>
+                  <div class="contact-label">WhatsApp</div>
+                  <div class="contact-value">01700-000001</div>
+                </div>
+              </li>
+              <li>
+                <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                <div>
+                  <div class="contact-label">ইমেইল</div>
+                  <div class="contact-value">support@beeharvest.com.bd</div>
+                </div>
+              </li>
+              <li>
+                <div class="contact-icon"><i class="fas fa-clock"></i></div>
+                <div>
+                  <div class="contact-label">সাপোর্ট সময়</div>
+                  <div class="contact-value">সকাল ৯টা – রাত ১০টা</div>
+                </div>
+              </li>
+            </ul>
+            <div class="footer-payments">
+              <span class="payment-logo bkash">bKash</span>
+              <span class="payment-logo nagad">Nagad</span>
+              <span class="payment-logo cod">COD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-bottom-inner">
+          <span>© ২০২৫ BeeHarvest. সর্বস্বত্ব সংরক্ষিত।</span>
+          <span class="footer-made"
+            >বাংলাদেশে তৈরি <i class="fas fa-heart" style="color: #f5a623"></i
+          ></span>
+        </div>
+      </div>
+    </footer>
 
-<!-- ═══ MOBILE BOTTOM NAV ════════════════════════════════ -->
-<div class="mobile-bottom-nav">
-  <div class="mobile-nav-items">
-    <a class="mobile-nav-item active" data-page="home">
-      <i class="fas fa-home"></i><span>হোম</span>
-    </a>
-    <a class="mobile-nav-item" data-page="products">
-      <i class="fas fa-box"></i><span>পণ্য</span>
-    </a>
-    <a class="mobile-nav-item" id="mobileCartBtn" style="position:relative;">
-      <i class="fas fa-shopping-cart"></i>
-      <span class="mobile-cart-badge-dot" id="mobileCartCount">0</span>
-      <span>কার্ট</span>
-    </a>
-    <a class="mobile-nav-item" data-page="orders">
-      <i class="fas fa-satellite-dish"></i><span>ট্র্যাক</span>
-    </a>
-    <a class="mobile-nav-item" data-page="profile">
-      <i class="fas fa-user"></i><span>প্রোফাইল</span>
-    </a>
-  </div>
-</div>
-
-<!-- ═══ MOBILE CART BOTTOM SHEET ═══════════════════════ -->
-<div class="bottom-sheet" id="mobileCartSheet">
-  <div class="bottom-sheet-handle"></div>
-  <div class="bottom-sheet-header">
-    <h3><i class="fas fa-shopping-cart" style="color:var(--honey)"></i> আমার কার্ট</h3>
-    <button class="bottom-sheet-close" id="closeMobileCart"><i class="fas fa-times"></i></button>
-  </div>
-  <div class="bottom-sheet-content" id="mobileCartItems"></div>
-  <div class="cart-footer" style="padding:1rem;">
-    <div class="cart-summary">
-      <div class="cart-summary-row total"><span>মোট</span><span id="mobileCartTotal">৳০</span></div>
+    <!-- ═══ POLICY MODAL ══════════════════════════════════════ -->
+    <div class="modal" id="policyModal">
+      <div class="modal-content modal-policy">
+        <div class="modal-header">
+          <h3 id="policyModalTitle"><i class="fas fa-file-lines"></i> পলিসি</h3>
+          <button class="close-modal" onclick="closeModal('policyModal')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div
+          class="modal-body"
+          id="policyModalBody"
+          style="
+            line-height: 1.85;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+          "
+        ></div>
+      </div>
     </div>
-    <button class="btn-primary btn-block btn-large" id="mobileCheckoutBtn">
-      <i class="fas fa-lock"></i> অর্ডার করুন
-    </button>
-  </div>
-</div>
 
-<!-- ═══ MAINTENANCE / RATE LIMIT OVERLAY ═══════════════════════════════════ -->
-<div class="maintenance-overlay" id="maintenanceOverlay" style="display: none;">
-  <div class="maintenance-card">
-    <div class="maintenance-icon"><i class="fas fa-tachometer-alt"></i></div>
-    <h2><i class="fas fa-exclamation-triangle"></i> রেট লিমিট এক্সিডেড</h2>
-    <p>আপনি খুব দ্রুত রিকোয়েস্ট করছেন। সার্ভারকে একটু সময় দিন।<br>অনুগ্রহ করে অপেক্ষা করুন...</p>
-    <div class="maintenance-countdown" id="maintenanceCountdown">
-      <span class="countdown-number" id="countdownNumber">60</span>
-      <span class="countdown-unit">সেকেন্ড</span>
+    <!-- ═══ MOBILE BOTTOM NAV ════════════════════════════════ -->
+    <div class="mobile-bottom-nav">
+      <div class="mobile-nav-items">
+        <a class="mobile-nav-item active" data-page="home">
+          <i class="fas fa-home"></i><span>হোম</span>
+        </a>
+        <a class="mobile-nav-item" data-page="products">
+          <i class="fas fa-box"></i><span>পণ্য</span>
+        </a>
+        <a
+          class="mobile-nav-item"
+          id="mobileCartBtn"
+          style="position: relative"
+        >
+          <i class="fas fa-shopping-cart"></i>
+          <span class="mobile-cart-badge-dot" id="mobileCartCount">0</span>
+          <span>কার্ট</span>
+        </a>
+        <a class="mobile-nav-item" data-page="orders">
+          <i class="fas fa-satellite-dish"></i><span>ট্র্যাক</span>
+        </a>
+        <a class="mobile-nav-item" data-page="profile">
+          <i class="fas fa-user"></i><span>প্রোফাইল</span>
+        </a>
+      </div>
     </div>
-    <div class="maintenance-progress">
-      <div class="progress-ring-bg"></div>
-      <div class="progress-ring-fill" id="progressRingFill"></div>
-      <div class="progress-text" id="progressPercent">100%</div>
-    </div>
-    <p class="maintenance-hint"><i class="fas fa-sync-alt"></i> টাইমার শেষ হলে স্বয়ংক্রিয়ভাবে রিফ্রেশ হবে</p>
-    <button class="maintenance-retry-btn" id="maintenanceRetryBtn" onclick="retryAfterMaintenance()">
-      <i class="fas fa-undo-alt"></i> এখনই রিট্রাই করুন
-    </button>
-  </div>
-</div>
 
-<script>
-/* ══════════════════════════════════════════════════════════
+    <!-- ═══ MOBILE CART BOTTOM SHEET ═══════════════════════ -->
+    <div class="bottom-sheet" id="mobileCartSheet">
+      <div class="bottom-sheet-handle"></div>
+      <div class="bottom-sheet-header">
+        <h3>
+          <i class="fas fa-shopping-cart" style="color: var(--honey)"></i> আমার
+          কার্ট
+        </h3>
+        <button class="bottom-sheet-close" id="closeMobileCart">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="bottom-sheet-content" id="mobileCartItems"></div>
+      <div class="cart-footer" style="padding: 1rem">
+        <div class="cart-summary">
+          <div class="cart-summary-row total">
+            <span>মোট</span><span id="mobileCartTotal">৳০</span>
+          </div>
+        </div>
+        <button class="btn-primary btn-block btn-large" id="mobileCheckoutBtn">
+          <i class="fas fa-lock"></i> অর্ডার করুন
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ MAINTENANCE / RATE LIMIT OVERLAY ═══════════════════════════════════ -->
+    <div
+      class="maintenance-overlay"
+      id="maintenanceOverlay"
+      style="display: none"
+    >
+      <div class="maintenance-card">
+        <div class="maintenance-icon">
+          <i class="fas fa-tachometer-alt"></i>
+        </div>
+        <h2><i class="fas fa-exclamation-triangle"></i> রেট লিমিট এক্সিডেড</h2>
+        <p>
+          আপনি খুব দ্রুত রিকোয়েস্ট করছেন। সার্ভারকে একটু সময় দিন।<br />অনুগ্রহ
+          করে অপেক্ষা করুন...
+        </p>
+        <div class="maintenance-countdown" id="maintenanceCountdown">
+          <span class="countdown-number" id="countdownNumber">60</span>
+          <span class="countdown-unit">সেকেন্ড</span>
+        </div>
+        <div class="maintenance-progress">
+          <div class="progress-ring-bg"></div>
+          <div class="progress-ring-fill" id="progressRingFill"></div>
+          <div class="progress-text" id="progressPercent">100%</div>
+        </div>
+        <p class="maintenance-hint">
+          <i class="fas fa-sync-alt"></i> টাইমার শেষ হলে স্বয়ংক্রিয়ভাবে
+          রিফ্রেশ হবে
+        </p>
+        <button
+          class="maintenance-retry-btn"
+          id="maintenanceRetryBtn"
+          onclick="retryAfterMaintenance()"
+        >
+          <i class="fas fa-undo-alt"></i> এখনই রিট্রাই করুন
+        </button>
+      </div>
+    </div>
+
+    <script>
+      /* ══════════════════════════════════════════════════════════
    ENHANCED HOME PAGE LOGIC
 ══════════════════════════════════════════════════════════ */
 
-/* Override loadFeaturedProducts to use new card design */
-function renderProductCardNew(p) {
-  if (!p?._id) return '';
-  const id       = String(p._id);
-  const safeName = p.name ? p.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
-  const price    = p.discountPrice || p.price;
-  const imgUrl   = p.images?.[0]?.url || 'https://via.placeholder.com/400x300?text=No+Image';
-  const discount = p.discountPrice ? Math.round(((p.price - p.discountPrice) / p.price) * 100) : 0;
-  const catName  = p.category?.name || '';
+      /* Override loadFeaturedProducts to use new card design */
+      function renderProductCardNew(p) {
+        if (!p?._id) return "";
+        const id = String(p._id);
+        const safeName = p.name
+          ? p.name
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+          : "";
+        const price = p.discountPrice || p.price;
+        const imgUrl =
+          p.images?.[0]?.url ||
+          "https://via.placeholder.com/400x300?text=No+Image";
+        const discount = p.discountPrice
+          ? Math.round(((p.price - p.discountPrice) / p.price) * 100)
+          : 0;
+        const catName = p.category?.name || "";
 
-  let stockClass = '', stockText = '', stockIcon = 'fa-circle-check';
-  if (!p.stock || p.stock <= 0) {
-    stockClass = 'out'; stockText = 'স্টকে নেই'; stockIcon = 'fa-circle-xmark';
-  } else if (p.stock <= 10) {
-    stockClass = 'low'; stockText = `মাত্র ${p.stock} টি বাকি`; stockIcon = 'fa-triangle-exclamation';
-  } else {
-    stockText = 'স্টকে আছে';
-  }
+        let stockClass = "",
+          stockText = "",
+          stockIcon = "fa-circle-check";
+        if (!p.stock || p.stock <= 0) {
+          stockClass = "out";
+          stockText = "স্টকে নেই";
+          stockIcon = "fa-circle-xmark";
+        } else if (p.stock <= 10) {
+          stockClass = "low";
+          stockText = `মাত্র ${p.stock} টি বাকি`;
+          stockIcon = "fa-triangle-exclamation";
+        } else {
+          stockText = "স্টকে আছে";
+        }
 
-  window[`__p_${id}`] = p;
+        window[`__p_${id}`] = p;
 
-  return `
+        return `
     <div class="pcard" onclick="viewProduct('${id}')">
       <div class="pcard-img-wrap">
-        <img class="pcard-img" src="${imgUrl.replace(/"/g,'&quot;')}" alt="${safeName}" loading="lazy"
+        <img class="pcard-img" src="${imgUrl.replace(/"/g, "&quot;")}" alt="${safeName}" loading="lazy"
              onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'">
-        ${discount ? `<div class="pcard-badge">${discount}% ছাড়</div>` : ''}
-        ${p.stock <= 0 ? `<div class="pcard-badge out">স্টক শেষ</div>` : ''}
+        ${discount ? `<div class="pcard-badge">${discount}% ছাড়</div>` : ""}
+        ${p.stock <= 0 ? `<div class="pcard-badge out">স্টক শেষ</div>` : ""}
         <button class="pcard-wishlist" onclick="event.stopPropagation();" title="উইশলিস্টে যোগ">
           <i class="fas fa-heart"></i>
         </button>
-        ${p.stock > 0 ? `
-        <button class="pcard-quick-add" onclick="event.stopPropagation(); addToCart('${id}', ${price}, '${imgUrl.replace(/'/g,"\\'")}')">
+        ${
+          p.stock > 0
+            ? `
+        <button class="pcard-quick-add" onclick="event.stopPropagation(); addToCart('${id}', ${price}, '${imgUrl.replace(/'/g, "\\'")}')">
           <i class="fas fa-cart-plus"></i> দ্রুত কার্টে যোগ করুন
-        </button>` : ''}
+        </button>`
+            : ""
+        }
       </div>
       <div class="pcard-body">
-        ${catName ? `<div class="pcard-cat">${catName}</div>` : ''}
+        ${catName ? `<div class="pcard-cat">${catName}</div>` : ""}
         <div class="pcard-name">${safeName}</div>
         <div class="pcard-footer">
           <div class="pcard-price-row">
-            <span class="pcard-price">৳${price.toLocaleString('bn-BD')}</span>
-            ${p.discountPrice ? `<span class="pcard-orig">৳${p.price.toLocaleString('bn-BD')}</span>` : ''}
-            ${discount ? `<span class="pcard-off">${discount}% ছাড়</span>` : ''}
+            <span class="pcard-price">৳${price.toLocaleString("bn-BD")}</span>
+            ${p.discountPrice ? `<span class="pcard-orig">৳${p.price.toLocaleString("bn-BD")}</span>` : ""}
+            ${discount ? `<span class="pcard-off">${discount}% ছাড়</span>` : ""}
           </div>
           <div class="pcard-stock ${stockClass}">
             <i class="fas ${stockIcon}"></i> ${stockText}
           </div>
-          ${p.stock > 0
-            ? `<button class="pcard-add-btn" onclick="event.stopPropagation(); addToCart('${id}', ${price}, '${imgUrl.replace(/'/g,"\\'")}')">
+          ${
+            p.stock > 0
+              ? `<button class="pcard-add-btn" onclick="event.stopPropagation(); addToCart('${id}', ${price}, '${imgUrl.replace(/'/g, "\\'")}')">
                 <i class="fas fa-cart-plus"></i> কার্টে যোগ করুন
                </button>`
-            : `<button class="pcard-add-btn" disabled><i class="fas fa-times"></i> স্টকে নেই</button>`
+              : `<button class="pcard-add-btn" disabled><i class="fas fa-times"></i> স্টকে নেই</button>`
           }
         </div>
       </div>
     </div>`;
-}
+      }
 
-function skeletonCardsNew(n) {
-  return Array(n).fill(0).map(() => `
+      function skeletonCardsNew(n) {
+        return Array(n)
+          .fill(0)
+          .map(
+            () => `
     <div class="pcard pcard-skeleton">
       <div class="skel-img"></div>
       <div class="pcard-body">
@@ -1651,96 +3259,129 @@ function skeletonCardsNew(n) {
         <div class="skel-line w60"></div>
         <div class="skel-line"></div>
       </div>
-    </div>`).join('');
-}
+    </div>`,
+          )
+          .join("");
+      }
 
-/* Override the featured products loader for new card design */
-const _origLoadFeatured = window.loadFeaturedProducts;
-window.loadFeaturedProducts = async function() {
-  const grid = document.getElementById('featuredProducts');
-  if (!grid) return;
-  grid.innerHTML = skeletonCardsNew(4);
-  try {
-    const API_URL = 'https://beeyond-harvest-admin.onrender.com/api';
-    const res = await fetch(`${API_URL}/products?isFeatured=true&limit=8`);
-    const data = await res.json();
-    if (!data.success) throw new Error('Invalid');
-    const products = data.data || [];
-    if (products.length === 0) {
-      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">
+      /* Override the featured products loader for new card design */
+      const _origLoadFeatured = window.loadFeaturedProducts;
+      window.loadFeaturedProducts = async function () {
+        const grid = document.getElementById("featuredProducts");
+        if (!grid) return;
+        grid.innerHTML = skeletonCardsNew(4);
+        try {
+          const API_URL = "https://beeyond-harvest-admin.onrender.com/api";
+          const res = await fetch(
+            `${API_URL}/products?isFeatured=true&limit=8`,
+          );
+          const data = await res.json();
+          if (!data.success) throw new Error("Invalid");
+          const products = data.data || [];
+          if (products.length === 0) {
+            grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">
         <i class="fas fa-box-open" style="font-size:2.5rem;margin-bottom:1rem;display:block;color:var(--border);"></i>
         কোনো ফিচার্ড পণ্য নেই
       </div>`;
-    } else {
-      grid.innerHTML = products.map(renderProductCardNew).join('');
-      /* Animate cards in */
-      grid.querySelectorAll('.pcard').forEach((el, i) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = `opacity 0.4s ease ${i * 0.06}s, transform 0.4s ease ${i * 0.06}s`;
-        requestAnimationFrame(() => {
-          el.style.opacity = '1';
-          el.style.transform = 'translateY(0)';
-        });
-      });
-    }
-  } catch(e) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">
+          } else {
+            grid.innerHTML = products.map(renderProductCardNew).join("");
+            /* Animate cards in */
+            grid.querySelectorAll(".pcard").forEach((el, i) => {
+              el.style.opacity = "0";
+              el.style.transform = "translateY(20px)";
+              el.style.transition = `opacity 0.4s ease ${i * 0.06}s, transform 0.4s ease ${i * 0.06}s`;
+              requestAnimationFrame(() => {
+                el.style.opacity = "1";
+                el.style.transform = "translateY(0)";
+              });
+            });
+          }
+        } catch (e) {
+          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">
       <i class="fas fa-exclamation-triangle" style="font-size:2rem;margin-bottom:0.75rem;display:block;color:var(--danger);"></i>
       পণ্য লোড করতে ব্যর্থ হয়েছে
     </div>`;
-  }
-};
+        }
+      };
 
-/* Override categories for new design */
-const _origLoadCats = window.loadCategories;
-window.loadCategories = async function() {
-  try {
-    const API_URL = 'https://beeyond-harvest-admin.onrender.com/api';
-    const res = await fetch(`${API_URL}/categories`);
-    const data = await res.json();
-    if (!data.success || !data.data) return;
-    const cats = data.data;
+      /* Override categories for new design */
+      const _origLoadCats = window.loadCategories;
+      window.loadCategories = async function () {
+        try {
+          const API_URL = "https://beeyond-harvest-admin.onrender.com/api";
+          const res = await fetch(`${API_URL}/categories`);
+          const data = await res.json();
+          if (!data.success || !data.data) return;
+          const cats = data.data;
 
-    const ICONS = ['fa-tag','fa-leaf','fa-seedling','fa-carrot','fa-jar','fa-bowl-food','fa-apple-whole','fa-wheat-awn','fa-bottle-droplet','fa-pepper-hot'];
-    const grid = document.getElementById('categoriesList');
-    if (grid) {
-      grid.innerHTML = cats.length === 0
-        ? '<p style="color:var(--text-muted)">কোনো ক্যাটাগরি নেই</p>'
-        : cats.map((c, i) => `
+          const ICONS = [
+            "fa-tag",
+            "fa-leaf",
+            "fa-seedling",
+            "fa-carrot",
+            "fa-jar",
+            "fa-bowl-food",
+            "fa-apple-whole",
+            "fa-wheat-awn",
+            "fa-bottle-droplet",
+            "fa-pepper-hot",
+          ];
+          const grid = document.getElementById("categoriesList");
+          if (grid) {
+            grid.innerHTML =
+              cats.length === 0
+                ? '<p style="color:var(--text-muted)">কোনো ক্যাটাগরি নেই</p>'
+                : cats
+                    .map(
+                      (c, i) => `
             <div class="cat-card" onclick="filterByCategory('${c._id}')">
               <div class="cat-icon-wrap">
                 <i class="fas ${ICONS[i % ICONS.length]}"></i>
               </div>
-              <div class="cat-name">${c.name.replace(/&/g,'&amp;')}</div>
-            </div>`).join('');
-    }
+              <div class="cat-name">${c.name.replace(/&/g, "&amp;")}</div>
+            </div>`,
+                    )
+                    .join("");
+          }
 
-    const sel = document.getElementById('categoryFilter');
-    if (sel) {
-      sel.innerHTML = '<option value="">সব ক্যাটাগরি</option>'
-        + cats.map(c => `<option value="${c._id}">${c.name.replace(/&/g,'&amp;')}</option>`).join('');
-    }
-  } catch(e) { console.error('Categories:', e); }
-};
+          const sel = document.getElementById("categoryFilter");
+          if (sel) {
+            sel.innerHTML =
+              '<option value="">সব ক্যাটাগরি</option>' +
+              cats
+                .map(
+                  (c) =>
+                    `<option value="${c._id}">${c.name.replace(/&/g, "&amp;")}</option>`,
+                )
+                .join("");
+          }
+        } catch (e) {
+          console.error("Categories:", e);
+        }
+      };
 
-/* Stagger animate on scroll using IntersectionObserver */
-document.addEventListener('DOMContentLoaded', () => {
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        io.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.1 });
+      /* Stagger animate on scroll using IntersectionObserver */
+      document.addEventListener("DOMContentLoaded", () => {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add("visible");
+                io.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.1 },
+        );
 
-  document.querySelectorAll('.why-item, .stat-cell, .cat-card').forEach(el => {
-    io.observe(el);
-  });
-});
-</script>
+        document
+          .querySelectorAll(".why-item, .stat-cell, .cat-card")
+          .forEach((el) => {
+            io.observe(el);
+          });
+      });
+    </script>
 
-<script src="js/customer.js"></script>
-</body>
+    <script src="js/customer.js"></script>
+  </body>
 </html>
