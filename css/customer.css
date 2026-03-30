@@ -1377,9 +1377,9 @@
      color: white;
      animation: successPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
    }
-   /* ══════════════════════════════════════════════════════════
-   ORDER TRACKING — FIXED RESPONSIVE CSS
-   Replace the entire tracking section in customer.css
+/* ══════════════════════════════════════════════════════════
+   ORDER TRACKING — COMPLETELY FIXED CSS
+   Replace the ENTIRE tracking section with this
 ══════════════════════════════════════════════════════════ */
 
 /* ── Modal size ─────────────────────────────────────────── */
@@ -1538,6 +1538,11 @@
   gap: 1rem;
 }
 
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .ts-header {
   height: 56px;
   background: linear-gradient(90deg, #f0f2f8 25%, #e8eaf0 50%, #f0f2f8 75%);
@@ -1623,9 +1628,10 @@
   justify-content: space-between;
   padding: 1rem 1.25rem;
   border-radius: var(--radius-md);
-  border: 1.5px solid;
+  border: 1.5px solid var(--border);
   gap: 1rem;
   flex-wrap: wrap;
+  background: white;
 }
 
 .track-order-num {
@@ -1650,6 +1656,8 @@
   white-space: nowrap;
   letter-spacing: 0.3px;
   flex-shrink: 0;
+  background: var(--success-bg);
+  color: var(--success);
 }
 
 /* Cancelled banner */
@@ -1695,82 +1703,98 @@
 
 .track-section-title i { color: var(--honey-dark); font-size: 0.85rem; }
 
-/* ── Timeline — DESKTOP (horizontal) ───────────────────── */
+/* ── Timeline — DESKTOP (horizontal with proper spacing) ── */
 .track-timeline {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
   position: relative;
-  padding: 0.5rem 0;
-  overflow-x: auto;
+  padding: 1.5rem 0.5rem;
+  margin: 0 0.5rem;
 }
 
 .tl-step {
   flex: 1;
-  min-width: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
   position: relative;
-  animation: stepIn var(--step-delay, 0s) 0.2s both;
-}
-
-@keyframes stepIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  min-width: 0;
 }
 
 .tl-dot-wrap {
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 100%;
   position: relative;
 }
 
 .tl-dot {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;
+  font-size: 1rem;
   flex-shrink: 0;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   transition: all 0.3s ease;
-  margin: 0 auto;
+  background: white;
+  border: 2px solid var(--border);
+  color: var(--text-light);
 }
 
-/* Desktop: connector is horizontal, fills space between dots */
-.tl-connector {
-  flex: 1;
+/* Connector line (horizontal) */
+.tl-step:not(:last-child) .tl-dot-wrap::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  right: -50%;
+  top: 50%;
+  transform: translateY(-50%);
   height: 3px;
-  margin: 0;
+  background: var(--border);
+  z-index: 1;
+  width: calc(100% - 44px);
 }
 
-/* States */
+/* Completed connector */
+.tl-step.tl-done:not(:last-child) .tl-dot-wrap::after {
+  background: linear-gradient(90deg, #27AE60, #27AE60);
+}
+
+/* Active connector - half green/half gray */
+.tl-step.tl-active:not(:last-child) .tl-dot-wrap::after {
+  background: linear-gradient(90deg, #27AE60 50%, var(--border) 50%);
+  background-size: 200% 100%;
+  background-position: left;
+}
+
+/* Step states */
 .tl-done .tl-dot {
   background: linear-gradient(135deg, #1E8A4A, #27AE60);
+  border-color: #27AE60;
   color: white;
   box-shadow: 0 2px 8px rgba(30,138,74,0.3);
 }
-.tl-done .tl-connector { background: #27AE60; }
 
 .tl-active .tl-dot {
   background: linear-gradient(135deg, var(--honey) 0%, var(--honey-dark) 100%);
+  border-color: var(--honey);
   color: var(--navy);
   box-shadow: 0 4px 16px rgba(245,166,35,0.45);
-  transform: scale(1.12);
+  transform: scale(1.08);
 }
-.tl-active .tl-connector { background: linear-gradient(90deg, #27AE60, var(--border)); }
 
 .tl-future .tl-dot {
   background: white;
   color: var(--text-light);
   border: 2px solid var(--border);
 }
-.tl-future .tl-connector { background: var(--border); }
 
 .tl-pulse {
   position: absolute;
@@ -1787,31 +1811,45 @@
   100% { opacity: 0; }
 }
 
-.tl-cancelled .tl-dot    { filter: grayscale(1); opacity: 0.4; }
-.tl-cancelled .tl-connector { background: var(--border); }
+.tl-cancelled .tl-dot {
+  filter: grayscale(1);
+  opacity: 0.5;
+  background: #ccc;
+}
 
 .tl-label {
   text-align: center;
-  padding: 0 4px;
   width: 100%;
+  padding: 0 4px;
 }
 
 .tl-step-name {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 2px;
-  line-height: 1.2;
+  margin-bottom: 4px;
+  line-height: 1.3;
+  white-space: nowrap;
 }
 
-.tl-future .tl-step-name { color: var(--text-light); font-weight: 500; }
-.tl-active .tl-step-name { color: var(--honey-dark); }
-.tl-done   .tl-step-name { color: var(--success); }
+.tl-future .tl-step-name { 
+  color: var(--text-light); 
+  font-weight: 500;
+}
+
+.tl-active .tl-step-name { 
+  color: var(--honey-dark);
+}
+
+.tl-done .tl-step-name { 
+  color: var(--success);
+}
 
 .tl-step-desc {
   font-size: 0.62rem;
   color: var(--text-muted);
   line-height: 1.3;
+  white-space: nowrap;
 }
 
 /* ── Info grid ──────────────────────────────────────────── */
@@ -2124,23 +2162,16 @@
 .track-pill i { color: var(--honey); font-size: 0.7rem; }
 
 /* ══════════════════════════════════════════════════════════
-   RESPONSIVE — TABLET (≤ 768px)
+   RESPONSIVE — TABLET & MOBILE (≤ 768px)
 ══════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  /* Modal fills screen */
   .modal-tracking {
     max-width: 100%;
     width: 100%;
     margin: 0;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-height: 92vh;
   }
 
-  /* Modal itself becomes bottom-sheet on mobile */
   .modal:has(.modal-tracking) {
     align-items: flex-end;
     padding: 0;
@@ -2148,21 +2179,33 @@
 
   .track-search-zone { padding: 1.25rem 1rem 1rem; }
 
-  /* Stack input + button vertically */
-  .track-search-row { flex-direction: column; gap: 0.625rem; }
-  .track-btn { width: 100%; padding: 13px; min-width: unset; }
+  .track-search-row { 
+    flex-direction: column; 
+    gap: 0.625rem; 
+  }
+  
+  .track-btn { 
+    width: 100%; 
+    padding: 13px; 
+    min-width: unset; 
+  }
 
-  /* Result area taller on mobile */
-  .track-result-area { max-height: 55vh; }
-  .track-result { padding: 1rem; gap: 1rem; }
+  .track-result-area { 
+    max-height: 55vh; 
+  }
+  
+  .track-result { 
+    padding: 1rem; 
+    gap: 1rem; 
+  }
 
   /* Timeline switches to VERTICAL on mobile */
   .track-timeline {
     flex-direction: column;
     align-items: stretch;
-    overflow-x: visible;
     gap: 0;
-    padding: 0.25rem 0;
+    padding: 0.5rem 0;
+    margin: 0;
   }
 
   .tl-step {
@@ -2170,70 +2213,157 @@
     align-items: flex-start;
     width: 100%;
     min-width: unset;
-    gap: 0.875rem;
-    flex: none;
-  }
-
-  /* Dot column — vertical connector below dot */
-  .tl-dot-wrap {
-    flex-direction: column;
-    align-items: center;
-    width: 40px;
-    flex-shrink: 0;
-    gap: 0;
-  }
-
-  /* Vertical connector bar */
-  .tl-connector {
-    width: 3px;
-    height: 28px;
+    gap: 1rem;
     flex: none;
     margin: 0;
+    padding: 0.5rem 0;
   }
 
-  /* Last step has no connector */
-  .tl-step:last-child .tl-connector { display: none; }
+  /* Remove horizontal connector */
+  .tl-step:not(:last-child) .tl-dot-wrap::after {
+    display: none;
+  }
 
-  /* Label to the right of dot, left-aligned */
+  .tl-dot-wrap {
+    width: 44px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  /* Vertical connector for mobile */
+  .tl-step:not(:last-child) .tl-dot-wrap::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 44px;
+    bottom: -20px;
+    width: 3px;
+    background: var(--border);
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+
+  .tl-step.tl-done:not(:last-child) .tl-dot-wrap::before {
+    background: #27AE60;
+  }
+
+  .tl-step.tl-active:not(:last-child) .tl-dot-wrap::before {
+    background: linear-gradient(180deg, #27AE60 50%, var(--border) 50%);
+  }
+
+  .tl-dot {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+
   .tl-label {
     text-align: left;
-    padding: 6px 0 14px;
+    padding: 0;
     flex: 1;
-    min-width: 0;
   }
 
-  .tl-step-name { font-size: 0.82rem; }
-  .tl-step-desc { font-size: 0.72rem; display: block; }
+  .tl-step-name { 
+    font-size: 0.85rem;
+    white-space: normal;
+  }
+  
+  .tl-step-desc { 
+    font-size: 0.7rem;
+    white-space: normal;
+  }
 
   /* Info grid stacks to single column */
-  .track-info-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+  .track-info-grid { 
+    grid-template-columns: 1fr; 
+    gap: 0.75rem; 
+  }
 
-  /* Orders page CTA */
-  .orders-track-cta { padding: 2rem 1.25rem; }
-  .orders-track-cta h3 { font-size: 1.3rem; }
-  .orders-track-input-row { flex-direction: column; }
-  .orders-track-input-row button { justify-content: center; }
+  .orders-track-cta { 
+    padding: 2rem 1.25rem; 
+  }
+  
+  .orders-track-cta h3 { 
+    font-size: 1.3rem; 
+  }
+  
+  .orders-track-input-row { 
+    flex-direction: column; 
+  }
+  
+  .orders-track-input-row button { 
+    justify-content: center; 
+  }
 
-  /* Status header wraps on small screens */
-  .track-status-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-  .track-status-badge { align-self: flex-start; }
+  .track-status-header { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 0.5rem; 
+  }
+  
+  .track-status-badge { 
+    align-self: flex-start; 
+  }
 }
 
-/* ══════════════════════════════════════════════════════════
-   RESPONSIVE — MOBILE (≤ 480px)
-══════════════════════════════════════════════════════════ */
 @media (max-width: 480px) {
-  .tl-dot { width: 34px; height: 34px; font-size: 0.85rem; }
-  .tl-dot-wrap { width: 34px; }
-  .tl-step-desc { font-size: 0.68rem; }
-  .track-feature-pills { display: none; }
-  .track-hint { font-size: 0.72rem; }
+  .tl-dot { 
+    width: 36px; 
+    height: 36px; 
+    font-size: 0.85rem; 
+  }
+  
+  .tl-dot-wrap { 
+    width: 36px; 
+  }
+  
+  .tl-step:not(:last-child) .tl-dot-wrap::before {
+    top: 36px;
+  }
+  
+  .tl-step-name { 
+    font-size: 0.8rem;
+  }
+  
+  .tl-step-desc { 
+    font-size: 0.65rem;
+  }
+  
+  .track-feature-pills { 
+    display: none; 
+  }
+  
+  .track-hint { 
+    font-size: 0.72rem; 
+  }
 
-  .track-info-row { flex-direction: column; gap: 2px; }
-  .ti-val { text-align: left; }
+  .track-info-row { 
+    flex-direction: column; 
+    gap: 2px; 
+  }
+  
+  .ti-val { 
+    text-align: left; 
+  }
 
-  .track-help-bar { font-size: 0.78rem; }
-  .track-help-bar span { min-width: 0; font-size: 0.75rem; }
+  .track-help-bar { 
+    font-size: 0.78rem; 
+  }
+  
+  .track-help-bar span { 
+    min-width: 0; 
+    font-size: 0.75rem; 
+  }
+  
+  .track-items-head,
+  .track-item {
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+  }
+  
+  .track-item-meta {
+    display: none;
+  }
 }
    
    /* ─── Toast ─────────────────────────────────────────────── */
