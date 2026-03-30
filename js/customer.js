@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   BeeHarvest — customer.js
-   Clean, production-ready. All bugs fixed.
+   BeeHarvest — customer.js  (COMPLETE + ORDER TRACKING FIXED)
    ═══════════════════════════════════════════════════════════ */
 
    const API_URL = 'https://beeyond-harvest-admin.onrender.com/api';
@@ -13,6 +12,12 @@
      const saved = localStorage.getItem('cart');
      if (saved) cart = JSON.parse(saved);
    } catch(e) { cart = []; }
+   
+   /* ─── Debounce ─────────────────────────────────────────── */
+   function debounce(fn, delay) {
+     let timer;
+     return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
+   }
    
    /* ════════════════════════════════════════════════════════════
       API HELPER
@@ -32,6 +37,92 @@
    }
    
    /* ════════════════════════════════════════════════════════════
+      UTILITY
+   ════════════════════════════════════════════════════════════ */
+   function escHtml(str) {
+     if (!str) return '';
+     return String(str)
+       .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+   }
+   function val(id) { return (document.getElementById(id)?.value || '').trim(); }
+   function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
+   
+   function emptyMsg(msg) {
+     return `<div class="empty-state" style="grid-column:1/-1;">
+       <div class="empty-state-icon"><i class="fas fa-box-open"></i></div>
+       <h3>${msg}</h3>
+     </div>`;
+   }
+   
+   function errorMsg(msg) {
+     return `<div class="empty-state" style="grid-column:1/-1;">
+       <div class="empty-state-icon" style="background:var(--danger-bg);color:var(--danger);">
+         <i class="fas fa-exclamation-triangle"></i>
+       </div>
+       <h3>${msg}</h3>
+       <button class="btn-primary mt-2" onclick="location.reload()">পুনরায় চেষ্টা করুন</button>
+     </div>`;
+   }
+   
+   function skeletonCards(n) {
+     return Array(n).fill(0).map(() => `
+       <div class="product-card" style="pointer-events:none;">
+         <div class="product-image-wrap" style="height:220px;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;animation:shimmer 1.4s infinite;"></div>
+         <div class="product-info">
+           <div style="height:16px;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;border-radius:4px;margin-bottom:8px;animation:shimmer 1.4s infinite;"></div>
+           <div style="height:24px;width:60%;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;border-radius:4px;animation:shimmer 1.4s infinite;"></div>
+         </div>
+       </div>`).join('');
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      MODAL HELPERS
+   ════════════════════════════════════════════════════════════ */
+   function openModal(id) {
+     const m = document.getElementById(id);
+     if (m) { m.classList.add('active'); document.body.style.overflow = 'hidden'; }
+   }
+   function closeModal(id) {
+     const m = document.getElementById(id);
+     if (m) { m.classList.remove('active'); document.body.style.overflow = ''; }
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      LOADING OVERLAY
+   ════════════════════════════════════════════════════════════ */
+   function showLoadingOverlay() { document.getElementById('loadingOverlay')?.classList.add('active'); }
+   function hideLoadingOverlay() { document.getElementById('loadingOverlay')?.classList.remove('active'); }
+   
+   function setButtonLoading(btn, loading) {
+     if (!btn) return;
+     if (loading) {
+       btn.disabled = true;
+       btn.classList.add('btn-loading');
+       btn._origHTML = btn.innerHTML;
+       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রক্রিয়াকরণ...';
+     } else {
+       btn.disabled = false;
+       btn.classList.remove('btn-loading');
+       if (btn._origHTML) btn.innerHTML = btn._origHTML;
+     }
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      TOAST
+   ════════════════════════════════════════════════════════════ */
+   const TOAST_ICONS = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+   
+   function showToast(message, type = 'info') {
+     document.querySelectorAll(`.toast.${type}`).forEach(t => t.remove());
+     const t = document.createElement('div');
+     t.className = `toast ${type}`;
+     t.innerHTML = `<i class="fas ${TOAST_ICONS[type] || TOAST_ICONS.info}"></i><span>${escHtml(message)}</span>`;
+     document.body.appendChild(t);
+     setTimeout(() => t.remove(), 3500);
+   }
+   
+   /* ════════════════════════════════════════════════════════════
       CATEGORIES
    ════════════════════════════════════════════════════════════ */
    async function loadCategories() {
@@ -40,7 +131,6 @@
        if (!res.success || !res.data) return;
        const cats = res.data;
    
-       // Grid on home
        const grid = document.getElementById('categoriesList');
        if (grid) {
          grid.innerHTML = cats.length === 0
@@ -52,7 +142,6 @@
                </div>`).join('');
        }
    
-       // Filter dropdown
        const sel = document.getElementById('categoryFilter');
        if (sel) {
          sel.innerHTML = '<option value="">সব ক্যাটাগরি</option>'
@@ -90,9 +179,9 @@
      grid.innerHTML = skeletonCards(6);
    
      try {
-       const search   = document.getElementById('searchProducts')?.value.trim() || '';
-       const category = document.getElementById('categoryFilter')?.value || '';
-       const sort     = document.getElementById('sortBy')?.value || '-createdAt';
+       const search     = document.getElementById('searchProducts')?.value.trim() || '';
+       const category   = document.getElementById('categoryFilter')?.value || '';
+       const sort       = document.getElementById('sortBy')?.value || '-createdAt';
        const priceRange = document.getElementById('priceFilter')?.value || '';
    
        const params = new URLSearchParams({ page, limit: 12 });
@@ -113,7 +202,7 @@
          : products.map(renderProductCard).join('');
    
        if (res.pagination) {
-         totalProductsPages = res.pagination.pages || 1;
+         totalProductsPages  = res.pagination.pages || 1;
          currentProductsPage = page;
          renderPagination('productsPagination', page, res.pagination.pages, 'loadProducts');
        }
@@ -124,16 +213,13 @@
      }
    }
    
-   /* ─── Render Product Card ────────────────────────────── */
    function renderProductCard(p) {
      if (!p?._id) return '';
-   
-     const id        = String(p._id);
-     const safeName  = escHtml(p.name || '');
-     const price     = p.discountPrice || p.price;
-     const imgUrl    = p.images?.[0]?.url || 'https://via.placeholder.com/400x300?text=No+Image';
-     const discount  = p.discountPrice
-       ? Math.round(((p.price - p.discountPrice) / p.price) * 100) : 0;
+     const id       = String(p._id);
+     const safeName = escHtml(p.name || '');
+     const price    = p.discountPrice || p.price;
+     const imgUrl   = p.images?.[0]?.url || 'https://via.placeholder.com/400x300?text=No+Image';
+     const discount = p.discountPrice ? Math.round(((p.price - p.discountPrice) / p.price) * 100) : 0;
    
      let stockClass = '', stockText = '', stockIcon = 'fa-check-circle';
      if (p.stock <= 0) {
@@ -144,7 +230,6 @@
        stockText = 'স্টকে আছে';
      }
    
-     // Store product data for inline access
      window[`__p_${id}`] = p;
    
      return `
@@ -189,14 +274,9 @@
    function addToCart(productId, price, imageUrl) {
      const pData = window[`__p_${productId}`];
      const name  = pData?.name || 'পণ্য';
-   
      const existing = cart.find(i => i.productId === productId);
-     if (existing) {
-       existing.quantity++;
-     } else {
-       cart.push({ productId, name, price, image: imageUrl, quantity: 1 });
-     }
-   
+     if (existing) { existing.quantity++; }
+     else { cart.push({ productId, name, price, image: imageUrl, quantity: 1 }); }
      saveCart();
      updateCartUI();
      showToast(`"${name}" কার্টে যোগ হয়েছে`, 'success');
@@ -205,13 +285,8 @@
    function updateQuantity(index, delta) {
      if (!cart[index]) return;
      const newQty = cart[index].quantity + delta;
-     if (newQty <= 0) {
-       removeFromCart(index);
-     } else {
-       cart[index].quantity = newQty;
-       saveCart();
-       updateCartUI();
-     }
+     if (newQty <= 0) { removeFromCart(index); }
+     else { cart[index].quantity = newQty; saveCart(); updateCartUI(); }
    }
    
    function removeFromCart(index) {
@@ -221,9 +296,7 @@
      showToast('পণ্য কার্ট থেকে সরানো হয়েছে', 'info');
    }
    
-   function saveCart() {
-     localStorage.setItem('cart', JSON.stringify(cart));
-   }
+   function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
    
    function cartTotals() {
      const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
@@ -255,31 +328,22 @@
      const count = cart.reduce((s, i) => s + i.quantity, 0);
      const { subtotal, shipping, total } = cartTotals();
    
-     // Navbar count
      const cc = document.getElementById('cartCount');
      if (cc) cc.textContent = count;
-   
-     // Mobile count
      const mc = document.getElementById('mobileCartCount');
      if (mc) mc.textContent = count;
    
-     // Desktop cart items
      const ci = document.getElementById('cartItems');
      if (ci) {
        ci.innerHTML = cart.length === 0
-         ? `<div class="cart-empty">
-              <i class="fas fa-shopping-cart"></i>
-              <p>আপনার কার্ট এখন খালি</p>
-            </div>`
+         ? `<div class="cart-empty"><i class="fas fa-shopping-cart"></i><p>আপনার কার্ট এখন খালি</p></div>`
          : cart.map(renderCartItem).join('');
      }
    
-     // Desktop totals
      setText('cartSubtotal', `৳${subtotal.toLocaleString('bn-BD')}`);
-     setText('cartShipping', `৳${shipping.toLocaleString('bn-BD')}`);
-     setText('cartTotal',    `৳${total.toLocaleString('bn-BD')}`);
+     setText('cartShipping',  `৳${shipping.toLocaleString('bn-BD')}`);
+     setText('cartTotal',     `৳${total.toLocaleString('bn-BD')}`);
    
-     // Mobile cart items
      const mi = document.getElementById('mobileCartItems');
      if (mi) {
        mi.innerHTML = cart.length === 0
@@ -293,12 +357,8 @@
       CHECKOUT
    ════════════════════════════════════════════════════════════ */
    function openCheckout() {
-     if (cart.length === 0) {
-       showToast('কার্ট খালি! আগে পণ্য যোগ করুন', 'error');
-       return;
-     }
+     if (cart.length === 0) { showToast('কার্ট খালি! আগে পণ্য যোগ করুন', 'error'); return; }
    
-     // Populate order summary
      const list = document.getElementById('checkoutItems');
      if (list) {
        list.innerHTML = cart.map(item => `
@@ -315,199 +375,170 @@
    
      const { subtotal, shipping, total } = cartTotals();
      setText('summarySubtotal', `৳${subtotal.toLocaleString()}`);
-     setText('summaryShipping', `৳${shipping.toLocaleString()}`);
-     setText('summaryTotal',    `৳${total.toLocaleString()}`);
+     setText('summaryShipping',  `৳${shipping.toLocaleString()}`);
+     setText('summaryTotal',     `৳${total.toLocaleString()}`);
    
      openModal('checkoutModal');
    }
    
-   /* ════════════════════════════════════════════════════════════
-   UPDATE ORDER PLACEMENT FUNCTION
-   ════════════════════════════════════════════════════════════ */
-
-async function placeOrder(e) {
-  if (e) e.preventDefault();
-  
-  if (cart.length === 0) {
-    showToast('কার্ট খালি!', 'error');
-    return;
-  }
-  
-  // Get values
-  const fullName  = val('checkoutName');
-  const email     = val('checkoutEmail');
-  const phone     = val('checkoutPhone');
-  const address   = val('checkoutAddress');
-  const city      = val('checkoutCity');
-  const zipCode   = val('checkoutZipCode');
-  const notes     = val('checkoutNotes');
-  const payMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD';
-  const accepted  = document.getElementById('acceptTerms')?.checked;
-  
-  // Validation
-  if (!fullName || !email || !phone || !address || !city) {
-    showToast('সব প্রয়োজনীয় তথ্য পূরণ করুন (*)', 'error');
-    return;
-  }
-  
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    showToast('সঠিক ইমেইল ঠিকানা দিন', 'error');
-    return;
-  }
-  
-  if (!/^01[3-9]\d{8}$/.test(phone)) {
-    showToast('সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)', 'error');
-    return;
-  }
-  
-  if (!accepted) {
-    showToast('শর্তাবলী মেনে নিন', 'error');
-    return;
-  }
-  
-  const pmMap = { COD: 'cash_on_delivery', bkash: 'bkash', nagad: 'nagad', card: 'card' };
-  
-  const orderData = {
-    items: cart.map(i => ({ 
-      product: i.productId, 
-      name: i.name,
-      price: i.price,
-      quantity: i.quantity 
-    })),
-    customer: {
-      name: fullName,
-      email,
-      phone,
-      address: {
-        street: address,
-        city, area: city, district: city, division: city,
-        postalCode: zipCode || '',
-      },
-    },
-    paymentMethod: pmMap[payMethod] || 'cash_on_delivery',
-    deliveryCharge: 60,
-    notes: notes || '',
-  };
-  
-  // Show loading
-  showLoadingOverlay();
-  const btn = document.getElementById('confirmOrderBtn');
-  setButtonLoading(btn, true);
-  
-  try {
-    const res = await fetch(`${API_URL}/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'অর্ডার দেওয়া যায়নি');
-    if (!data.success) throw new Error(data.message || 'অর্ডার ব্যর্থ');
-    
-    // Success!
-    const orderNum = data.data?.orderNumber || data.data?._id?.slice(-8) || 'SUCCESS';
-    const { subtotal, shipping, total } = cartTotals();
-    
-    // Clear cart
-    cart = [];
-    saveCart();
-    updateCartUI();
-    closeModal('checkoutModal');
-    hideLoadingOverlay();
-    
-    // Set order number in success modal
-    setText('orderNumber', `#${orderNum}`);
-    
-    // Store order data for slip generation
-    window.lastOrderData = {
-      orderNumber: orderNum,
-      customer: orderData.customer,
-      items: orderData.items,
-      subtotal,
-      shipping,
-      total,
-      paymentMethod: orderData.paymentMethod
-    };
-    
-    // Setup download button
-    const downloadBtn = document.getElementById('downloadSlipBtn');
-    if (downloadBtn) {
-      downloadBtn.onclick = () => {
-        generateOrderSlipPNG(window.lastOrderData);
-      };
-    }
-    
-    // Show success modal
-    setTimeout(() => {
-      openModal('successModal');
-      startConfetti();
-      setTimeout(stopConfetti, 4000);
-    }, 400);
-    
-    showToast('অর্ডার সফল হয়েছে! 🎉', 'success');
-    document.getElementById('checkoutForm')?.reset();
-    
-  } catch(err) {
-    hideLoadingOverlay();
-    showToast(err.message || 'অর্ডার দেওয়া যায়নি। আবার চেষ্টা করুন।', 'error');
-    console.error('Order error:', err);
-  } finally {
-    setButtonLoading(btn, false);
-  }
-}
+   async function placeOrder(e) {
+     if (e) e.preventDefault();
+     if (cart.length === 0) { showToast('কার্ট খালি!', 'error'); return; }
+   
+     const fullName  = val('checkoutName');
+     const email     = val('checkoutEmail');
+     const phone     = val('checkoutPhone');
+     const address   = val('checkoutAddress');
+     const city      = val('checkoutCity');
+     const zipCode   = val('checkoutZipCode');
+     const notes     = val('checkoutNotes');
+     const payMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD';
+     const accepted  = document.getElementById('acceptTerms')?.checked;
+   
+     if (!fullName || !email || !phone || !address || !city) {
+       showToast('সব প্রয়োজনীয় তথ্য পূরণ করুন (*)', 'error'); return;
+     }
+     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+       showToast('সঠিক ইমেইল ঠিকানা দিন', 'error'); return;
+     }
+     if (!/^01[3-9]\d{8}$/.test(phone)) {
+       showToast('সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)', 'error'); return;
+     }
+     if (!accepted) { showToast('শর্তাবলী মেনে নিন', 'error'); return; }
+   
+     const pmMap = { COD: 'cash_on_delivery', bkash: 'bkash', nagad: 'nagad', card: 'card' };
+     const orderData = {
+       items: cart.map(i => ({ product: i.productId, name: i.name, price: i.price, quantity: i.quantity })),
+       customer: {
+         name: fullName, email, phone,
+         address: { street: address, city, area: city, district: city, division: city, postalCode: zipCode || '' },
+       },
+       paymentMethod: pmMap[payMethod] || 'cash_on_delivery',
+       deliveryCharge: 60,
+       notes: notes || '',
+     };
+   
+     showLoadingOverlay();
+     const btn = document.getElementById('confirmOrderBtn');
+     setButtonLoading(btn, true);
+   
+     try {
+       const res = await fetch(`${API_URL}/orders`, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify(orderData),
+       });
+       const data = await res.json();
+       if (!res.ok) throw new Error(data.message || 'অর্ডার দেওয়া যায়নি');
+       if (!data.success) throw new Error(data.message || 'অর্ডার ব্যর্থ');
+   
+       const orderNum = data.data?.orderNumber || data.data?._id?.slice(-8) || 'SUCCESS';
+       const { subtotal, shipping, total } = cartTotals();
+   
+       // Store for slip and tracking
+       window.lastOrderData = {
+         orderNumber: orderNum,
+         customer: orderData.customer,
+         items: orderData.items,
+         subtotal, shipping, total,
+         paymentMethod: orderData.paymentMethod
+       };
+   
+       cart = [];
+       saveCart();
+       updateCartUI();
+       closeModal('checkoutModal');
+       hideLoadingOverlay();
+   
+       setText('orderNumber', `#${orderNum}`);
+   
+       // Wire up download slip button
+       const downloadBtn = document.getElementById('downloadSlipBtn');
+       if (downloadBtn) {
+         downloadBtn.onclick = () => generateOrderSlipPNG(window.lastOrderData);
+       }
+   
+       // ★ Wire up track order button in success modal
+       const trackBtn = document.getElementById('trackSuccessOrderBtn');
+       if (trackBtn) {
+         trackBtn.onclick = () => {
+           closeModal('successModal');
+           openTrackingModal(orderNum);
+         };
+       }
+   
+       setTimeout(() => {
+         openModal('successModal');
+         startConfetti();
+         setTimeout(stopConfetti, 4000);
+       }, 400);
+   
+       showToast('অর্ডার সফল হয়েছে! 🎉', 'success');
+       document.getElementById('checkoutForm')?.reset();
+   
+     } catch(err) {
+       hideLoadingOverlay();
+       showToast(err.message || 'অর্ডার দেওয়া যায়নি। আবার চেষ্টা করুন।', 'error');
+       console.error('Order error:', err);
+     } finally {
+       setButtonLoading(btn, false);
+     }
+   }
    
    /* ════════════════════════════════════════════════════════════
       NAVIGATION
    ════════════════════════════════════════════════════════════ */
    function navigateTo(page) {
-     // Update desktop nav links
      document.querySelectorAll('.nav-link').forEach(l => {
        l.classList.toggle('active', l.dataset.page === page);
      });
-   
-     // Update mobile nav items
      document.querySelectorAll('.mobile-nav-item[data-page]').forEach(l => {
        l.classList.toggle('active', l.dataset.page === page);
      });
-   
-     // Show/hide pages
      document.querySelectorAll('.page-content').forEach(el => {
        el.classList.toggle('active', el.id === `${page}Page`);
      });
    
-     // Load data
      switch (page) {
-       case 'home':
-         loadFeaturedProducts();
-         loadCategories();
-         break;
-       case 'products':
-         loadCategories();
-         loadProducts(1);
-         break;
-       case 'orders':
-         renderOrdersPage();
-         break;
-       case 'profile':
-         renderProfilePage();
-         break;
+       case 'home':     loadFeaturedProducts(); loadCategories(); break;
+       case 'products': loadCategories(); loadProducts(1); break;
+       case 'orders':   renderOrdersPage(); break;
+       case 'profile':  renderProfilePage(); break;
      }
-   
      window.scrollTo({ top: 0, behavior: 'smooth' });
    }
    
+   /* ★ FIXED renderOrdersPage — shows tracking CTA */
    function renderOrdersPage() {
      const el = document.getElementById('userOrders');
      if (!el) return;
      el.innerHTML = `
-       <div class="empty-state">
-         <div class="empty-state-icon"><i class="fas fa-shopping-bag"></i></div>
-         <h3>কোনো অর্ডার নেই</h3>
-         <p>পণ্য কার্টে যোগ করুন এবং অর্ডার করুন।</p>
-         <button class="btn-primary" onclick="navigateTo('products')">
-           <i class="fas fa-box"></i> পণ্য দেখুন
-         </button>
+       <div class="orders-track-cta">
+         <h3>
+           <i class="fas fa-satellite-dish" style="color:var(--honey);margin-right:10px;font-size:1.1rem;"></i>
+           আপনার অর্ডার ট্র্যাক করুন
+         </h3>
+         <p>অর্ডার নম্বর দিয়ে রিয়েল-টাইম ডেলিভারি স্ট্যাটাস, পেমেন্ট তথ্য ও সকল বিবরণ দেখুন।</p>
+         <div class="orders-track-input-row">
+           <input type="text" id="ordersTrackInput"
+                  placeholder="ORD-2025XX-00001"
+                  autocomplete="off" spellcheck="false"
+                  onkeydown="if(event.key==='Enter') quickTrackFromOrders()">
+           <button onclick="quickTrackFromOrders()">
+             <i class="fas fa-magnifying-glass"></i> ট্র্যাক করুন
+           </button>
+         </div>
+         <div class="track-feature-pills">
+           <span class="track-pill"><i class="fas fa-clock"></i> রিয়েল-টাইম স্ট্যাটাস</span>
+           <span class="track-pill"><i class="fas fa-truck"></i> ডেলিভারি আপডেট</span>
+           <span class="track-pill"><i class="fas fa-shield-halved"></i> নিরাপদ ট্র্যাকিং</span>
+         </div>
        </div>`;
+   }
+   
+   function quickTrackFromOrders() {
+     const v = document.getElementById('ordersTrackInput')?.value.trim() || '';
+     openTrackingModal(v);
    }
    
    function renderProfilePage() {
@@ -529,12 +560,10 @@ async function placeOrder(e) {
            </div>
          </div>
          <div class="profile-card">
-           <div class="profile-card-header">
-             <h3>দ্রুত লিংক</h3>
-           </div>
+           <div class="profile-card-header"><h3>দ্রুত লিংক</h3></div>
            <div class="profile-card-body" style="display:flex;flex-direction:column;gap:.75rem;">
              <button class="btn-ghost btn-block" onclick="navigateTo('orders')">
-               <i class="fas fa-shopping-bag"></i> আমার অর্ডার
+               <i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক করুন
              </button>
              <button class="btn-ghost btn-block" onclick="navigateTo('products')">
                <i class="fas fa-box"></i> সব পণ্য
@@ -545,13 +574,10 @@ async function placeOrder(e) {
    }
    
    /* ════════════════════════════════════════════════════════════
-      VIEW PRODUCT (navigate to detail page)
+      VIEW PRODUCT
    ════════════════════════════════════════════════════════════ */
    function viewProduct(productId) {
-     if (!productId || productId === 'undefined') {
-       showToast('পণ্যের তথ্য পাওয়া যায়নি', 'error');
-       return;
-     }
+     if (!productId || productId === 'undefined') { showToast('পণ্যের তথ্য পাওয়া যায়নি', 'error'); return; }
      const id = String(productId).trim();
      localStorage.setItem('lastViewedProductId', id);
      window.location.href = `product-detail.html?id=${encodeURIComponent(id)}`;
@@ -573,8 +599,7 @@ async function placeOrder(e) {
      if (!el || total <= 1) { if (el) el.innerHTML = ''; return; }
    
      const pages = [];
-     pages.push(`<button onclick="${fnName}(${current - 1})" ${current === 1 ? 'disabled' : ''}>
-       <i class="fas fa-chevron-left"></i></button>`);
+     pages.push(`<button onclick="${fnName}(${current - 1})" ${current === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`);
    
      const start = Math.max(1, current - 2);
      const end   = Math.min(total, current + 2);
@@ -587,65 +612,20 @@ async function placeOrder(e) {
    
      if (end < total - 1) pages.push(`<button disabled>…</button>`);
      if (end < total)     pages.push(`<button onclick="${fnName}(${total})">${total}</button>`);
-   
-     pages.push(`<button onclick="${fnName}(${current + 1})" ${current === total ? 'disabled' : ''}>
-       <i class="fas fa-chevron-right"></i></button>`);
+     pages.push(`<button onclick="${fnName}(${current + 1})" ${current === total ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`);
    
      el.innerHTML = pages.join('');
    }
    
    /* ════════════════════════════════════════════════════════════
-      MODAL HELPERS
+      MOBILE CART SHEET
    ════════════════════════════════════════════════════════════ */
-   function openModal(id) {
-     const m = document.getElementById(id);
-     if (m) { m.classList.add('active'); document.body.style.overflow = 'hidden'; }
+   function openMobileCart() {
+     updateCartUI();
+     document.getElementById('mobileCartSheet')?.classList.add('open');
    }
-   
-   function closeModal(id) {
-     const m = document.getElementById(id);
-     if (m) { m.classList.remove('active'); document.body.style.overflow = ''; }
-   }
-   
-   /* ════════════════════════════════════════════════════════════
-      LOADING OVERLAY
-   ════════════════════════════════════════════════════════════ */
-   function showLoadingOverlay() {
-     document.getElementById('loadingOverlay')?.classList.add('active');
-   }
-   
-   function hideLoadingOverlay() {
-     document.getElementById('loadingOverlay')?.classList.remove('active');
-   }
-   
-   function setButtonLoading(btn, loading) {
-     if (!btn) return;
-     if (loading) {
-       btn.disabled = true;
-       btn.classList.add('btn-loading');
-       btn._origHTML = btn.innerHTML;
-       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রক্রিয়াকরণ...';
-     } else {
-       btn.disabled = false;
-       btn.classList.remove('btn-loading');
-       if (btn._origHTML) btn.innerHTML = btn._origHTML;
-     }
-   }
-   
-   /* ════════════════════════════════════════════════════════════
-      TOAST
-   ════════════════════════════════════════════════════════════ */
-   const TOAST_ICONS = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
-   
-   function showToast(message, type = 'info') {
-     // Remove existing toasts of same type
-     document.querySelectorAll(`.toast.${type}`).forEach(t => t.remove());
-   
-     const t = document.createElement('div');
-     t.className = `toast ${type}`;
-     t.innerHTML = `<i class="fas ${TOAST_ICONS[type] || TOAST_ICONS.info}"></i><span>${escHtml(message)}</span>`;
-     document.body.appendChild(t);
-     setTimeout(() => t.remove(), 3500);
+   function closeMobileCart() {
+     document.getElementById('mobileCartSheet')?.classList.remove('open');
    }
    
    /* ════════════════════════════════════════════════════════════
@@ -660,19 +640,13 @@ async function placeOrder(e) {
      canvas.width  = window.innerWidth;
      canvas.height = window.innerHeight;
      const ctx = canvas.getContext('2d');
-   
      const colors = ['#F5A623','#FDD882','#C47F11','#0D1B3E','#1A2E5A','#28a745','#ff6b6b'];
      const particles = Array.from({ length: 180 }, () => ({
-       x: Math.random() * canvas.width,
-       y: -20 - Math.random() * canvas.height,
-       size: Math.random() * 9 + 4,
-       color: colors[Math.floor(Math.random() * colors.length)],
-       vy: Math.random() * 5 + 3,
-       vx: (Math.random() - 0.5) * 3,
-       rot: Math.random() * 360,
-       rotV: (Math.random() - 0.5) * 8,
+       x: Math.random() * canvas.width, y: -20 - Math.random() * canvas.height,
+       size: Math.random() * 9 + 4, color: colors[Math.floor(Math.random() * colors.length)],
+       vy: Math.random() * 5 + 3, vx: (Math.random() - 0.5) * 3,
+       rot: Math.random() * 360, rotV: (Math.random() - 0.5) * 8,
      }));
-   
      function draw() {
        ctx.clearRect(0, 0, canvas.width, canvas.height);
        let alive = 0;
@@ -694,154 +668,489 @@ async function placeOrder(e) {
    
    function stopConfetti() {
      const canvas = document.getElementById('confettiCanvas');
-     if (canvas) {
-       canvas.classList.remove('active');
-       canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-     }
+     if (canvas) { canvas.classList.remove('active'); canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); }
      if (_confettiRaf) { cancelAnimationFrame(_confettiRaf); _confettiRaf = null; }
    }
    
    /* ════════════════════════════════════════════════════════════
-      UTILITY
+      ORDER TRACKING
    ════════════════════════════════════════════════════════════ */
-   function escHtml(str) {
-     if (!str) return '';
-     return String(str)
-       .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+   const ORDER_STATUS_STEPS = [
+     { key: 'pending',    icon: 'fa-clock',             label: 'অর্ডার প্রাপ্ত',    desc: 'আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে' },
+     { key: 'confirmed',  icon: 'fa-circle-check',       label: 'কনফার্মড',          desc: 'আমাদের টিম আপনার অর্ডার নিশ্চিত করেছে' },
+     { key: 'processing', icon: 'fa-box-open',           label: 'প্রস্তুত হচ্ছে',    desc: 'পণ্য প্যাক করা হচ্ছে' },
+     { key: 'shipped',    icon: 'fa-truck-fast',         label: 'পাঠানো হয়েছে',     desc: 'পণ্যটি কুরিয়ারে দেওয়া হয়েছে' },
+     { key: 'delivered',  icon: 'fa-house-circle-check', label: 'ডেলিভারি সম্পন্ন', desc: 'পণ্য সফলভাবে পৌঁছে গেছে' },
+   ];
+   
+   function getStatusIndex(status) {
+     return ORDER_STATUS_STEPS.findIndex(s => s.key === status);
    }
    
-   function val(id) {
-     return (document.getElementById(id)?.value || '').trim();
+   function openTrackingModal(prefillOrderNumber = '') {
+     const input  = document.getElementById('trackOrderInput');
+     const result = document.getElementById('trackResult');
+     if (input)  { input.value = prefillOrderNumber || ''; _toggleClearBtn(); }
+     if (result) { result.innerHTML = ''; }
+     openModal('trackingModal');
+     if (prefillOrderNumber) {
+       setTimeout(trackOrder, 350);
+     } else {
+       setTimeout(() => input?.focus(), 350);
+     }
    }
    
-   function setText(id, text) {
-     const el = document.getElementById(id);
-     if (el) el.textContent = text;
+   function clearTracking() {
+     const input  = document.getElementById('trackOrderInput');
+     const result = document.getElementById('trackResult');
+     if (input)  { input.value = ''; input.focus(); }
+     if (result) { result.innerHTML = ''; }
+     _toggleClearBtn();
    }
    
-   function emptyMsg(msg) {
-     return `<div class="empty-state" style="grid-column:1/-1;">
-       <div class="empty-state-icon"><i class="fas fa-box-open"></i></div>
-       <h3>${msg}</h3>
-     </div>`;
+   function _toggleClearBtn() {
+     const input = document.getElementById('trackOrderInput');
+     const btn   = document.getElementById('trackClearBtn');
+     if (btn) btn.style.display = input?.value.trim() ? 'flex' : 'none';
    }
    
-   function errorMsg(msg) {
-     return `<div class="empty-state" style="grid-column:1/-1;">
-       <div class="empty-state-icon" style="background:var(--danger-bg);color:var(--danger);">
-         <i class="fas fa-exclamation-triangle"></i>
-       </div>
-       <h3>${msg}</h3>
-       <button class="btn-primary mt-2" onclick="location.reload()">পুনরায় চেষ্টা করুন</button>
-     </div>`;
+   async function trackOrder() {
+    const input    = document.getElementById('trackOrderInput');
+    const orderNum = (input?.value || '').trim().toUpperCase();
+    const resultEl = document.getElementById('trackResult');
+    const btn      = document.getElementById('trackBtn');
+  
+    if (!orderNum) {
+      _showTrackError(resultEl, 'অর্ডার নম্বর দিন', 'অনুগ্রহ করে আপনার অর্ডার নম্বরটি উপরের বক্সে টাইপ করুন।');
+      return;
+    }
+  
+    // Loading state
+    if (btn) {
+      btn.querySelector('.track-btn-text').style.display = 'none';
+      btn.querySelector('.track-btn-loading').style.display = 'inline-flex';
+      btn.disabled = true;
+    }
+  
+    resultEl.innerHTML = `
+      <div class="track-skeleton">
+        <div class="ts-header"></div>
+        <div class="ts-bar"></div>
+        <div class="ts-steps">${[1,2,3,4,5].map(() => `<div class="ts-step"></div>`).join('')}</div>
+        <div class="ts-info"></div>
+      </div>`;
+  
+    try {
+      // ✅ FIXED: Changed from /order/track/ to /orders/track/
+      const res = await apiCall(`/orders/track/${encodeURIComponent(orderNum)}`);
+  
+      if (!res.success || !res.data) {
+        _showTrackError(resultEl, 'অর্ডার পাওয়া যায়নি',
+          `"${orderNum}" নম্বরে কোনো অর্ডার পাওয়া যায়নি। নম্বরটি সঠিকভাবে লিখুন।`);
+        return;
+      }
+  
+      _renderTrackingResult(resultEl, res.data);
+  
+    } catch (err) {
+      _showTrackError(resultEl, 'সংযোগ সমস্যা', 'সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না। কিছুক্ষণ পরে আবার চেষ্টা করুন।');
+      console.error('Tracking error:', err);
+    } finally {
+      if (btn) {
+        btn.querySelector('.track-btn-text').style.display = 'inline-flex';
+        btn.querySelector('.track-btn-loading').style.display = 'none';
+        btn.disabled = false;
+      }
+    }
+  }
+  
+  
+   
+   function _showTrackError(el, title, msg) {
+     if (!el) return;
+     el.innerHTML = `
+       <div class="track-error-state">
+         <div class="track-err-icon"><i class="fas fa-circle-xmark"></i></div>
+         <h4>${escHtml(title)}</h4>
+         <p>${escHtml(msg)}</p>
+       </div>`;
    }
    
-   function skeletonCards(n) {
-     return Array(n).fill(0).map(() => `
-       <div class="product-card" style="pointer-events:none;">
-         <div class="product-image-wrap" style="height:220px;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;animation:shimmer 1.4s infinite;"></div>
-         <div class="product-info">
-           <div style="height:16px;background:#eee;border-radius:4px;margin-bottom:8px;animation:shimmer 1.4s infinite;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;"></div>
-           <div style="height:24px;width:60%;background:#eee;border-radius:4px;animation:shimmer 1.4s infinite;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;"></div>
+   function _renderTrackingResult(el, order) {
+     if (!el) return;
+     const isCancelled = order.orderStatus === 'cancelled';
+     const currentIdx  = isCancelled ? -1 : getStatusIndex(order.orderStatus);
+   
+     const displayDate = d => {
+       if (!d) return '—';
+       return new Date(d).toLocaleString('en-BD', {
+         day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+       });
+     };
+   
+     const payMethodLabel = {
+       cash_on_delivery: 'ক্যাশ অন ডেলিভারি',
+       bkash: 'bKash', nagad: 'Nagad', card: 'কার্ড পেমেন্ট'
+     };
+   
+     const statusColorMap = {
+       pending:    { bg: '#FEF3CD', color: '#B7770D', border: '#F5C518' },
+       confirmed:  { bg: '#E8F5EE', color: '#1E8A4A', border: '#2ECC71' },
+       processing: { bg: '#EEF2FF', color: '#4338CA', border: '#6366F1' },
+       shipped:    { bg: '#E0F2FE', color: '#0369A1', border: '#0EA5E9' },
+       delivered:  { bg: '#ECFDF5', color: '#059669', border: '#10B981' },
+       cancelled:  { bg: '#FDEDEC', color: '#C0392B', border: '#E74C3C' },
+     };
+     const sc = statusColorMap[order.orderStatus] || statusColorMap.pending;
+   
+     const statusBn = {
+       cancelled: 'বাতিল', delivered: 'ডেলিভারি সম্পন্ন', shipped: 'পাঠানো হয়েছে',
+       processing: 'প্রস্তুত হচ্ছে', confirmed: 'কনফার্মড', pending: 'অপেক্ষায়'
+     };
+   
+     const stepsHTML = ORDER_STATUS_STEPS.map((step, i) => {
+       let state = 'future';
+       if (!isCancelled) {
+         if (i < currentIdx) state = 'done';
+         else if (i === currentIdx) state = 'active';
+       }
+       return `
+         <div class="tl-step tl-${state}" style="--step-delay:${i * 0.08}s">
+           <div class="tl-dot-wrap">
+             <div class="tl-dot">
+               <i class="fas ${step.icon}"></i>
+               ${state === 'active' ? '<span class="tl-pulse"></span>' : ''}
+             </div>
+             ${i < ORDER_STATUS_STEPS.length - 1 ? `<div class="tl-connector"></div>` : ''}
+           </div>
+           <div class="tl-label">
+             <div class="tl-step-name">${step.label}</div>
+             <div class="tl-step-desc">${step.desc}</div>
+           </div>
+         </div>`;
+     }).join('');
+   
+     const cancelledHTML = isCancelled ? `
+       <div class="track-cancelled-banner">
+         <i class="fas fa-ban"></i>
+         <div>
+           <strong>এই অর্ডারটি বাতিল করা হয়েছে।</strong>
+           <span>যেকোনো সহায়তার জন্য আমাদের সাথে যোগাযোগ করুন।</span>
          </div>
+       </div>` : '';
+   
+     const itemsHTML = (order.items || []).map(item => `
+       <div class="track-item">
+         <div class="track-item-name">${escHtml(item.name || 'পণ্য')}</div>
+         <div class="track-item-meta">x${item.quantity} × ৳${(item.price || 0).toLocaleString()}</div>
+         <div class="track-item-total">৳${(item.total || (item.price * item.quantity) || 0).toLocaleString()}</div>
        </div>`).join('');
+   
+     el.innerHTML = `
+       <div class="track-result" style="animation:trackResultIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;">
+   
+         <div class="track-status-header" style="background:${sc.bg};border-color:${sc.border};">
+           <div class="track-status-left">
+             <div class="track-order-num">${escHtml(order.orderNumber || '—')}</div>
+             <div class="track-order-date">অর্ডারের তারিখ: ${displayDate(order.createdAt)}</div>
+           </div>
+           <div class="track-status-badge" style="background:${sc.color};color:#fff;">
+             ${statusBn[order.orderStatus] || 'অপেক্ষায়'}
+           </div>
+         </div>
+   
+         ${cancelledHTML}
+   
+         <div class="track-section">
+           <div class="track-section-title"><i class="fas fa-route"></i> অর্ডারের অগ্রগতি</div>
+           <div class="track-timeline ${isCancelled ? 'tl-cancelled' : ''}">${stepsHTML}</div>
+         </div>
+   
+         <div class="track-info-grid">
+           <div class="track-info-card">
+             <div class="track-card-title"><i class="fas fa-user"></i> গ্রাহক তথ্য</div>
+             <div class="track-info-row"><span class="ti-label">নাম</span><span class="ti-val">${escHtml(order.customer?.name || '—')}</span></div>
+             <div class="track-info-row"><span class="ti-label">মোবাইল</span><span class="ti-val">${escHtml(order.customer?.phone || '—')}</span></div>
+             <div class="track-info-row">
+               <span class="ti-label">ঠিকানা</span>
+               <span class="ti-val">${escHtml([order.customer?.address?.street, order.customer?.address?.city].filter(Boolean).join(', ') || '—')}</span>
+             </div>
+             ${order.trackingNumber ? `
+             <div class="track-info-row highlight-row">
+               <span class="ti-label"><i class="fas fa-barcode"></i> ট্র্যাকিং ID</span>
+               <span class="ti-val ti-mono">${escHtml(order.trackingNumber)}</span>
+             </div>` : ''}
+             ${order.deliveryPartner ? `
+             <div class="track-info-row"><span class="ti-label">কুরিয়ার</span><span class="ti-val">${escHtml(order.deliveryPartner)}</span></div>` : ''}
+           </div>
+   
+           <div class="track-info-card">
+             <div class="track-card-title"><i class="fas fa-wallet"></i> পেমেন্ট তথ্য</div>
+             <div class="track-info-row"><span class="ti-label">পেমেন্ট পদ্ধতি</span><span class="ti-val">${payMethodLabel[order.paymentMethod] || escHtml(order.paymentMethod || '—')}</span></div>
+             <div class="track-info-row">
+               <span class="ti-label">পেমেন্ট স্ট্যাটাস</span>
+               <span class="ti-val">
+                 ${order.paymentStatus === 'paid'
+                   ? '<span class="pay-badge pay-paid"><i class="fas fa-check"></i> পরিশোধিত</span>'
+                   : '<span class="pay-badge pay-pending"><i class="fas fa-clock"></i> বাকি</span>'}
+               </span>
+             </div>
+             <div class="track-info-row"><span class="ti-label">পণ্যের মূল্য</span><span class="ti-val">৳${(order.subtotal || 0).toLocaleString()}</span></div>
+             <div class="track-info-row"><span class="ti-label">ডেলিভারি চার্জ</span><span class="ti-val">৳${(order.deliveryCharge || 0).toLocaleString()}</span></div>
+             <div class="track-info-row track-total-row"><span class="ti-label">মোট</span><span class="ti-val ti-total">৳${(order.total || 0).toLocaleString()}</span></div>
+           </div>
+         </div>
+   
+         <div class="track-section">
+           <div class="track-section-title"><i class="fas fa-box"></i> অর্ডার আইটেম</div>
+           <div class="track-items-list">
+             <div class="track-items-head"><span>পণ্য</span><span></span><span style="text-align:right;">মোট</span></div>
+             ${itemsHTML}
+           </div>
+         </div>
+   
+         <div class="track-help-bar">
+           <i class="fas fa-headset"></i>
+           <span>সমস্যা হচ্ছে? কল করুন: <strong>01700-000000</strong> অথবা WhatsApp করুন</span>
+           <button class="track-help-btn" onclick="closeModal('trackingModal')"><i class="fas fa-times"></i></button>
+         </div>
+   
+       </div>`;
    }
    
    /* ════════════════════════════════════════════════════════════
-      MOBILE CART SHEET
+      ORDER SLIP GENERATOR
    ════════════════════════════════════════════════════════════ */
-   function openMobileCart() {
-     updateCartUI();
-     document.getElementById('mobileCartSheet')?.classList.add('open');
-   }
+   function generateOrderSlipPNG(orderData) {
+     const canvas = document.createElement('canvas');
+     const ctx    = canvas.getContext('2d');
+     canvas.width  = 800;
+     canvas.height = 1000;
    
-   function closeMobileCart() {
-     document.getElementById('mobileCartSheet')?.classList.remove('open');
+     ctx.fillStyle = '#ffffff';
+     ctx.fillRect(0, 0, canvas.width, canvas.height);
+   
+     const colors = { primary: '#0D1B3E', secondary: '#1A2E5A', accent: '#F5A623', text: '#333333', muted: '#666666', border: '#e0e0e0' };
+   
+     function wrapText(text, x, y, maxWidth, lineHeight) {
+       const words = text.split(' ');
+       let line = '', lineY = y;
+       for (let n = 0; n < words.length; n++) {
+         const testLine = line + words[n] + ' ';
+         if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+           ctx.fillText(line, x, lineY); line = words[n] + ' '; lineY += lineHeight;
+         } else { line = testLine; }
+       }
+       ctx.fillText(line, x, lineY);
+       return lineY + lineHeight;
+     }
+   
+     ctx.fillStyle = colors.primary;
+     ctx.fillRect(0, 0, canvas.width, 120);
+     ctx.fillStyle = '#ffffff';
+     ctx.font = 'bold 28px sans-serif';
+     ctx.fillText('BeeHarvest', 50, 55);
+     ctx.font = '14px sans-serif';
+     ctx.fillText('Bangladesh Trusted Online Shop', 50, 85);
+   
+     let yPos = 160;
+     ctx.fillStyle = colors.accent;
+     ctx.font = 'bold 22px sans-serif';
+     ctx.fillText(`Order: ${orderData.orderNumber}`, 50, yPos);
+     yPos += 40;
+   
+     ctx.fillStyle = colors.muted;
+     ctx.font = '14px sans-serif';
+     ctx.fillText(`Date: ${new Date().toLocaleDateString('en-BD', { year:'numeric', month:'long', day:'numeric' })}`, 50, yPos);
+     yPos += 30;
+   
+     ctx.strokeStyle = colors.border; ctx.lineWidth = 1;
+     ctx.beginPath(); ctx.moveTo(50, yPos); ctx.lineTo(750, yPos); ctx.stroke();
+     yPos += 30;
+   
+     ctx.fillStyle = colors.primary; ctx.font = 'bold 18px sans-serif';
+     ctx.fillText('Customer Info', 50, yPos); yPos += 30;
+     ctx.fillStyle = colors.text; ctx.font = '15px sans-serif';
+     ctx.fillText(`Name: ${orderData.customer.name}`, 50, yPos); yPos += 25;
+     ctx.fillText(`Phone: ${orderData.customer.phone}`, 50, yPos); yPos += 25;
+     ctx.fillText(`Email: ${orderData.customer.email}`, 50, yPos); yPos += 25;
+     yPos = wrapText(`Address: ${orderData.customer.address.street}, ${orderData.customer.address.city}`, 50, yPos, 700, 22);
+     yPos += 10;
+   
+     ctx.strokeStyle = colors.border;
+     ctx.beginPath(); ctx.moveTo(50, yPos); ctx.lineTo(750, yPos); ctx.stroke();
+     yPos += 30;
+   
+     ctx.fillStyle = colors.primary; ctx.font = 'bold 18px sans-serif';
+     ctx.fillText('Order Items', 50, yPos); yPos += 30;
+   
+     ctx.fillStyle = colors.secondary;
+     ctx.fillRect(50, yPos, 700, 38);
+     ctx.fillStyle = '#fff'; ctx.font = 'bold 14px sans-serif';
+     ctx.fillText('Product', 70, yPos + 24);
+     ctx.fillText('Qty', 460, yPos + 24);
+     ctx.fillText('Price', 540, yPos + 24);
+     ctx.fillText('Total', 650, yPos + 24);
+     yPos += 48;
+   
+     ctx.font = '14px sans-serif';
+     (orderData.items || []).forEach((item, i) => {
+       if (yPos > 780) return;
+       if (i % 2 === 0) { ctx.fillStyle = '#f9f9f9'; ctx.fillRect(50, yPos - 8, 700, 36); }
+       ctx.fillStyle = colors.text;
+       let name = item.name || 'Product';
+       if (name.length > 42) name = name.substring(0, 39) + '...';
+       ctx.fillText(name, 70, yPos + 14);
+       ctx.fillText(`x${item.quantity}`, 460, yPos + 14);
+       ctx.fillText(`${(item.price || 0).toLocaleString()} BDT`, 540, yPos + 14);
+       ctx.fillText(`${((item.price || 0) * item.quantity).toLocaleString()} BDT`, 640, yPos + 14);
+       yPos += 36;
+     });
+   
+     yPos += 20;
+     ctx.strokeStyle = colors.border;
+     ctx.beginPath(); ctx.moveTo(50, yPos); ctx.lineTo(750, yPos); ctx.stroke();
+     yPos += 30;
+   
+     ctx.fillStyle = colors.text; ctx.font = '15px sans-serif';
+     ctx.fillText('Subtotal:', 100, yPos); ctx.fillText(`${(orderData.subtotal || 0).toLocaleString()} BDT`, 640, yPos); yPos += 25;
+     ctx.fillText('Delivery:', 100, yPos); ctx.fillText(`${(orderData.shipping || 0).toLocaleString()} BDT`, 640, yPos); yPos += 25;
+     ctx.fillStyle = colors.primary; ctx.font = 'bold 17px sans-serif';
+     ctx.fillText('Total:', 100, yPos); ctx.fillText(`${(orderData.total || 0).toLocaleString()} BDT`, 640, yPos); yPos += 40;
+   
+     ctx.fillStyle = colors.muted; ctx.font = '14px sans-serif';
+     ctx.textAlign = 'center';
+     ctx.fillText('Thank you for shopping with BeeHarvest!', canvas.width / 2, yPos + 30);
+     ctx.fillText('Support: 01700-000000', canvas.width / 2, yPos + 55);
+   
+     canvas.toBlob(blob => {
+       const url = URL.createObjectURL(blob);
+       const a   = document.createElement('a');
+       a.href = url; a.download = `beeharvest_order_${orderData.orderNumber}.png`;
+       document.body.appendChild(a); a.click(); document.body.removeChild(a);
+       URL.revokeObjectURL(url);
+       showToast('অর্ডার স্লিপ ডাউনলোড হয়েছে!', 'success');
+     });
    }
    
    /* ════════════════════════════════════════════════════════════
-      EVENT LISTENERS
+      POLICIES
+   ════════════════════════════════════════════════════════════ */
+   const POLICIES = {
+     delivery: {
+       title: '<i class="fas fa-truck"></i> ডেলিভারি পলিসি',
+       body: `
+         <div class="policy-section"><div class="policy-highlight">ঢাকার ভিতরে ১–২ কার্যদিবস, ঢাকার বাইরে ২–৫ কার্যদিবসের মধ্যে ডেলিভারি।</div></div>
+         <div class="policy-section"><h4><i class="fas fa-map-marker-alt"></i> ডেলিভারি এলাকা</h4><p>আমরা বাংলাদেশের সকল জেলায় ডেলিভারি প্রদান করি।</p></div>
+         <div class="policy-section"><h4><i class="fas fa-taka-sign"></i> ডেলিভারি চার্জ</h4><p>ঢাকার মধ্যে: ৳৬০ | ঢাকার বাইরে: ৳১০০–৳১৫০।</p></div>
+         <div class="policy-section"><h4><i class="fas fa-triangle-exclamation"></i> গুরুত্বপূর্ণ তথ্য</h4><p>ডেলিভারির সময় পণ্য গ্রহণ করে বাক্স খুলে যাচাই করুন।</p></div>`
+     },
+     return: {
+       title: '<i class="fas fa-rotate-left"></i> রিটার্ন ও রিফান্ড পলিসি',
+       body: `
+         <div class="policy-section"><div class="policy-highlight">পণ্য পাওয়ার ৭ দিনের মধ্যে রিটার্ন করা যাবে।</div></div>
+         <div class="policy-section"><h4><i class="fas fa-money-bill-wave"></i> রিফান্ড প্রক্রিয়া</h4><p>রিটার্ন অনুমোদনের পর ৩–৫ কার্যদিবসের মধ্যে রিফান্ড প্রদান করা হবে।</p></div>`
+     },
+     privacy: {
+       title: '<i class="fas fa-lock"></i> গোপনীয়তা নীতি',
+       body: `
+         <div class="policy-section"><div class="policy-highlight">আপনার ব্যক্তিগত তথ্য সুরক্ষিত রাখা আমাদের সর্বোচ্চ অগ্রাধিকার।</div></div>
+         <div class="policy-section"><h4><i class="fas fa-database"></i> আমরা কী তথ্য সংগ্রহ করি</h4><p>নাম, ঠিকানা, মোবাইল নম্বর, ইমেইল এবং অর্ডার সংক্রান্ত তথ্য।</p></div>`
+     },
+     terms: {
+       title: '<i class="fas fa-scroll"></i> শর্তাবলী',
+       body: `
+         <div class="policy-section"><div class="policy-highlight">BeeHarvest ব্যবহার করে আপনি নিচের শর্তসমূহ মেনে নিচ্ছেন।</div></div>
+         <div class="policy-section"><h4><i class="fas fa-gavel"></i> আইনি এখতিয়ার</h4><p>যেকোনো বিরোধ বাংলাদেশের আইন অনুযায়ী নিষ্পত্তি করা হবে।</p></div>`
+     },
+     payment: {
+       title: '<i class="fas fa-credit-card"></i> পেমেন্ট নীতি',
+       body: `
+         <div class="policy-section"><div class="policy-highlight">আমরা ক্যাশ অন ডেলিভারি, bKash এবং Nagad গ্রহণ করি।</div></div>
+         <div class="policy-section"><h4><i class="fas fa-triangle-exclamation"></i> পেমেন্ট নিরাপত্তা</h4><p>আমাদের কোনো প্রতিনিধি কখনো OTP বা পিন চাইবে না।</p></div>`
+     },
+     faq: {
+       title: '<i class="fas fa-circle-question"></i> সাধারণ প্রশ্নোত্তর (FAQ)',
+       body: `
+         <div class="policy-section"><h4><i class="fas fa-clock"></i> অর্ডার কতদিনে পাব?</h4><p>ঢাকার মধ্যে ১–২ দিন এবং ঢাকার বাইরে ৩–৫ কার্যদিবস।</p></div>
+         <div class="policy-section"><h4><i class="fas fa-rotate-left"></i> কীভাবে রিটার্ন করব?</h4><p>পণ্য পাওয়ার ৭ দিনের মধ্যে আমাদের হটলাইনে কল করুন।</p></div>
+         <div class="policy-section"><h4><i class="fas fa-gift"></i> অর্ডার বাতিল করা যাবে?</h4><p>অর্ডার শিপ হওয়ার আগে বাতিল করা যাবে।</p></div>`
+     }
+   };
+   
+   function showPolicy(key) {
+     const policy = POLICIES[key];
+     if (!policy) return;
+     document.getElementById('policyModalTitle').innerHTML = policy.title;
+     document.getElementById('policyModalBody').innerHTML  = policy.body;
+     openModal('policyModal');
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      EVENT LISTENERS  (single DOMContentLoaded)
    ════════════════════════════════════════════════════════════ */
    document.addEventListener('DOMContentLoaded', () => {
    
-     /* ── Shimmer animation ── */
+     /* Shimmer keyframe */
      const style = document.createElement('style');
-     style.textContent = `@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`;
+     style.textContent = `
+       @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+       @keyframes trackResultIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+     `;
      document.head.appendChild(style);
    
-     /* ── Desktop cart ── */
+     /* Desktop cart */
      document.getElementById('cartBtn')?.addEventListener('click', () => {
        document.getElementById('cartSidebar').classList.add('open');
        document.getElementById('cartBackdrop').classList.add('show');
        updateCartUI();
      });
-   
      document.getElementById('closeCart')?.addEventListener('click', () => {
        document.getElementById('cartSidebar').classList.remove('open');
        document.getElementById('cartBackdrop').classList.remove('show');
      });
-   
      document.getElementById('cartBackdrop')?.addEventListener('click', () => {
        document.getElementById('cartSidebar').classList.remove('open');
        document.getElementById('cartBackdrop').classList.remove('show');
      });
    
-     /* ── Checkout ── */
+     /* Checkout */
      document.getElementById('checkoutBtn')?.addEventListener('click', () => {
        document.getElementById('cartSidebar').classList.remove('open');
        document.getElementById('cartBackdrop').classList.remove('show');
        openCheckout();
      });
-   
-     const form = document.getElementById('checkoutForm');
-     if (form) form.addEventListener('submit', placeOrder);
-   
+     document.getElementById('checkoutForm')?.addEventListener('submit', placeOrder);
      document.getElementById('confirmOrderBtn')?.addEventListener('click', placeOrder);
    
-     /* ── Mobile nav ── */
+     /* Mobile nav */
      document.querySelectorAll('.mobile-nav-item[data-page]').forEach(item => {
-       item.addEventListener('click', e => {
-         e.preventDefault();
-         navigateTo(item.dataset.page);
-       });
+       item.addEventListener('click', e => { e.preventDefault(); navigateTo(item.dataset.page); });
      });
-   
-     document.getElementById('mobileCartBtn')?.addEventListener('click', e => {
-       e.preventDefault();
-       openMobileCart();
-     });
-   
+     document.getElementById('mobileCartBtn')?.addEventListener('click', e => { e.preventDefault(); openMobileCart(); });
      document.getElementById('closeMobileCart')?.addEventListener('click', closeMobileCart);
+     document.getElementById('mobileCheckoutBtn')?.addEventListener('click', () => { closeMobileCart(); openCheckout(); });
    
-     document.getElementById('mobileCheckoutBtn')?.addEventListener('click', () => {
-       closeMobileCart();
-       openCheckout();
-     });
-   
-     /* ── Desktop nav links ── */
+     /* Desktop nav */
      document.querySelectorAll('.nav-link[data-page]').forEach(link => {
-       link.addEventListener('click', e => {
-         e.preventDefault();
-         navigateTo(link.dataset.page);
-       });
+       link.addEventListener('click', e => { e.preventDefault(); navigateTo(link.dataset.page); });
      });
    
-     /* ── Filters ── */
-     document.getElementById('searchProducts')?.addEventListener('input',
-       debounce(() => loadProducts(1), 400));
+     /* Filters */
+     document.getElementById('searchProducts')?.addEventListener('input', debounce(() => loadProducts(1), 400));
      document.getElementById('categoryFilter')?.addEventListener('change', () => loadProducts(1));
      document.getElementById('sortBy')?.addEventListener('change', () => loadProducts(1));
      document.getElementById('priceFilter')?.addEventListener('change', () => loadProducts(1));
    
-     /* ── Close modal on backdrop click ── */
+     /* ★ Tracking modal input listener */
+     document.getElementById('trackOrderInput')?.addEventListener('input', _toggleClearBtn);
+   
+     /* Close modal on backdrop */
      document.querySelectorAll('.modal').forEach(m => {
-       m.addEventListener('click', e => {
-         if (e.target === m) closeModal(m.id);
-       });
+       m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
      });
    
-     /* ── Escape key ── */
+     /* Escape key */
      document.addEventListener('keydown', e => {
        if (e.key === 'Escape') {
          document.querySelectorAll('.modal.active').forEach(m => closeModal(m.id));
@@ -851,440 +1160,32 @@ async function placeOrder(e) {
        }
      });
    
-     /* ── Resize confetti ── */
+     /* Resize confetti */
      window.addEventListener('resize', () => {
        const c = document.getElementById('confettiCanvas');
-       if (c?.classList.contains('active')) {
-         c.width = window.innerWidth;
-         c.height = window.innerHeight;
-       }
+       if (c?.classList.contains('active')) { c.width = window.innerWidth; c.height = window.innerHeight; }
      });
    
-     /* ── Init ── */
+     /* Init */
      updateCartUI();
      navigateTo('home');
    });
    
-   /* ─── Debounce ─────────────────────────────────────────── */
-   function debounce(fn, delay) {
-     let timer;
-     return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
-   }
-   /* ═══════════════════════════════════════════════════════════
-   BEEHARVEST FOOTER JS
-   Add this to the bottom of customer.js (or a separate footer.js)
-   ═══════════════════════════════════════════════════════════ */
-
-const POLICIES = {
-    delivery: {
-      title: '<i class="fas fa-truck"></i> ডেলিভারি পলিসি',
-      body: `
-        <div class="policy-section">
-          <div class="policy-highlight">ঢাকার ভিতরে ১–২ কার্যদিবস, ঢাকার বাইরে ২–৫ কার্যদিবসের মধ্যে ডেলিভারি।</div>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-map-marker-alt"></i> ডেলিভারি এলাকা</h4>
-          <p>আমরা বাংলাদেশের সকল জেলায় ডেলিভারি প্রদান করি। প্রত্যন্ত অঞ্চলে ডেলিভারি সময় কিছুটা বেশি লাগতে পারে।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-taka-sign"></i> ডেলিভারি চার্জ</h4>
-          <p>ঢাকার মধ্যে: ৳৬০ | ঢাকার বাইরে: ৳১০০–৳১৫০। ৳৩,০০০ বা তার বেশি অর্ডারে ঢাকায় বিনামূল্যে ডেলিভারি।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-box-open"></i> অর্ডার ট্র্যাকিং</h4>
-          <p>অর্ডার নিশ্চিত হলে আপনার মোবাইলে SMS এবং ইমেইলে আপডেট পাঠানো হবে। যেকোনো সমস্যায় আমাদের হটলাইনে যোগাযোগ করুন।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-triangle-exclamation"></i> গুরুত্বপূর্ণ তথ্য</h4>
-          <p>ডেলিভারির সময় পণ্য গ্রহণ করে বাক্স খুলে যাচাই করুন। পণ্যে সমস্যা থাকলে ডেলিভারি ম্যানের সামনেই জানান।</p>
-        </div>
-      `
-    },
-  
-    return: {
-      title: '<i class="fas fa-rotate-left"></i> রিটার্ন ও রিফান্ড পলিসি',
-      body: `
-        <div class="policy-section">
-          <div class="policy-highlight">পণ্য পাওয়ার ৭ দিনের মধ্যে রিটার্ন করা যাবে — কোনো প্রশ্ন ছাড়াই।</div>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-check-circle"></i> রিটার্নযোগ্য পণ্য</h4>
-          <p>যেসব পণ্য ত্রুটিপূর্ণ, ভুল বা বর্ণনার সাথে মেলে না সেগুলো রিটার্ন করা যাবে। পণ্য অবশ্যই অব্যবহৃত, মূল প্যাকেজিংসহ হতে হবে।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-times-circle"></i> রিটার্ন হবে না</h4>
-          <p>ব্যবহৃত পণ্য, ভাঙা সিল বা প্যাকেজিং ছাড়া পণ্য, ডিজিটাল পণ্য এবং অর্ডারের ৭ দিন পরে রিটার্ন গ্রহণযোগ্য নয়।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-money-bill-wave"></i> রিফান্ড প্রক্রিয়া</h4>
-          <p>রিটার্ন অনুমোদনের পর ৩–৫ কার্যদিবসের মধ্যে রিফান্ড প্রদান করা হবে। bKash বা Nagad এ রিফান্ড পাঠানো হবে।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-phone"></i> রিটার্ন শুরু করতে</h4>
-          <p>আমাদের হটলাইনে কল করুন অথবা WhatsApp এ মেসেজ করুন। অর্ডার নম্বর এবং সমস্যার বিবরণ জানান।</p>
-        </div>
-      `
-    },
-  
-    privacy: {
-      title: '<i class="fas fa-lock"></i> গোপনীয়তা নীতি',
-      body: `
-        <div class="policy-section">
-          <div class="policy-highlight">আপনার ব্যক্তিগত তথ্য সুরক্ষিত রাখা আমাদের সর্বোচ্চ অগ্রাধিকার।</div>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-database"></i> আমরা কী তথ্য সংগ্রহ করি</h4>
-          <p>নাম, ঠিকানা, মোবাইল নম্বর, ইমেইল এবং অর্ডার সংক্রান্ত তথ্য। পেমেন্টের কোনো তথ্য আমাদের সার্ভারে সংরক্ষিত হয় না।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-share-nodes"></i> তথ্য ব্যবহার</h4>
-          <p>আপনার তথ্য শুধুমাত্র অর্ডার প্রসেস, ডেলিভারি এবং কাস্টমার সার্ভিসের জন্য ব্যবহার করা হয়। তৃতীয় পক্ষের কাছে বিক্রি করা হয় না।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-shield-halved"></i> নিরাপত্তা</h4>
-          <p>SSL এনক্রিপশন ব্যবহার করে সকল তথ্য সুরক্ষিত রাখা হয়। নিয়মিত নিরাপত্তা অডিট পরিচালনা করা হয়।</p>
-        </div>
-      `
-    },
-  
-    terms: {
-      title: '<i class="fas fa-scroll"></i> শর্তাবলী',
-      body: `
-        <div class="policy-section">
-          <div class="policy-highlight">BeeHarvest ব্যবহার করে আপনি নিচের শর্তসমূহ মেনে নিচ্ছেন।</div>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-user-check"></i> ব্যবহারকারীর দায়িত্ব</h4>
-          <p>সঠিক তথ্য দিয়ে অর্ডার করুন। ভুল ঠিকানা বা নম্বরের কারণে ডেলিভারি ব্যর্থ হলে আমরা দায়ী নই।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-ban"></i> নিষিদ্ধ কার্যক্রম</h4>
-          <p>ভুয়া অর্ডার, জালিয়াতি বা সিস্টেম অপব্যবহার কঠোরভাবে নিষিদ্ধ। এই ধরনের কার্যক্রমে আইনি ব্যবস্থা নেওয়া হবে।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-pen"></i> পরিবর্তনের অধিকার</h4>
-          <p>BeeHarvest যেকোনো সময় পলিসি পরিবর্তন করার অধিকার রাখে। পরিবর্তন ওয়েবসাইটে প্রকাশিত হবে।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-gavel"></i> আইনি এখতিয়ার</h4>
-          <p>যেকোনো বিরোধ বাংলাদেশের আইন অনুযায়ী নিষ্পত্তি করা হবে।</p>
-        </div>
-      `
-    },
-  
-    payment: {
-      title: '<i class="fas fa-credit-card"></i> পেমেন্ট নীতি',
-      body: `
-        <div class="policy-section">
-          <div class="policy-highlight">আমরা ক্যাশ অন ডেলিভারি, bKash এবং Nagad গ্রহণ করি।</div>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-hand-holding-usd"></i> ক্যাশ অন ডেলিভারি (COD)</h4>
-          <p>পণ্য পেয়ে হাতে হাতে পেমেন্ট করুন। ডেলিভারি ম্যানকে সঠিক পরিমাণ প্রস্তুত রাখুন।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-mobile-alt"></i> মোবাইল ব্যাংকিং</h4>
-          <p>bKash বা Nagad এ পেমেন্ট করলে অর্ডার নম্বর উল্লেখ করে Send Money করুন। স্ক্রিনশট আমাদের WhatsApp এ পাঠান।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-triangle-exclamation"></i> পেমেন্ট নিরাপত্তা</h4>
-          <p>আমাদের কোনো প্রতিনিধি কখনো OTP বা পিন চাইবে না। এই ধরনের অনুরোধ সম্পূর্ণ প্রতারণা।</p>
-        </div>
-      `
-    },
-  
-    faq: {
-      title: '<i class="fas fa-circle-question"></i> সাধারণ প্রশ্নোত্তর (FAQ)',
-      body: `
-        <div class="policy-section">
-          <h4><i class="fas fa-clock"></i> অর্ডার কতদিনে পাব?</h4>
-          <p>ঢাকার মধ্যে ১–২ দিন এবং ঢাকার বাইরে ৩–৫ কার্যদিবস। উইকেন্ড বা সরকারি ছুটিতে ডেলিভারি নাও হতে পারে।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-rotate-left"></i> কীভাবে রিটার্ন করব?</h4>
-          <p>পণ্য পাওয়ার ৭ দিনের মধ্যে আমাদের হটলাইনে কল করুন। আমাদের টিম আপনাকে গাইড করবে।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-box-open"></i> পণ্য নষ্ট এলে কী করব?</h4>
-          <p>ডেলিভারি ম্যানের সামনেই বাক্স খুলে চেক করুন। সমস্যা দেখলে তাৎক্ষণিকভাবে জানান এবং আমাদের ফোন করুন।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-location-dot"></i> কোন কোন জেলায় ডেলিভারি করেন?</h4>
-          <p>বাংলাদেশের সকল ৬৪ জেলায় আমরা ডেলিভারি দিই। তবে প্রত্যন্ত অঞ্চলে কিছুটা বেশি সময় লাগতে পারে।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-taka-sign"></i> ন্যূনতম অর্ডার কত?</h4>
-          <p>কোনো ন্যূনতম অর্ডার সীমা নেই। যেকোনো পরিমাণে অর্ডার করা যাবে।</p>
-        </div>
-        <div class="policy-section">
-          <h4><i class="fas fa-gift"></i> অর্ডার বাতিল করা যাবে?</h4>
-          <p>অর্ডার শিপ হওয়ার আগে বাতিল করা যাবে। শিপমেন্টের পরে বাতিল সম্ভব নয়, তবে রিটার্ন করা যাবে।</p>
-        </div>
-      `
-    }
-  };
-
-  /* ════════════════════════════════════════════════════════════
-   ORDER SLIP GENERATOR
+   /* ════════════════════════════════════════════════════════════
+      GLOBAL EXPORTS
    ════════════════════════════════════════════════════════════ */
-
-function generateOrderSlipPNG(orderData) {
-  // Create canvas
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  
-  // Set canvas dimensions
-  canvas.width = 800;
-  canvas.height = 1000;
-  
-  // Background
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-  // Colors
-  const colors = {
-    primary: '#0D1B3E',
-    secondary: '#1A2E5A',
-    accent: '#F5A623',
-    text: '#333333',
-    muted: '#666666',
-    border: '#e0e0e0'
-  };
-  
-  // Helper function to wrap text
-  function wrapText(text, x, y, maxWidth, lineHeight) {
-    const words = text.split(' ');
-    let line = '';
-    let lineY = y;
-    
-    for(let n = 0; n < words.length; n++) {
-      const testLine = line + words[n] + ' ';
-      const metrics = ctx.measureText(testLine);
-      const testWidth = metrics.width;
-      
-      if (testWidth > maxWidth && n > 0) {
-        ctx.fillText(line, x, lineY);
-        line = words[n] + ' ';
-        lineY += lineHeight;
-      } else {
-        line = testLine;
-      }
-    }
-    ctx.fillText(line, x, lineY);
-    return lineY + lineHeight;
-  }
-  
-  // Header
-  ctx.fillStyle = colors.primary;
-  ctx.fillRect(0, 0, canvas.width, 120);
-  
-  // Logo/Title
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 28px "Hind Siliguri", sans-serif';
-  ctx.fillText('BeeHarvest', 50, 50);
-  ctx.font = '14px "Hind Siliguri", sans-serif';
-  ctx.fillText('বাংলাদেশের বিশ্বস্ত অনলাইন শপ', 50, 80);
-  
-  // Order Info Section
-  let yPos = 160;
-  
-  // Order Number
-  ctx.fillStyle = colors.accent;
-  ctx.font = 'bold 24px "Hind Siliguri", sans-serif';
-  ctx.fillText(`অর্ডার নম্বর: ${orderData.orderNumber}`, 50, yPos);
-  yPos += 40;
-  
-  // Date
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('bn-BD', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long'
-  });
-  
-  ctx.fillStyle = colors.muted;
-  ctx.font = '16px "Hind Siliguri", sans-serif';
-  ctx.fillText(`তারিখ: ${dateStr}`, 50, yPos);
-  yPos += 30;
-  
-  // Separator
-  ctx.strokeStyle = colors.border;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(50, yPos);
-  ctx.lineTo(canvas.width - 50, yPos);
-  ctx.stroke();
-  yPos += 40;
-  
-  // Customer Info
-  ctx.fillStyle = colors.primary;
-  ctx.font = 'bold 20px "Hind Siliguri", sans-serif';
-  ctx.fillText('গ্রাহক তথ্য', 50, yPos);
-  yPos += 30;
-  
-  ctx.fillStyle = colors.text;
-  ctx.font = '16px "Hind Siliguri", sans-serif';
-  ctx.fillText(`নাম: ${orderData.customer.name}`, 50, yPos);
-  yPos += 25;
-  ctx.fillText(`মোবাইল: ${orderData.customer.phone}`, 50, yPos);
-  yPos += 25;
-  ctx.fillText(`ইমেইল: ${orderData.customer.email}`, 50, yPos);
-  yPos += 25;
-  
-  // Address
-  ctx.font = '15px "Hind Siliguri", sans-serif';
-  yPos = wrapText(`ঠিকানা: ${orderData.customer.address.street}, ${orderData.customer.address.city}`, 50, yPos, 700, 22);
-  yPos += 10;
-  
-  // Separator
-  ctx.strokeStyle = colors.border;
-  ctx.beginPath();
-  ctx.moveTo(50, yPos);
-  ctx.lineTo(canvas.width - 50, yPos);
-  ctx.stroke();
-  yPos += 40;
-  
-  // Order Items Header
-  ctx.fillStyle = colors.primary;
-  ctx.font = 'bold 20px "Hind Siliguri", sans-serif';
-  ctx.fillText('অর্ডার আইটেমসমূহ', 50, yPos);
-  yPos += 40;
-  
-  // Table Header
-  ctx.fillStyle = colors.secondary;
-  ctx.fillRect(50, yPos, 700, 40);
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 16px "Hind Siliguri", sans-serif';
-  ctx.fillText('পণ্যের নাম', 70, yPos + 25);
-  ctx.fillText('পরিমাণ', 450, yPos + 25);
-  ctx.fillText('মূল্য', 550, yPos + 25);
-  ctx.fillText('মোট', 650, yPos + 25);
-  yPos += 50;
-  
-  // Order Items
-  ctx.fillStyle = colors.text;
-  ctx.font = '15px "Hind Siliguri", sans-serif';
-  
-  orderData.items.forEach((item, index) => {
-    if (yPos > 750) return; // Prevent overflow
-    
-    // Alternate row colors
-    if (index % 2 === 0) {
-      ctx.fillStyle = '#f9f9f9';
-      ctx.fillRect(50, yPos - 10, 700, 40);
-    }
-    
-    ctx.fillStyle = colors.text;
-    
-    // Product name (truncate if too long)
-    let productName = item.name;
-    if (productName.length > 40) {
-      productName = productName.substring(0, 37) + '...';
-    }
-    ctx.fillText(productName, 70, yPos + 15);
-    
-    // Quantity
-    ctx.fillText(`x${item.quantity}`, 450, yPos + 15);
-    
-    // Price
-    ctx.fillText(`৳${item.price.toLocaleString('bn-BD')}`, 550, yPos + 15);
-    
-    // Total
-    const itemTotal = item.price * item.quantity;
-    ctx.fillText(`৳${itemTotal.toLocaleString('bn-BD')}`, 650, yPos + 15);
-    
-    yPos += 40;
-  });
-  
-  yPos += 20;
-  
-  // Separator
-  ctx.strokeStyle = colors.border;
-  ctx.beginPath();
-  ctx.moveTo(50, yPos);
-  ctx.lineTo(canvas.width - 50, yPos);
-  ctx.stroke();
-  yPos += 40;
-  
-  // Summary
-  ctx.fillStyle = colors.text;
-  ctx.font = '16px "Hind Siliguri", sans-serif';
-  ctx.fillText('সারসংক্ষেপ', 50, yPos);
-  yPos += 30;
-  
-  ctx.fillText('পণ্যের মূল্য:', 100, yPos);
-  ctx.fillText(`৳${orderData.subtotal.toLocaleString('bn-BD')}`, 650, yPos);
-  yPos += 25;
-  
-  ctx.fillText('ডেলিভারি চার্জ:', 100, yPos);
-  ctx.fillText(`৳${orderData.shipping.toLocaleString('bn-BD')}`, 650, yPos);
-  yPos += 25;
-  
-  // Total
-  ctx.fillStyle = colors.primary;
-  ctx.font = 'bold 18px "Hind Siliguri", sans-serif';
-  ctx.fillText('মোট প্রদেয়:', 100, yPos);
-  ctx.fillText(`৳${orderData.total.toLocaleString('bn-BD')}`, 650, yPos);
-  yPos += 40;
-  
-  // Payment Method
-  ctx.fillStyle = colors.text;
-  ctx.font = '16px "Hind Siliguri", sans-serif';
-  const paymentMethodText = {
-    'cash_on_delivery': 'ক্যাশ অন ডেলিভারি',
-    'bkash': 'bKash',
-    'nagad': 'Nagad',
-    'card': 'কার্ড পেমেন্ট'
-  };
-  ctx.fillText(`পেমেন্ট পদ্ধতি: ${paymentMethodText[orderData.paymentMethod] || orderData.paymentMethod}`, 50, yPos);
-  yPos += 30;
-  
-  // Footer
-  ctx.fillStyle = colors.muted;
-  ctx.font = '14px "Hind Siliguri", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('ধন্যবাদ, BeeHarvest এ কেনাকাটা করার জন্য', canvas.width / 2, yPos + 40);
-  ctx.fillText('যেকোনো সহায়তার জন্য কল করুন: 01700-000000', canvas.width / 2, yPos + 65);
-  
-  // Generate PNG and trigger download
-  canvas.toBlob(function(blob) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `beeharvest_order_${orderData.orderNumber}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    showToast('অর্ডার স্লিপ ডাউনলোড হয়েছে!', 'success');
-  });
-}
-  
-  function showPolicy(key) {
-    const policy = POLICIES[key];
-    if (!policy) return;
-  
-    document.getElementById('policyModalTitle').innerHTML = policy.title;
-  
-    const body = document.getElementById('policyModalBody');
-    body.innerHTML = policy.body;
-  
-    openModal('policyModal');
-  }
-  
-  // Make globally available
-  window.showPolicy = showPolicy;
-   
-   /* ── Global exports ─────────────────────────────────────── */
-   window.navigateTo    = navigateTo;
-   window.viewProduct   = viewProduct;
-   window.addToCart     = addToCart;
-   window.updateQuantity = updateQuantity;
-   window.removeFromCart = removeFromCart;
-   window.openCheckout  = openCheckout;
-   window.placeOrder    = placeOrder;
-   window.closeModal    = closeModal;
-   window.loadProducts  = loadProducts;
-   window.filterByCategory = filterByCategory;
+   window.navigateTo         = navigateTo;
+   window.viewProduct        = viewProduct;
+   window.addToCart          = addToCart;
+   window.updateQuantity     = updateQuantity;
+   window.removeFromCart     = removeFromCart;
+   window.openCheckout       = openCheckout;
+   window.placeOrder         = placeOrder;
+   window.closeModal         = closeModal;
+   window.loadProducts       = loadProducts;
+   window.filterByCategory   = filterByCategory;
+   window.showPolicy         = showPolicy;
+   window.openTrackingModal  = openTrackingModal;
+   window.trackOrder         = trackOrder;
+   window.clearTracking      = clearTracking;
+   window.quickTrackFromOrders = quickTrackFromOrders;
