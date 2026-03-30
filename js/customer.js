@@ -676,8 +676,8 @@
       ORDER TRACKING
    ════════════════════════════════════════════════════════════ */
    const ORDER_STATUS_STEPS = [
-     { key: 'pending',    icon: 'fa-clock',             label: 'অর্ডার প্রাপ্ত',    desc: 'আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে' },
-     { key: 'confirmed',  icon: 'fa-circle-check',       label: 'কনফার্মড',          desc: 'আমাদের টিম আপনার অর্ডার নিশ্চিত করেছে' },
+     { key: 'pending',    icon: 'fa-clock',             label: 'অর্ডার প্রাপ্ত',    desc: 'অর্ডারটি সফলভাবে গ্রহণ হয়েছে' },
+     { key: 'confirmed',  icon: 'fa-circle-check',       label: 'কনফার্মড',          desc: 'অর্ডার নিশ্চিত করা হয়েছে' },
      { key: 'processing', icon: 'fa-box-open',           label: 'প্রস্তুত হচ্ছে',    desc: 'পণ্য প্যাক করা হচ্ছে' },
      { key: 'shipped',    icon: 'fa-truck-fast',         label: 'পাঠানো হয়েছে',     desc: 'পণ্যটি কুরিয়ারে দেওয়া হয়েছে' },
      { key: 'delivered',  icon: 'fa-house-circle-check', label: 'ডেলিভারি সম্পন্ন', desc: 'পণ্য সফলভাবে পৌঁছে গেছে' },
