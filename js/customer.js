@@ -27,19 +27,35 @@ function debounce(fn, delay) {
 /* ════════════════════════════════════════════════════════════
       API HELPER
    ════════════════════════════════════════════════════════════ */
-async function apiCall(endpoint, options = {}) {
-  const res = await fetch(`${API_URL}${endpoint}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) {
-    throw new Error(`সার্ভার থেকে অপ্রত্যাশিত রেসপন্স (HTTP ${res.status})`);
+   async function apiCall(endpoint, options = {}) {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      headers: { "Content-Type": "application/json" },
+      ...options,
+    });
+    
+    // Check for rate limit FIRST
+    if (response.status === 429) {
+      const retryAfter = response.headers.get("Retry-After") || 60;
+      const waitSeconds = parseInt(retryAfter) || 60;
+      showMaintenanceOverlay(waitSeconds);
+      throw new Error(`Rate limit exceeded. Please wait ${waitSeconds} seconds.`);
+    }
+    
+    const ct = response.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) {
+      throw new Error(`সার্ভার থেকে অপ্রত্যাশিত রেসপন্স (HTTP ${response.status})`);
+    }
+    const data = await response.json();
+    
+    // Check for rate limit in response body
+    if (checkForRateLimit(data)) {
+      showMaintenanceOverlay(60);
+      throw new Error(data.message || "Too many requests");
+    }
+    
+    if (!response.ok) throw new Error(data.message || "সার্ভার ত্রুটি");
+    return data;
   }
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "সার্ভার ত্রুটি");
-  return data;
-}
 
 /* ════════════════════════════════════════════════════════════
       UTILITY
@@ -194,13 +210,28 @@ async function loadCategories() {
 /* ════════════════════════════════════════════════════════════
       PRODUCTS
    ════════════════════════════════════════════════════════════ */
+// Replace your existing loadFeaturedProducts function with this version
 async function loadFeaturedProducts() {
   const grid = document.getElementById("featuredProducts");
   if (!grid) return;
   grid.innerHTML = skeletonCards(4);
   try {
-    const res = await fetch(`${API_URL}/products?isFeatured=true&limit=8`);
-    const data = await res.json();
+    const response = await fetch(`${API_URL}/products?isFeatured=true&limit=8`);
+    
+    // Check for rate limit
+    if (response.status === 429) {
+      const retryAfter = response.headers.get("Retry-After") || 60;
+      const waitSeconds = parseInt(retryAfter) || 60;
+      showMaintenanceOverlay(waitSeconds);
+      return;
+    }
+    
+    const data = await response.json();
+    
+    if (checkForRateLimit(data)) {
+      throw new Error("Rate limit exceeded");
+    }
+    
     if (!data.success) throw new Error("Invalid response");
     const products = data.data || [];
     grid.innerHTML =
@@ -209,7 +240,9 @@ async function loadFeaturedProducts() {
         : products.map(renderProductCard).join("");
   } catch (e) {
     console.error("Featured:", e);
-    grid.innerHTML = errorMsg("ফিচার্ড পণ্য লোড করতে ব্যর্থ হয়েছে");
+    if (!e.message?.includes("rate limit")) {
+      grid.innerHTML = errorMsg("ফিচার্ড পণ্য লোড করতে ব্যর্থ হয়েছে");
+    }
   }
 }
 
@@ -219,8 +252,7 @@ async function loadProducts(page = 1) {
   grid.innerHTML = skeletonCards(6);
 
   try {
-    const search =
-      document.getElementById("searchProducts")?.value.trim() || "";
+    const search = document.getElementById("searchProducts")?.value.trim() || "";
     const category = document.getElementById("categoryFilter")?.value || "";
     const sort = document.getElementById("sortBy")?.value || "-createdAt";
     const priceRange = document.getElementById("priceFilter")?.value || "";
@@ -235,7 +267,24 @@ async function loadProducts(page = 1) {
       if (max && max !== "100000") params.set("maxPrice", max);
     }
 
-    const res = await apiCall(`/products?${params}`);
+    // Use direct fetch instead of apiCall to handle rate limit properly
+    const response = await fetch(`${API_URL}/products?${params}`);
+    
+    // Check for rate limit (429)
+    if (response.status === 429) {
+      const retryAfter = response.headers.get("Retry-After") || 60;
+      const waitSeconds = parseInt(retryAfter) || 60;
+      showMaintenanceOverlay(waitSeconds);
+      return; // Stop further processing
+    }
+    
+    const res = await response.json();
+    
+    // Check if response indicates rate limit
+    if (!response.ok || checkForRateLimit(res)) {
+      throw new Error(res.message || "Failed to load products");
+    }
+    
     const products = res.data || [];
 
     grid.innerHTML =
@@ -255,8 +304,11 @@ async function loadProducts(page = 1) {
     }
   } catch (e) {
     console.error("Products:", e);
-    grid.innerHTML = errorMsg("পণ্য লোড করতে ব্যর্থ হয়েছে");
-    showToast("পণ্য লোড করতে সমস্যা হয়েছে", "error");
+    // Don't show maintenance overlay for non-rate-limit errors
+    if (!e.message?.includes("rate limit") && !e.message?.includes("Too many requests")) {
+      grid.innerHTML = errorMsg("পণ্য লোড করতে ব্যর্থ হয়েছে");
+      showToast("পণ্য লোড করতে সমস্যা হয়েছে", "error");
+    }
   }
 }
 
@@ -395,9 +447,15 @@ function renderCartItem(item, index) {
        </div>`;
 }
 
-function updateCartUI() {
+async function updateCartUI() {
   const count = cart.reduce((s, i) => s + i.quantity, 0);
-  const { subtotal, shipping, total } = cartTotals();
+  
+  // ✅ Get city if available
+  const citySelect = document.getElementById("checkoutCity");
+  const city = citySelect ? citySelect.value : null;
+  
+  // ✅ Suppress toast when updating cart UI
+  const { subtotal, shipping, total } = await cartTotalsAsync(city, true);
 
   const cc = document.getElementById("cartCount");
   if (cc) cc.textContent = count;
@@ -425,180 +483,182 @@ function updateCartUI() {
   }
   setText("mobileCartTotal", `৳${total.toLocaleString("bn-BD")}`);
 }
-
 /* ════════════════════════════════════════════════════════════
       CHECKOUT
    ════════════════════════════════════════════════════════════ */
-function openCheckout() {
-  if (cart.length === 0) {
-    showToast("কার্ট খালি! আগে পণ্য যোগ করুন", "error");
-    return;
+   async function openCheckout() {
+    if (cart.length === 0) {
+      showToast("কার্ট খালি! আগে পণ্য যোগ করুন", "error");
+      return;
+    }
+  
+    const list = document.getElementById("checkoutItems");
+    if (list) {
+      list.innerHTML = cart
+        .map(
+          (item) => `
+          <div class="checkout-item">
+            <img src="${escHtml(item.image || "https://via.placeholder.com/60")}" alt="${escHtml(item.name)}"
+                 onerror="this.src='https://via.placeholder.com/60'">
+            <div class="checkout-item-details">
+              <div class="checkout-item-name">${escHtml(item.name)}</div>
+              <div class="checkout-item-meta">৳${item.price.toLocaleString()} × ${item.quantity}</div>
+            </div>
+            <div class="checkout-item-total">৳${(item.price * item.quantity).toLocaleString()}</div>
+          </div>`,
+        )
+        .join("");
+    }
+  
+    // ✅ Get the selected city from the dropdown (if any)
+    const citySelect = document.getElementById("checkoutCity");
+    const selectedCity = citySelect ? citySelect.value : null;
+    
+    // ✅ Suppress toast when opening checkout
+    const { subtotal, shipping, total } = await cartTotalsAsync(selectedCity, true);
+    
+    setText("summarySubtotal", `৳${subtotal.toLocaleString()}`);
+    setText("summaryShipping", `৳${shipping.toLocaleString()}`);
+    setText("summaryTotal", `৳${total.toLocaleString()}`);
+  
+    openModal("checkoutModal");
   }
 
-  const list = document.getElementById("checkoutItems");
-  if (list) {
-    list.innerHTML = cart
-      .map(
-        (item) => `
-         <div class="checkout-item">
-           <img src="${escHtml(item.image || "https://via.placeholder.com/60")}" alt="${escHtml(item.name)}"
-                onerror="this.src='https://via.placeholder.com/60'">
-           <div class="checkout-item-details">
-             <div class="checkout-item-name">${escHtml(item.name)}</div>
-             <div class="checkout-item-meta">৳${item.price.toLocaleString()} × ${item.quantity}</div>
-           </div>
-           <div class="checkout-item-total">৳${(item.price * item.quantity).toLocaleString()}</div>
-         </div>`,
-      )
-      .join("");
-  }
-
-  const { subtotal, shipping, total } = cartTotals();
-  setText("summarySubtotal", `৳${subtotal.toLocaleString()}`);
-  setText("summaryShipping", `৳${shipping.toLocaleString()}`);
-  setText("summaryTotal", `৳${total.toLocaleString()}`);
-
-  openModal("checkoutModal");
-}
-
-async function placeOrder(e) {
-  if (e) e.preventDefault();
-  if (cart.length === 0) {
-    showToast("কার্ট খালি!", "error");
-    return;
-  }
-
-  const fullName = val("checkoutName");
-  const email = val("checkoutEmail");
-  const phone = val("checkoutPhone");
-  const address = val("checkoutAddress");
-  const city = val("checkoutCity");
-  const zipCode = val("checkoutZipCode");
-  const notes = val("checkoutNotes");
-  const payMethod =
-    document.querySelector('input[name="paymentMethod"]:checked')?.value ||
-    "COD";
-  const accepted = document.getElementById("acceptTerms")?.checked;
-
-  if (!fullName || !email || !phone || !address || !city) {
-    showToast("সব প্রয়োজনীয় তথ্য পূরণ করুন (*)", "error");
-    return;
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    showToast("সঠিক ইমেইল ঠিকানা দিন", "error");
-    return;
-  }
-  if (!/^01[3-9]\d{8}$/.test(phone)) {
-    showToast("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)", "error");
-    return;
-  }
-  if (!accepted) {
-    showToast("শর্তাবলী মেনে নিন", "error");
-    return;
-  }
-
-  const pmMap = {
-    COD: "cash_on_delivery",
-    bkash: "bkash",
-    nagad: "nagad",
-    card: "card",
-  };
-  const orderData = {
-    items: cart.map((i) => ({
-      product: i.productId,
-      name: i.name,
-      price: i.price,
-      quantity: i.quantity,
-    })),
-    customer: {
-      name: fullName,
-      email,
-      phone,
-      address: {
-        street: address,
-        city,
-        area: city,
-        district: city,
-        division: city,
-        postalCode: zipCode || "",
-      },
-    },
-    paymentMethod: pmMap[payMethod] || "cash_on_delivery",
-    deliveryCharge: 60,
-    notes: notes || "",
-  };
-
-  showLoadingOverlay();
-  const btn = document.getElementById("confirmOrderBtn");
-  setButtonLoading(btn, true);
-
-  try {
-    const res = await fetch(`${API_URL}/orders`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(orderData),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "অর্ডার দেওয়া যায়নি");
-    if (!data.success) throw new Error(data.message || "অর্ডার ব্যর্থ");
-
-    const orderNum =
-      data.data?.orderNumber || data.data?._id?.slice(-8) || "SUCCESS";
-    const { subtotal, shipping, total } = cartTotals();
-
-    // Store for slip and tracking
-    window.lastOrderData = {
-      orderNumber: orderNum,
-      customer: orderData.customer,
-      items: orderData.items,
-      subtotal,
-      shipping,
-      total,
-      paymentMethod: orderData.paymentMethod,
+  async function placeOrder(e) {
+    if (e) e.preventDefault();
+    if (cart.length === 0) {
+      showToast("কার্ট খালি!", "error");
+      return;
+    }
+    
+    const fullName = val("checkoutName");
+    const email = val("checkoutEmail");
+    const phone = val("checkoutPhone");
+    const address = val("checkoutAddress");
+    const city = val("checkoutCity");
+    const zipCode = val("checkoutZipCode");
+    const notes = val("checkoutNotes");
+    const payMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || "COD";
+    const accepted = document.getElementById("acceptTerms")?.checked;
+    
+    if (!fullName || !email || !phone || !address || !city) {
+      showToast("সব প্রয়োজনীয় তথ্য পূরণ করুন (*)", "error");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showToast("সঠিক ইমেইল ঠিকানা দিন", "error");
+      return;
+    }
+    if (!/^01[3-9]\d{8}$/.test(phone)) {
+      showToast("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)", "error");
+      return;
+    }
+    if (!accepted) {
+      showToast("শর্তাবলী মেনে নিন", "error");
+      return;
+    }
+    
+    // ✅ Get dynamic shipping based on city (suppress toast during order placement)
+    const { subtotal, shipping, total } = await cartTotalsAsync(city, true);
+    
+    const pmMap = {
+      COD: "cash_on_delivery",
+      bkash: "bkash",
+      nagad: "nagad",
+      card: "card",
     };
-
-    cart = [];
-    saveCart();
-    updateCartUI();
-    closeModal("checkoutModal");
-    hideLoadingOverlay();
-
-    setText("orderNumber", `#${orderNum}`);
-
-    // Wire up download slip button
-    const downloadBtn = document.getElementById("downloadSlipBtn");
-    if (downloadBtn) {
-      downloadBtn.onclick = () => generateOrderSlipPNG(window.lastOrderData);
-    }
-
-    // ★ Wire up track order button in success modal
-    const trackBtn = document.getElementById("trackSuccessOrderBtn");
-    if (trackBtn) {
-      trackBtn.onclick = () => {
-        closeModal("successModal");
-        openTrackingModal(orderNum);
+    
+    const orderData = {
+      items: cart.map((i) => ({
+        product: i.productId,
+        name: i.name,
+        price: i.price,
+        quantity: i.quantity,
+      })),
+      customer: {
+        name: fullName,
+        email,
+        phone,
+        address: {
+          street: address,
+          city,
+          area: city,
+          district: city,
+          division: city,
+          postalCode: zipCode || "",
+        },
+      },
+      paymentMethod: pmMap[payMethod] || "cash_on_delivery",
+      deliveryCharge: shipping,
+      notes: notes || "",
+    };
+  
+    showLoadingOverlay();
+    const btn = document.getElementById("confirmOrderBtn");
+    setButtonLoading(btn, true);
+  
+    try {
+      const res = await fetch(`${API_URL}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "অর্ডার দেওয়া যায়নি");
+      if (!data.success) throw new Error(data.message || "অর্ডার ব্যর্থ");
+  
+      const orderNum = data.data?.orderNumber || data.data?._id?.slice(-8) || "SUCCESS";
+  
+      window.lastOrderData = {
+        orderNumber: orderNum,
+        customer: orderData.customer,
+        items: orderData.items,
+        subtotal,
+        shipping,
+        total,
+        paymentMethod: orderData.paymentMethod,
       };
+  
+      cart = [];
+      saveCart();
+      updateCartUI();
+      closeModal("checkoutModal");
+      hideLoadingOverlay();
+  
+      setText("orderNumber", `#${orderNum}`);
+  
+      const downloadBtn = document.getElementById("downloadSlipBtn");
+      if (downloadBtn) {
+        downloadBtn.onclick = () => generateOrderSlipPNG(window.lastOrderData);
+      }
+  
+      const trackBtn = document.getElementById("trackSuccessOrderBtn");
+      if (trackBtn) {
+        trackBtn.onclick = () => {
+          closeModal("successModal");
+          openTrackingModal(orderNum);
+        };
+      }
+  
+      setTimeout(() => {
+        openModal("successModal");
+        startConfetti();
+        setTimeout(stopConfetti, 4000);
+      }, 400);
+  
+      showToast("অর্ডার সফল হয়েছে! 🎉", "success");
+      document.getElementById("checkoutForm")?.reset();
+    } catch (err) {
+      hideLoadingOverlay();
+      showToast(
+        err.message || "অর্ডার দেওয়া যায়নি। আবার চেষ্টা করুন।",
+        "error",
+      );
+      console.error("Order error:", err);
+    } finally {
+      setButtonLoading(btn, false);
     }
-
-    setTimeout(() => {
-      openModal("successModal");
-      startConfetti();
-      setTimeout(stopConfetti, 4000);
-    }, 400);
-
-    showToast("অর্ডার সফল হয়েছে! 🎉", "success");
-    document.getElementById("checkoutForm")?.reset();
-  } catch (err) {
-    hideLoadingOverlay();
-    showToast(
-      err.message || "অর্ডার দেওয়া যায়নি। আবার চেষ্টা করুন।",
-      "error",
-    );
-    console.error("Order error:", err);
-  } finally {
-    setButtonLoading(btn, false);
   }
-}
 
 /* ════════════════════════════════════════════════════════════
       NAVIGATION
@@ -1451,14 +1511,36 @@ let maintenanceActive = false;
 let maintenanceCountdownInterval = null;
 let pendingRequestsQueue = [];
 
+function checkForRateLimit(data) {
+  if (!data) return false;
+  
+  // Check for various rate limit indicators
+  const msg = (data.message || "").toLowerCase();
+  if (
+    msg.includes("too many requests") ||
+    msg.includes("rate limit") ||
+    msg.includes("429") ||
+    data.statusCode === 429 ||
+    data.error === "Too Many Requests" ||
+    data.code === "RATE_LIMIT"
+  ) {
+    return true;
+  }
+  return false;
+}
+
 function showMaintenanceOverlay(seconds = 60) {
   if (maintenanceActive) return;
   maintenanceActive = true;
 
   const overlay = document.getElementById("maintenanceOverlay");
-  if (!overlay) return;
+  if (!overlay) {
+    console.error("Maintenance overlay element not found!");
+    return;
+  }
 
   overlay.style.display = "flex";
+  overlay.style.opacity = "1";
 
   let remainingSeconds = seconds;
   const countdownEl = document.getElementById("countdownNumber");
@@ -1541,6 +1623,7 @@ window.fetch = function (url, options = {}) {
   return originalFetch(url, options).then(async (response) => {
     // Check for rate limit (429)
     if (response.status === 429) {
+      console.log("⚠️ Rate limit detected (429)");
       const retryAfter = response.headers.get("Retry-After") || 60;
       const waitSeconds = parseInt(retryAfter) || 60;
 
@@ -1551,23 +1634,26 @@ window.fetch = function (url, options = {}) {
         pendingRequestsQueue.push({ url, options, resolve, reject });
       });
     }
+    
+    // Check for rate limit in response body for other status codes
+    const clonedResponse = response.clone();
+    try {
+      const data = await clonedResponse.json();
+      if (checkForRateLimit(data)) {
+        console.log("⚠️ Rate limit detected in response body");
+        showMaintenanceOverlay(60);
+        return new Promise((resolve, reject) => {
+          pendingRequestsQueue.push({ url, options, resolve, reject });
+        });
+      }
+    } catch (e) {
+      // Not JSON or no body, ignore
+    }
 
     return response;
   });
 };
 
-// Also handle API calls that might return rate limit in JSON
-function checkForRateLimit(data) {
-  if (
-    data &&
-    (data.message?.includes("Too many requests") ||
-      data.message?.includes("rate limit"))
-  ) {
-    showMaintenanceOverlay(60);
-    return true;
-  }
-  return false;
-}
 
 // Helper to show toast if not already defined
 if (typeof window.showToast === "undefined") {
@@ -1650,7 +1736,6 @@ function saveStoredMobileOrders() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedOrdersByMobile));
 }
 
-// Fetch orders by mobile number - Direct API call (no auth needed)
 async function fetchOrdersByMobile(phoneNumber) {
   const cleanPhone = phoneNumber.trim();
   if (!cleanPhone || !/^01[3-9]\d{8}$/.test(cleanPhone)) {
@@ -1674,7 +1759,24 @@ async function fetchOrdersByMobile(phoneNumber) {
     const response = await fetch(
       `${API_URL}/orders/phone/${encodeURIComponent(cleanPhone)}`,
     );
+    
+    // Check for rate limit
+    if (response.status === 429) {
+      hideLoadingOverlay();
+      const retryAfter = response.headers.get("Retry-After") || 60;
+      const waitSeconds = parseInt(retryAfter) || 60;
+      showMaintenanceOverlay(waitSeconds);
+      return null;
+    }
+    
     const data = await response.json();
+    
+    // Check for rate limit in response
+    if (checkForRateLimit(data)) {
+      hideLoadingOverlay();
+      showMaintenanceOverlay(60);
+      return null;
+    }
 
     if (!response.ok) {
       throw new Error(data.message || "Failed to fetch orders");
@@ -1979,6 +2081,65 @@ function viewOrderDetails(orderId) {
   openTrackingModal(orderId);
 }
 
+// Replace the existing getDeliveryCharge function with this:
+async function getDeliveryCharge(city, subtotal) {
+  try {
+    const params = new URLSearchParams();
+    if (city) params.append('city', city);
+    if (subtotal) params.append('subtotal', subtotal);
+    
+    // ✅ FIXED: Changed from /delivery-charge/active to /delivery-charges/active
+    const response = await fetch(`${API_URL}/delivery-charges/active?${params}`);
+    const data = await response.json();
+    
+    if (data.success && data.data) {
+      return data.data.amount;
+    }
+    return 60; // Default fallback
+  } catch (error) {
+    console.error('Failed to fetch delivery charge:', error);
+    return 60;
+  }
+}
+
+async function cartTotalsAsync(city = null, suppressToast = false) {
+  const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+  let shipping = 60; // Default fallback
+  
+  if (subtotal > 0) {
+    try {
+      const params = new URLSearchParams();
+      if (city && city.trim()) {
+        params.append('city', city.trim());
+      }
+      params.append('subtotal', subtotal);
+      
+      const url = `${API_URL}/delivery-charges/active?${params}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data.success && data.data && data.data.amount !== undefined) {
+        shipping = data.data.amount;
+        
+        // ✅ Show toast ONLY when NOT suppressed and city is provided
+        if (!suppressToast && city) {
+          if (city.toLowerCase() === 'dhaka') {
+            showToast(`ঢাকার জন্য ডেলিভারি চার্জ: ৳${shipping}`, "info");
+          } else {
+            showToast(`ঢাকার বাইরের জন্য ডেলিভারি চার্জ: ৳${shipping}`, "info");
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch delivery charge:', error);
+      shipping = 60;
+    }
+  } else {
+    shipping = 0;
+  }
+  
+  return { subtotal, shipping, total: subtotal + shipping };
+}
 // Export functions globally
 window.handleMobileNumberSubmit = handleMobileNumberSubmit;
 window.fetchOrdersByMobile = fetchOrdersByMobile;
@@ -1992,9 +2153,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadStoredMobileOrders();
   renderStoredNumberBadges();
 });
-/* ════════════════════════════════════════════════════════════
-      EVENT LISTENERS  (single DOMContentLoaded)
-   ════════════════════════════════════════════════════════════ */
 document.addEventListener("DOMContentLoaded", () => {
   /* Shimmer keyframe */
   const style = document.createElement("style");
@@ -2080,6 +2238,21 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("trackOrderInput")
     ?.addEventListener("input", _toggleClearBtn);
+
+ /* ✅ City select listener for dynamic shipping update */
+const citySelect = document.getElementById("checkoutCity");
+if (citySelect) {
+  citySelect.addEventListener("change", async () => {
+    const city = citySelect.value;
+    if (cart.length > 0) {
+      // Pass suppressToast = false to show the appropriate message
+      const { shipping, subtotal, total } = await cartTotalsAsync(city, false);
+      setText("summaryShipping", `৳${shipping.toLocaleString()}`);
+      setText("summaryTotal", `৳${(subtotal + shipping).toLocaleString()}`);
+      // No need for extra toast here - cartTotalsAsync already shows it
+    }
+  });
+}
 
   /* Close modal on backdrop */
   document.querySelectorAll(".modal").forEach((m) => {
