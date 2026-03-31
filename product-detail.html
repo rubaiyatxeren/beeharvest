@@ -1,930 +1,381 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>পণ্যের বিবরণ — BeeHarvest</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --honey:#F5A623; --honey-light:#FDD882; --honey-dark:#C47F11;
-      --navy:#0D1B3E; --navy-mid:#1A2E5A; --navy-light:#253F7A;
-      --cream:#FFF9F0; --cream-dark:#F0E8D8;
-      --surface:#FFFFFF;
-      --text-primary:#0D1B3E; --text-muted:#6B7A99; --text-light:#A0ABBE;
-      --success:#1E8A4A; --success-bg:#E8F5EE;
-      --danger:#C0392B; --danger-bg:#FDEDEC;
-      --warning:#B7770D; --warning-bg:#FEF3CD;
-      --border:#E8EBF4;
-      --shadow-sm:0 2px 8px rgba(13,27,62,0.06);
-      --shadow-md:0 8px 24px rgba(13,27,62,0.10);
-      --shadow-lg:0 20px 48px rgba(13,27,62,0.14);
-      --radius-sm:8px; --radius-md:14px; --radius-lg:20px; --radius-xl:28px;
-      --transition:0.25s cubic-bezier(0.4,0,0.2,1);
-    }
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-    html{scroll-behavior:smooth;}
-    body{font-family:'Hind Siliguri','DM Sans',sans-serif;background:var(--cream);color:var(--text-primary);min-height:100vh;}
-    ::-webkit-scrollbar{width:6px;}
-    ::-webkit-scrollbar-track{background:var(--cream-dark);}
-    ::-webkit-scrollbar-thumb{background:var(--honey);border-radius:3px;}
-
-    /* ── NAVBAR ── */
-    .navbar{background:var(--navy);position:sticky;top:0;z-index:900;box-shadow:0 2px 20px rgba(13,27,62,0.25);}
-    .nav-container{max-width:1400px;margin:0 auto;padding:0 2rem;height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem;}
-    .logo{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
-    .logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--honey),var(--honey-dark));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:white;flex-shrink:0;}
-    .logo-text{display:flex;flex-direction:column;line-height:1.1;}
-    .logo-name{font-family:'DM Serif Display',serif;font-size:1.35rem;color:white;}
-    .logo-tagline{font-size:0.62rem;color:var(--honey-light);letter-spacing:0.3px;}
-    .nav-right{display:flex;align-items:center;gap:0.75rem;}
-    .btn-back{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.85);padding:0.45rem 1rem;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:6px;font-size:0.875rem;font-family:inherit;transition:all var(--transition);}
-    .btn-back:hover{background:rgba(255,255,255,0.18);color:white;}
-    .cart-nav-btn{position:relative;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:white;padding:0.5rem 1.1rem;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:8px;font-size:0.9rem;font-family:inherit;transition:all var(--transition);}
-    .cart-nav-btn:hover{background:rgba(245,166,35,0.2);border-color:var(--honey);color:var(--honey);}
-    .cart-badge{background:var(--honey);color:var(--navy);border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;padding:0 4px;position:absolute;top:-8px;right:-8px;}
-
-    /* ── MAIN ── */
-    .main-content{max-width:1200px;margin:0 auto;padding:2rem;}
-
-    /* ── BREADCRUMB ── */
-    .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:1.75rem;font-size:0.85rem;color:var(--text-muted);}
-    .breadcrumb a{color:var(--honey-dark);text-decoration:none;font-weight:500;display:flex;align-items:center;gap:5px;}
-    .breadcrumb a:hover{text-decoration:underline;}
-    .breadcrumb i.sep{font-size:0.65rem;color:var(--text-light);}
-
-    /* ── STATES ── */
-    .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px;gap:1.25rem;}
-    .loading-ring{width:52px;height:52px;border:4px solid var(--border);border-top-color:var(--honey);border-radius:50%;animation:spin 0.8s linear infinite;}
-    @keyframes spin{to{transform:rotate(360deg);}}
-    .loading-state p{color:var(--text-muted);font-size:0.95rem;}
-    .error-state{text-align:center;padding:5rem 2rem;background:var(--surface);border-radius:var(--radius-xl);box-shadow:var(--shadow-md);border:1px solid var(--border);}
-    .error-icon{width:80px;height:80px;background:var(--danger-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem;color:var(--danger);}
-    .error-state h2{font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--navy);margin-bottom:0.5rem;}
-    .error-state p{color:var(--text-muted);margin-bottom:1.75rem;}
-
-    /* ── PRODUCT LAYOUT ── */
-    .product-detail{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;animation:fadeUp 0.4s ease;}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-
-    /* ── GALLERY ── */
-    .product-gallery{position:sticky;top:88px;align-self:start;}
-    .main-image-wrap{position:relative;background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-bottom:0.875rem;aspect-ratio:4/3;}
-    .main-image{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.5s ease;cursor:zoom-in;}
-    .main-image-wrap:hover .main-image{transform:scale(1.06);}
-    .img-badge-wrap{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:6px;z-index:2;}
-    .img-badge{padding:4px 12px;border-radius:50px;font-size:0.72rem;font-weight:700;}
-    .img-badge.discount{background:var(--honey);color:var(--navy);}
-    .img-badge.out{background:var(--danger);color:white;}
-    .img-badge.featured{background:var(--navy);color:var(--honey);}
-    .zoom-hint{position:absolute;bottom:12px;right:12px;background:rgba(13,27,62,0.65);backdrop-filter:blur(6px);color:white;font-size:0.7rem;padding:5px 10px;border-radius:50px;display:flex;align-items:center;gap:5px;opacity:0;transition:opacity var(--transition);}
-    .main-image-wrap:hover .zoom-hint{opacity:1;}
-    .thumbnail-strip{display:flex;gap:0.6rem;overflow-x:auto;padding-bottom:4px;}
-    .thumbnail-strip::-webkit-scrollbar{height:4px;}
-    .thumbnail{width:72px;height:72px;object-fit:cover;border-radius:var(--radius-sm);cursor:pointer;border:2px solid transparent;transition:all var(--transition);flex-shrink:0;background:var(--cream-dark);}
-    .thumbnail:hover{border-color:var(--honey-light);}
-    .thumbnail.active{border-color:var(--honey);box-shadow:0 0 0 2px rgba(245,166,35,0.3);}
-
-    /* ── INFO WRAP ── */
-    .product-info-wrap{display:flex;flex-direction:column;gap:1.25rem;}
-
-    /* ── INFO CARD ── */
-    .info-card{background:var(--surface);border-radius:var(--radius-lg);padding:2rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);}
-    .product-category-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(245,166,35,0.12);color:var(--honey-dark);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:50px;margin-bottom:0.75rem;}
-    .product-name{font-family:'DM Serif Display',serif;font-size:1.9rem;line-height:1.22;color:var(--navy);margin-bottom:1rem;}
-    .price-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:1rem;}
-    .price-main{font-family:'DM Serif Display',serif;font-size:2.5rem;color:var(--navy);line-height:1;}
-    .price-orig{font-size:1.05rem;color:var(--text-light);text-decoration:line-through;}
-    .price-off{background:var(--success-bg);color:var(--success);padding:4px 12px;border-radius:50px;font-size:0.8rem;font-weight:700;}
-    .stock-pill{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:50px;font-size:0.875rem;font-weight:600;margin-bottom:1.25rem;}
-    .stock-pill.in{background:var(--success-bg);color:var(--success);}
-    .stock-pill.low{background:var(--warning-bg);color:var(--warning);}
-    .stock-pill.out{background:var(--danger-bg);color:var(--danger);}
-    .divider{height:1px;background:var(--border);margin:1.25rem 0;}
-    .section-label{font-size:0.78rem;font-weight:700;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:0.6rem;}
-
-    /* ── QTY ── */
-    .qty-row{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;}
-    .qty-ctrl{display:flex;align-items:center;border:2px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--cream);}
-    .qty-btn{background:none;border:none;width:44px;height:46px;cursor:pointer;font-size:1.2rem;font-family:inherit;color:var(--text-primary);transition:all var(--transition);display:flex;align-items:center;justify-content:center;}
-    .qty-btn:hover:not(:disabled){background:var(--honey);color:var(--navy);}
-    .qty-btn:disabled{opacity:0.4;cursor:not-allowed;}
-    .qty-val{width:60px;text-align:center;font-size:1rem;font-weight:700;border:none;border-left:2px solid var(--border);border-right:2px solid var(--border);background:white;height:46px;padding:0;color:var(--text-primary);font-family:inherit;}
-    .qty-val:focus{outline:none;}
-    .qty-note{font-size:0.8rem;color:var(--text-muted);}
-
-    /* ── ACTION BUTTONS ── */
-    .btn-cart{background:linear-gradient(135deg,var(--honey),var(--honey-dark));color:var(--navy);border:none;padding:1rem 1.5rem;border-radius:var(--radius-md);font-size:1rem;font-weight:700;cursor:pointer;width:100%;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:all var(--transition);margin-bottom:0.75rem;}
-    .btn-cart:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,166,35,0.4);}
-    .btn-cart:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
-    .btn-buy{background:var(--navy);color:white;border:none;padding:1rem 1.5rem;border-radius:var(--radius-md);font-size:1rem;font-weight:700;cursor:pointer;width:100%;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:all var(--transition);margin-bottom:1rem;}
-    .btn-buy:hover:not(:disabled){background:var(--navy-mid);transform:translateY(-1px);box-shadow:0 6px 20px rgba(13,27,62,0.3);}
-    .btn-buy:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
-
-    /* ── TRUST ── */
-    .trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;}
-    .trust-item{text-align:center;padding:0.875rem 0.5rem;background:var(--cream);border-radius:var(--radius-sm);border:1px solid var(--border);}
-    .trust-item i{font-size:1.2rem;color:var(--honey-dark);display:block;margin-bottom:5px;}
-    .trust-item span{font-size:0.7rem;color:var(--text-muted);font-weight:500;line-height:1.3;}
-
-    /* ── META TAGS ── */
-    .meta-tags{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;}
-    .meta-tag{background:var(--cream-dark);border:1px solid var(--border);padding:4px 12px;border-radius:50px;font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:5px;}
-    .meta-tag i{color:var(--honey-dark);font-size:0.7rem;}
-
-    /* ── EXTRA CARDS ── */
-    .extra-card{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow-sm);}
-    .extra-header{background:var(--navy);color:white;padding:1rem 1.5rem;font-family:'DM Serif Display',serif;font-size:1rem;display:flex;align-items:center;gap:10px;}
-    .extra-header i{color:var(--honey);}
-    .extra-body{padding:1.5rem;}
-    .extra-body p{color:var(--text-muted);line-height:1.85;font-size:0.9rem;white-space:pre-wrap;}
-    .features-list{list-style:none;display:flex;flex-direction:column;gap:0.5rem;}
-    .features-list li{display:flex;align-items:flex-start;gap:10px;padding:0.6rem 0.875rem;background:var(--cream);border-radius:var(--radius-sm);font-size:0.875rem;color:var(--text-primary);}
-    .features-list li i{color:var(--success);margin-top:2px;flex-shrink:0;}
-    .spec-table{width:100%;border-collapse:collapse;}
-    .spec-table tr:nth-child(even) td{background:var(--cream);}
-    .spec-table td{padding:0.6rem 0.875rem;font-size:0.875rem;border-bottom:1px solid var(--border);}
-    .spec-table td:first-child{color:var(--text-muted);font-weight:600;width:40%;}
-    .spec-table td:last-child{color:var(--text-primary);}
-
-    /* ── RELATED ── */
-    .related-section{margin-top:3rem;}
-    .related-title{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--navy);margin-bottom:1.5rem;display:flex;align-items:center;gap:10px;}
-    .related-title i{color:var(--honey);}
-    .related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.25rem;}
-    .related-card{background:var(--surface);border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow-sm);}
-    .related-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
-    .related-card img{width:100%;height:150px;object-fit:cover;display:block;}
-    .related-card-info{padding:0.875rem;}
-    .related-card-name{font-size:0.875rem;font-weight:600;color:var(--text-primary);margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-    .related-card-price{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);}
-
-    /* ── TOAST ── */
-    .toast{position:fixed;bottom:24px;right:24px;background:var(--surface);padding:1rem 1.25rem;border-radius:var(--radius-md);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;z-index:9999;max-width:320px;font-size:0.875rem;font-weight:500;animation:toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1);}
-    @keyframes toastIn{from{transform:translateX(120%);opacity:0;}to{transform:translateX(0);opacity:1;}}
-    .toast.success{border-left:4px solid var(--success);}
-    .toast.success i{color:var(--success);}
-    .toast.error{border-left:4px solid var(--danger);}
-    .toast.error i{color:var(--danger);}
-    .toast.info{border-left:4px solid var(--honey);}
-    .toast.info i{color:var(--honey-dark);}
-
-    /* ── MODAL ── */
-    .modal{display:none;position:fixed;inset:0;background:rgba(13,27,62,0.55);z-index:1300;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);}
-    .modal.active{display:flex;animation:modalIn 0.3s ease;}
-    @keyframes modalIn{from{opacity:0;}to{opacity:1;}}
-    .modal-content{background:var(--surface);border-radius:var(--radius-xl);width:100%;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalSlide 0.35s cubic-bezier(0.34,1.56,0.64,1);}
-    @keyframes modalSlide{from{transform:scale(0.92) translateY(20px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
-    .modal-large{max-width:920px;}
-    .modal-small{max-width:440px;text-align:center;}
-    .modal-header{padding:1.5rem 1.75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--navy);border-radius:var(--radius-xl) var(--radius-xl) 0 0;}
-    .modal-header h3{font-family:'DM Serif Display',serif;font-size:1.3rem;color:white;display:flex;align-items:center;gap:10px;}
-    .modal-header h3 i{color:var(--honey);}
-    .close-modal{background:rgba(255,255,255,0.1);border:none;color:white;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:background var(--transition);}
-    .close-modal:hover{background:rgba(255,255,255,0.2);}
-    .modal-body{padding:1.75rem;}
-
-    /* ── CHECKOUT FORM ── */
-    .checkout-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.75rem;}
-    .checkout-section{background:var(--cream);border-radius:var(--radius-lg);padding:1.5rem;}
-    .checkout-section-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;padding-bottom:0.75rem;border-bottom:2px solid var(--border);}
-    .checkout-section-title i{color:var(--honey);}
-    .form-group{margin-bottom:1.1rem;}
-    .form-group label{display:block;font-size:0.8rem;font-weight:700;color:var(--text-primary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;}
-    .form-group input,.form-group textarea,.form-group select{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;background:white;color:var(--text-primary);transition:border-color var(--transition);}
-    .form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--honey);box-shadow:0 0 0 3px rgba(245,166,35,0.15);}
-    .form-group input::placeholder,.form-group textarea::placeholder{color:var(--text-light);}
-    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
-    textarea{resize:vertical;min-height:80px;}
-    select{appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7A99' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 12px center;background-size:1.1em;padding-right:36px;}
-    .form-hint{font-size:0.75rem;color:var(--text-muted);margin-top:4px;}
-    .checkout-items-list{max-height:200px;overflow-y:auto;margin-bottom:1rem;}
-    .checkout-item{display:flex;gap:0.75rem;padding:0.75rem;background:white;border-radius:var(--radius-sm);margin-bottom:0.5rem;align-items:center;border:1px solid var(--border);}
-    .checkout-item img{width:52px;height:52px;object-fit:cover;border-radius:var(--radius-sm);flex-shrink:0;}
-    .checkout-item-name{font-weight:600;font-size:0.875rem;color:var(--text-primary);}
-    .checkout-item-meta{font-size:0.78rem;color:var(--text-muted);margin-top:2px;}
-    .checkout-item-total{font-weight:700;color:var(--navy);font-size:0.9rem;flex-shrink:0;margin-left:auto;}
-    .payment-methods{display:flex;flex-direction:column;gap:0.5rem;margin:0.75rem 0 1rem;}
-    .payment-method{display:flex;align-items:center;gap:12px;padding:0.875rem 1rem;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);background:white;}
-    .payment-method:has(input:checked){border-color:var(--honey);background:rgba(245,166,35,0.06);}
-    .payment-method input[type="radio"]{accent-color:var(--honey);width:16px;height:16px;flex-shrink:0;}
-    .payment-method-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
-    .pm-cod{background:#E8F5EE;color:#1E8A4A;} .pm-bkash{background:#FCE4EC;color:#D81B60;} .pm-nagad{background:#FFF3E0;color:#E65100;}
-    .payment-method-text span{font-weight:600;font-size:0.875rem;display:block;}
-    .payment-method-text small{font-size:0.75rem;color:var(--text-muted);}
-    .order-summary-box{background:var(--navy);border-radius:var(--radius-md);padding:1.1rem;margin:1rem 0;color:white;}
-    .summary-line{display:flex;justify-content:space-between;font-size:0.875rem;padding:5px 0;color:rgba(255,255,255,0.75);}
-    .summary-line.total{font-size:1.05rem;font-weight:700;color:var(--honey);border-top:1px solid rgba(255,255,255,0.15);margin-top:8px;padding-top:10px;}
-    .terms-row{display:flex;align-items:center;gap:8px;margin:1rem 0;font-size:0.85rem;color:var(--text-muted);}
-    .terms-row input{accent-color:var(--honey);width:16px;height:16px;cursor:pointer;flex-shrink:0;}
-    .terms-row a{color:var(--honey-dark);text-decoration:none;font-weight:500;}
-    .btn-primary{background:linear-gradient(135deg,var(--honey),var(--honey-dark));color:var(--navy);border:none;padding:13px 24px;border-radius:var(--radius-md);font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all var(--transition);width:100%;}
-    .btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,166,35,0.4);}
-    .btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
-
-    /* ── SUCCESS MODAL ── */
-    .success-content{padding:3rem 2rem;text-align:center;}
-    .success-icon{width:90px;height:90px;background:linear-gradient(135deg,var(--honey),var(--honey-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2.5rem;color:white;animation:pop 0.5s cubic-bezier(0.34,1.56,0.64,1);}
-    @keyframes pop{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
-    .success-content h3{font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--navy);margin-bottom:0.5rem;}
-    .success-content p{color:var(--text-muted);margin-bottom:1rem;font-size:0.9rem;}
-    .order-chip{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:white;padding:8px 18px;border-radius:50px;font-weight:700;font-size:0.9rem;margin:0.5rem 0 1.5rem;}
-    .order-chip i{color:var(--honey);}
-    .success-actions{display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;}
-    .btn-ghost{background:rgba(13,27,62,0.06);color:var(--navy);border:none;padding:10px 20px;border-radius:var(--radius-sm);cursor:pointer;font-weight:600;font-size:0.9rem;font-family:inherit;transition:all var(--transition);display:inline-flex;align-items:center;justify-content:center;gap:7px;}
-    .btn-ghost:hover{background:rgba(13,27,62,0.12);}
-
-    /* ── LOADING OVERLAY ── */
-    .loading-overlay{position:fixed;inset:0;background:rgba(13,27,62,0.8);backdrop-filter:blur(6px);z-index:9000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
-    .loading-overlay.active{display:flex;}
-    .lo-ring{width:56px;height:56px;border:4px solid rgba(255,255,255,0.15);border-top-color:var(--honey);border-radius:50%;animation:spin 0.8s linear infinite;}
-    .loading-overlay p{color:white;font-size:0.95rem;font-weight:500;}
-
-    /* ── CONFETTI ── */
-    #confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:10000;display:none;}
-    #confettiCanvas.active{display:block;}
-
-    /* ── RESPONSIVE (no sticky bar) ── */
-    @media(max-width:1024px){
-      .product-gallery{position:static;}
-    }
-    @media(max-width:768px){
-      .main-content{padding:1rem;}
-      .product-detail{grid-template-columns:1fr;gap:1.25rem;}
-      .product-name{font-size:1.5rem;}
-      .price-main{font-size:2rem;}
-      .info-card{padding:1.25rem;}
-      .checkout-grid{grid-template-columns:1fr;}
-      .form-row{grid-template-columns:1fr;}
-      .logo-tagline{display:none;}
-      .btn-back span{display:none;}
-      .toast{bottom:20px;right:12px;left:12px;max-width:100%;}
-    }
-    @media(max-width:480px){
-      .trust-grid{grid-template-columns:repeat(3,1fr);}
-      .thumbnail{width:60px;height:60px;}
-    }
-  </style>
-</head>
-<body>
-
-<!-- Loading Overlay -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="lo-ring"></div>
-  <p>অর্ডার প্রক্রিয়া চলছে...</p>
-</div>
-
-<!-- Confetti -->
-<canvas id="confettiCanvas"></canvas>
-
-<!-- ═══ NAVBAR ════════════════════════════════════════════ -->
-<nav class="navbar">
-  <div class="nav-container">
-    <div class="logo" onclick="goBack()">
-      <div class="logo-icon"><i class="fa-brands fa-forumbee"></i></div>
-      <div class="logo-text">
-        <span class="logo-name">BeeHarvest</span>
-        <span class="logo-tagline">বাংলাদেশের বিশ্বস্ত অনলাইন শপ</span>
-      </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    <title>পণ্যের বিবরণ — BeeHarvest</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/details.css" />
+  </head>
+  <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="lo-ring"></div>
+      <p>অর্ডার প্রক্রিয়া চলছে...</p>
     </div>
-    <div class="nav-right">
-      <button class="btn-back" onclick="goBack()">
-        <i class="fas fa-arrow-left"></i>
-        <span>পণ্যের তালিকা</span>
-      </button>
-      <button class="cart-nav-btn" onclick="openCheckoutDirect()">
-        <i class="fas fa-shopping-cart"></i>
-        <span>কার্ট</span>
-        <span class="cart-badge" id="cartCount">0</span>
-      </button>
-    </div>
-  </div>
-</nav>
 
-<!-- ═══ MAIN ══════════════════════════════════════════════ -->
-<div class="main-content">
+    <!-- Confetti -->
+    <canvas id="confettiCanvas"></canvas>
 
-  <div class="breadcrumb">
-    <a href="index.html"><i class="fas fa-home"></i> হোম</a>
-    <i class="fas fa-chevron-right sep"></i>
-    <a href="index.html">পণ্য</a>
-    <i class="fas fa-chevron-right sep"></i>
-    <span id="breadcrumbName">লোড হচ্ছে...</span>
-  </div>
-
-  <!-- Loading -->
-  <div id="loadingState" class="loading-state">
-    <div class="loading-ring"></div>
-    <p>পণ্যের তথ্য লোড হচ্ছে...</p>
-  </div>
-
-  <!-- Error -->
-  <div id="errorState" style="display:none;">
-    <div class="error-state">
-      <div class="error-icon"><i class="fas fa-box-open"></i></div>
-      <h2>পণ্য পাওয়া যায়নি</h2>
-      <p id="errorMsg">পণ্যটি খুঁজে পাওয়া যায়নি।</p>
-      <button class="btn-primary" style="width:auto;margin:0 auto;" onclick="goBack()">
-        <i class="fas fa-arrow-left"></i> তালিকায় ফিরুন
-      </button>
-    </div>
-  </div>
-
-  <!-- Product Detail -->
-  <div id="productDetail" style="display:none;">
-    <div class="product-detail">
-
-      <!-- Gallery -->
-      <div class="product-gallery">
-        <div class="main-image-wrap">
-          <img id="mainImage" class="main-image" src="" alt="">
-          <div class="img-badge-wrap" id="imgBadges"></div>
-          <div class="zoom-hint"><i class="fas fa-search-plus"></i> জুম করুন</div>
-        </div>
-        <div id="thumbnailStrip" class="thumbnail-strip"></div>
-      </div>
-
-      <!-- Info -->
-      <div class="product-info-wrap">
-        <div class="info-card">
-          <div id="categoryTag"></div>
-          <h1 class="product-name" id="productName"></h1>
-          <div class="meta-tags" id="metaTags"></div>
-
-          <div class="price-row">
-            <span class="price-main" id="priceMain"></span>
-            <span class="price-orig" id="priceOrig" style="display:none;"></span>
-            <span class="price-off" id="priceOff" style="display:none;"></span>
-          </div>
-
-          <div id="stockStatus"></div>
-
-          <div class="divider"></div>
-
-          <div class="section-label">পরিমাণ নির্বাচন করুন</div>
-          <div class="qty-row">
-            <div class="qty-ctrl">
-              <button class="qty-btn" id="qtyMinus" onclick="changeQty(-1)">−</button>
-              <input class="qty-val" type="number" id="qtyInput" value="1" min="1" max="99" readonly>
-              <button class="qty-btn" id="qtyPlus" onclick="changeQty(1)">+</button>
-            </div>
-            <span class="qty-note" id="qtyNote"></span>
-          </div>
-
-          <button id="btnAddCart" class="btn-cart" onclick="addToCart()">
-            <i class="fas fa-cart-plus"></i> কার্টে যোগ করুন
-          </button>
-
-          <button id="btnBuyNow" class="btn-buy" onclick="buyNow()">
-            <i class="fas fa-bolt"></i> এখনই অর্ডার করুন
-          </button>
-
-          <div class="trust-grid">
-            <div class="trust-item"><i class="fas fa-truck-fast"></i><span>দ্রুত ডেলিভারি</span></div>
-            <div class="trust-item"><i class="fas fa-shield-halved"></i><span>নিরাপদ পেমেন্ট</span></div>
-            <div class="trust-item"><i class="fas fa-rotate-left"></i><span>৭ দিনের রিটার্ন</span></div>
+    <!-- ═══ NAVBAR ════════════════════════════════════════════ -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="logo" onclick="goBack()">
+          <div class="logo-icon"><i class="fa-brands fa-forumbee"></i></div>
+          <div class="logo-text">
+            <span class="logo-name">BeeHarvest</span>
+            <span class="logo-tagline">বাংলাদেশের বিশ্বস্ত অনলাইন শপ</span>
           </div>
         </div>
-
-        <div id="productExtras"></div>
+        <div class="nav-right">
+          <button class="btn-back" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+            <span>পণ্যের তালিকা</span>
+          </button>
+          <button class="cart-nav-btn" onclick="openCheckoutDirect()">
+            <i class="fas fa-shopping-cart"></i>
+            <span>কার্ট</span>
+            <span class="cart-badge" id="cartCount">0</span>
+          </button>
+        </div>
       </div>
-    </div>
+    </nav>
 
-    <!-- Related -->
-    <div class="related-section" id="relatedSection" style="display:none;">
-      <div class="related-title"><i class="fas fa-fire"></i> আরও পণ্য দেখুন</div>
-      <div class="related-grid" id="relatedGrid"></div>
-    </div>
-  </div>
+    <!-- ═══ MAIN ══════════════════════════════════════════════ -->
+    <div class="main-content">
+      <div class="breadcrumb">
+        <a href="index.html"><i class="fas fa-home"></i> হোম</a>
+        <i class="fas fa-chevron-right sep"></i>
+        <a href="index.html">পণ্য</a>
+        <i class="fas fa-chevron-right sep"></i>
+        <span id="breadcrumbName">লোড হচ্ছে...</span>
+      </div>
 
-</div>
+      <!-- Loading -->
+      <div id="loadingState" class="loading-state">
+        <div class="loading-ring"></div>
+        <p>পণ্যের তথ্য লোড হচ্ছে...</p>
+      </div>
 
-<!-- ═══ CHECKOUT MODAL ════════════════════════════════════ -->
-<div class="modal" id="checkoutModal">
-  <div class="modal-content modal-large">
-    <div class="modal-header">
-      <h3><i class="fas fa-truck"></i> অর্ডার কনফার্মেশন</h3>
-      <button class="close-modal" onclick="closeModal('checkoutModal')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <form id="checkoutForm" novalidate>
-        <div class="checkout-grid">
-          <div class="checkout-section">
-            <div class="checkout-section-title"><i class="fas fa-user"></i> প্রাপকের তথ্য</div>
-            <div class="form-group"><label>পূর্ণ নাম *</label><input type="text" id="coName" required placeholder="আপনার পূর্ণ নাম"></div>
-            <div class="form-group">
-              <label>ইমেইল ঠিকানা *</label>
-              <input type="email" id="coEmail" required placeholder="example@email.com">
-              <div class="form-hint">অর্ডার কনফার্মেশন ইমেইলে পাবেন</div>
-            </div>
-            <div class="form-group">
-              <label>মোবাইল নম্বর *</label>
-              <input type="tel" id="coPhone" required placeholder="01XXXXXXXXX">
-              <div class="form-hint">বাংলাদেশি নম্বর (01X-XXXXXXXX)</div>
-            </div>
-            <div class="form-group"><label>বিস্তারিত ঠিকানা *</label><textarea id="coAddress" rows="3" required placeholder="বাড়ির নম্বর, রাস্তা, এলাকা..."></textarea></div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>জেলা/শহর *</label>
-                <select id="coCity" required>
-                  <option value="">নির্বাচন করুন</option>
-                  <option>ঢাকা</option><option>চট্টগ্রাম</option><option>রাজশাহী</option>
-                  <option>খুলনা</option><option>বরিশাল</option><option>সিলেট</option>
-                  <option>রংপুর</option><option>ময়মনসিংহ</option><option>কুমিল্লা</option>
-                  <option>নারায়ণগঞ্জ</option><option>গাজীপুর</option><option>টাঙ্গাইল</option>
-                </select>
+      <!-- Error -->
+      <div id="errorState" style="display: none">
+        <div class="error-state">
+          <div class="error-icon"><i class="fas fa-box-open"></i></div>
+          <h2>পণ্য পাওয়া যায়নি</h2>
+          <p id="errorMsg">পণ্যটি খুঁজে পাওয়া যায়নি।</p>
+          <button
+            class="btn-primary"
+            style="width: auto; margin: 0 auto"
+            onclick="goBack()"
+          >
+            <i class="fas fa-arrow-left"></i> তালিকায় ফিরুন
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Detail -->
+      <div id="productDetail" style="display: none">
+        <div class="product-detail">
+          <!-- Gallery -->
+          <div class="product-gallery">
+            <div class="main-image-wrap">
+              <img id="mainImage" class="main-image" src="" alt="" />
+              <div class="img-badge-wrap" id="imgBadges"></div>
+              <div class="zoom-hint">
+                <i class="fas fa-search-plus"></i> জুম করুন
               </div>
-              <div class="form-group"><label>জিপ কোড</label><input type="text" id="coZip" placeholder="ঐচ্ছিক"></div>
             </div>
-            <div class="form-group"><label>বিশেষ নির্দেশনা</label><textarea id="coNotes" rows="2" placeholder="যেমন: গেটে কল করুন..."></textarea></div>
+            <div id="thumbnailStrip" class="thumbnail-strip"></div>
           </div>
 
-          <div class="checkout-section">
-            <div class="checkout-section-title"><i class="fas fa-box"></i> অর্ডার সারসংক্ষেপ</div>
-            <div class="checkout-items-list" id="coItemsList"></div>
+          <!-- Info -->
+          <div class="product-info-wrap">
+            <div class="info-card">
+              <div id="categoryTag"></div>
+              <h1 class="product-name" id="productName"></h1>
+              <div class="meta-tags" id="metaTags"></div>
 
-            <div class="checkout-section-title" style="margin-top:1rem;"><i class="fas fa-wallet"></i> পেমেন্ট পদ্ধতি</div>
-            <div class="payment-methods">
-              <label class="payment-method">
-                <input type="radio" name="payMethod" value="COD" checked>
-                <span class="payment-method-icon pm-cod"><i class="fas fa-hand-holding-usd"></i></span>
-                <div class="payment-method-text"><span>ক্যাশ অন ডেলিভারি</span><small>ডেলিভারির সময় নগদ পরিশোধ</small></div>
-              </label>
-              <label class="payment-method">
-                <input type="radio" name="payMethod" value="bkash">
-                <span class="payment-method-icon pm-bkash"><i class="fas fa-mobile-alt"></i></span>
-                <div class="payment-method-text"><span>bKash</span><small>মোবাইল ব্যাংকিং</small></div>
-              </label>
-              <label class="payment-method">
-                <input type="radio" name="payMethod" value="nagad">
-                <span class="payment-method-icon pm-nagad"><i class="fas fa-wallet"></i></span>
-                <div class="payment-method-text"><span>Nagad</span><small>মোবাইল ব্যাংকিং</small></div>
-              </label>
+              <div class="price-row">
+                <span class="price-main" id="priceMain"></span>
+                <span
+                  class="price-orig"
+                  id="priceOrig"
+                  style="display: none"
+                ></span>
+                <span
+                  class="price-off"
+                  id="priceOff"
+                  style="display: none"
+                ></span>
+              </div>
+
+              <div id="stockStatus"></div>
+
+              <div class="divider"></div>
+
+              <div class="section-label">পরিমাণ নির্বাচন করুন</div>
+              <div class="qty-row">
+                <div class="qty-ctrl">
+                  <button class="qty-btn" id="qtyMinus" onclick="changeQty(-1)">
+                    −
+                  </button>
+                  <input
+                    class="qty-val"
+                    type="number"
+                    id="qtyInput"
+                    value="1"
+                    min="1"
+                    max="99"
+                    readonly
+                  />
+                  <button class="qty-btn" id="qtyPlus" onclick="changeQty(1)">
+                    +
+                  </button>
+                </div>
+                <span class="qty-note" id="qtyNote"></span>
+              </div>
+
+              <button id="btnAddCart" class="btn-cart" onclick="addToCart()">
+                <i class="fas fa-cart-plus"></i> কার্টে যোগ করুন
+              </button>
+
+              <button id="btnBuyNow" class="btn-buy" onclick="buyNow()">
+                <i class="fas fa-bolt"></i> এখনই অর্ডার করুন
+              </button>
+
+              <div class="trust-grid">
+                <div class="trust-item">
+                  <i class="fas fa-truck-fast"></i><span>দ্রুত ডেলিভারি</span>
+                </div>
+                <div class="trust-item">
+                  <i class="fas fa-shield-halved"></i
+                  ><span>নিরাপদ পেমেন্ট</span>
+                </div>
+                <div class="trust-item">
+                  <i class="fas fa-rotate-left"></i><span>৭ দিনের রিটার্ন</span>
+                </div>
+              </div>
             </div>
 
-            <div class="order-summary-box">
-              <div class="summary-line"><span>পণ্যের মূল্য</span><span id="coSubtotal">৳০</span></div>
-              <div class="summary-line"><span>ডেলিভারি চার্জ</span><span id="coShipping">৳৬০</span></div>
-              <div class="summary-line total"><span>মোট প্রদেয়</span><span id="coTotal">৳৬০</span></div>
-            </div>
+            <div id="productExtras"></div>
+          </div>
+        </div>
 
-            <div class="terms-row">
-              <input type="checkbox" id="coTerms">
-              <span>আমি <a href="#" onclick="return false;">শর্তাবলী ও নীতিমালা</a> মেনে নিচ্ছি</span>
+        <!-- Related -->
+        <div class="related-section" id="relatedSection" style="display: none">
+          <div class="related-title">
+            <i class="fas fa-fire"></i> আরও পণ্য দেখুন
+          </div>
+          <div class="related-grid" id="relatedGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CHECKOUT MODAL ════════════════════════════════════ -->
+    <div class="modal" id="checkoutModal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3><i class="fas fa-truck"></i> অর্ডার কনফার্মেশন</h3>
+          <button class="close-modal" onclick="closeModal('checkoutModal')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="checkoutForm" novalidate>
+            <div class="checkout-grid">
+              <div class="checkout-section">
+                <div class="checkout-section-title">
+                  <i class="fas fa-user"></i> প্রাপকের তথ্য
+                </div>
+                <div class="form-group">
+                  <label>পূর্ণ নাম *</label
+                  ><input
+                    type="text"
+                    id="coName"
+                    required
+                    placeholder="আপনার পূর্ণ নাম"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>ইমেইল ঠিকানা *</label>
+                  <input
+                    type="email"
+                    id="coEmail"
+                    required
+                    placeholder="example@email.com"
+                  />
+                  <div class="form-hint">অর্ডার কনফার্মেশন ইমেইলে পাবেন</div>
+                </div>
+                <div class="form-group">
+                  <label>মোবাইল নম্বর *</label>
+                  <input
+                    type="tel"
+                    id="coPhone"
+                    required
+                    placeholder="01XXXXXXXXX"
+                  />
+                  <div class="form-hint">বাংলাদেশি নম্বর (01X-XXXXXXXX)</div>
+                </div>
+                <div class="form-group">
+                  <label>বিস্তারিত ঠিকানা *</label
+                  ><textarea
+                    id="coAddress"
+                    rows="3"
+                    required
+                    placeholder="বাড়ির নম্বর, রাস্তা, এলাকা..."
+                  ></textarea>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>জেলা/শহর *</label>
+                    <select id="coCity" required>
+                      <option value="">নির্বাচন করুন</option>
+                      <option>ঢাকা</option>
+                      <option>চট্টগ্রাম</option>
+                      <option>রাজশাহী</option>
+                      <option>খুলনা</option>
+                      <option>বরিশাল</option>
+                      <option>সিলেট</option>
+                      <option>রংপুর</option>
+                      <option>ময়মনসিংহ</option>
+                      <option>কুমিল্লা</option>
+                      <option>নারায়ণগঞ্জ</option>
+                      <option>গাজীপুর</option>
+                      <option>টাঙ্গাইল</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>জিপ কোড</label
+                    ><input type="text" id="coZip" placeholder="ঐচ্ছিক" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>বিশেষ নির্দেশনা</label
+                  ><textarea
+                    id="coNotes"
+                    rows="2"
+                    placeholder="যেমন: গেটে কল করুন..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="checkout-section">
+                <div class="checkout-section-title">
+                  <i class="fas fa-box"></i> অর্ডার সারসংক্ষেপ
+                </div>
+                <div class="checkout-items-list" id="coItemsList"></div>
+
+                <div class="checkout-section-title" style="margin-top: 1rem">
+                  <i class="fas fa-wallet"></i> পেমেন্ট পদ্ধতি
+                </div>
+                <div class="payment-methods">
+                  <label class="payment-method">
+                    <input type="radio" name="payMethod" value="COD" checked />
+                    <span class="payment-method-icon pm-cod"
+                      ><i class="fas fa-hand-holding-usd"></i
+                    ></span>
+                    <div class="payment-method-text">
+                      <span>ক্যাশ অন ডেলিভারি</span
+                      ><small>ডেলিভারির সময় নগদ পরিশোধ</small>
+                    </div>
+                  </label>
+                  <label class="payment-method">
+                    <input type="radio" name="payMethod" value="bkash" />
+                    <span class="payment-method-icon pm-bkash"
+                      ><i class="fas fa-mobile-alt"></i
+                    ></span>
+                    <div class="payment-method-text">
+                      <span>bKash</span><small>মোবাইল ব্যাংকিং</small>
+                    </div>
+                  </label>
+                  <label class="payment-method">
+                    <input type="radio" name="payMethod" value="nagad" />
+                    <span class="payment-method-icon pm-nagad"
+                      ><i class="fas fa-wallet"></i
+                    ></span>
+                    <div class="payment-method-text">
+                      <span>Nagad</span><small>মোবাইল ব্যাংকিং</small>
+                    </div>
+                  </label>
+                </div>
+
+                <div class="order-summary-box">
+                  <div class="summary-line">
+                    <span>পণ্যের মূল্য</span><span id="coSubtotal">৳০</span>
+                  </div>
+                  <div class="summary-line">
+                    <span>ডেলিভারি চার্জ</span><span id="coShipping">৳৬০</span>
+                  </div>
+                  <div class="summary-line total">
+                    <span>মোট প্রদেয়</span><span id="coTotal">৳৬০</span>
+                  </div>
+                </div>
+
+                <div class="terms-row">
+                  <input type="checkbox" id="coTerms" />
+                  <span
+                    >আমি
+                    <a href="#" onclick="return false;">শর্তাবলী ও নীতিমালা</a>
+                    মেনে নিচ্ছি</span
+                  >
+                </div>
+                <button
+                  type="button"
+                  class="btn-primary"
+                  id="confirmBtn"
+                  onclick="placeOrder()"
+                >
+                  <i class="fas fa-check-circle"></i> অর্ডার কনফার্ম করুন
+                </button>
+              </div>
             </div>
-            <button type="button" class="btn-primary" id="confirmBtn" onclick="placeOrder()">
-              <i class="fas fa-check-circle"></i> অর্ডার কনফার্ম করুন
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SUCCESS MODAL ════════════════════════════════════ -->
+    <div class="modal" id="successModal">
+      <div class="modal-content modal-small">
+        <div class="success-content">
+          <div class="success-icon"><i class="fas fa-check"></i></div>
+          <h3>অর্ডার সফল হয়েছে!</h3>
+          <p>
+            আপনার অর্ডারটি গ্রহণ করা হয়েছে।<br />শীঘ্রই আপনার সাথে যোগাযোগ করা
+            হবে।
+          </p>
+          <div class="order-chip">
+            <i class="fas fa-ticket-alt"></i><span id="successOrderNum"></span>
+          </div>
+          <div class="success-actions">
+            <button
+              class="btn-primary"
+              style="width: auto"
+              onclick="
+                closeModal('successModal');
+                goBack();
+              "
+            >
+              <i class="fas fa-arrow-left"></i> কেনাকাটা চালিয়ে যান
+            </button>
+            <button class="btn-ghost" onclick="closeModal('successModal')">
+              <i class="fas fa-times"></i> বন্ধ করুন
             </button>
           </div>
         </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ SUCCESS MODAL ════════════════════════════════════ -->
-<div class="modal" id="successModal">
-  <div class="modal-content modal-small">
-    <div class="success-content">
-      <div class="success-icon"><i class="fas fa-check"></i></div>
-      <h3>অর্ডার সফল হয়েছে!</h3>
-      <p>আপনার অর্ডারটি গ্রহণ করা হয়েছে।<br>শীঘ্রই আপনার সাথে যোগাযোগ করা হবে।</p>
-      <div class="order-chip"><i class="fas fa-ticket-alt"></i><span id="successOrderNum"></span></div>
-      <div class="success-actions">
-        <button class="btn-primary" style="width:auto;" onclick="closeModal('successModal');goBack();">
-          <i class="fas fa-arrow-left"></i> কেনাকাটা চালিয়ে যান
-        </button>
-        <button class="btn-ghost" onclick="closeModal('successModal')">
-          <i class="fas fa-times"></i> বন্ধ করুন
-        </button>
       </div>
     </div>
-  </div>
-</div>
 
-<script>
-  const API_URL = 'https://beeyond-harvest-admin.onrender.com/api';
-  let currentProduct = null;
-  let cart = [];
-  let checkoutItems = [];
-
-  try { const s = localStorage.getItem('cart'); if (s) cart = JSON.parse(s); } catch(e){}
-
-  function esc(s) {
-    if (!s) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  function val(id) { return (document.getElementById(id)?.value || '').trim(); }
-
-  const TOAST_ICONS = {success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'};
-  function showToast(msg, type='info') {
-    document.querySelectorAll('.toast').forEach(t=>t.remove());
-    const t = document.createElement('div');
-    t.className = `toast ${type}`;
-    t.innerHTML = `<i class="fas ${TOAST_ICONS[type]}"></i><span>${esc(msg)}</span>`;
-    document.body.appendChild(t);
-    setTimeout(()=>t.remove(), 3500);
-  }
-
-  function openModal(id) {
-    const m = document.getElementById(id);
-    if (m) { m.classList.add('active'); document.body.style.overflow='hidden'; }
-  }
-
-  function closeModal(id) {
-    const m = document.getElementById(id);
-    if (m) { m.classList.remove('active'); document.body.style.overflow=''; }
-  }
-
-  function showOverlay() { document.getElementById('loadingOverlay').classList.add('active'); }
-  function hideOverlay() { document.getElementById('loadingOverlay').classList.remove('active'); }
-
-  function goBack() {
-    if (document.referrer && document.referrer.includes(window.location.hostname)) {
-      window.history.back();
-    } else {
-      window.location.href = 'index.html';
-    }
-  }
-
-  function getProductId() {
-    const valid = id => id && id.trim() && id !== 'undefined' && id !== 'null';
-    let id = new URLSearchParams(window.location.search).get('id');
-    if (valid(id)) return id.trim();
-    id = localStorage.getItem('lastViewedProductId');
-    if (valid(id)) return id.trim();
-    return null;
-  }
-
-  function showLoading() {
-    document.getElementById('loadingState').style.display='flex';
-    document.getElementById('errorState').style.display='none';
-    document.getElementById('productDetail').style.display='none';
-  }
-  function showError(msg) {
-    document.getElementById('loadingState').style.display='none';
-    document.getElementById('errorState').style.display='block';
-    document.getElementById('productDetail').style.display='none';
-    document.getElementById('errorMsg').textContent = msg;
-  }
-  function showDetail() {
-    document.getElementById('loadingState').style.display='none';
-    document.getElementById('errorState').style.display='none';
-    document.getElementById('productDetail').style.display='block';
-  }
-
-  async function loadProduct() {
-    showLoading();
-    const pid = getProductId();
-    if (!pid) { showError('পণ্যের আইডি পাওয়া যায়নি। তালিকা থেকে আবার চেষ্টা করুন।'); return; }
-    try {
-      const res  = await fetch(`${API_URL}/products/${pid}`);
-      const data = await res.json();
-      if (!res.ok || !data.success || !data.data) throw new Error(data.message || 'পণ্য পাওয়া যায়নি');
-      currentProduct = data.data;
-      localStorage.setItem('lastViewedProductId', pid);
-      renderProduct(currentProduct);
-      loadRelated(currentProduct.category?._id || currentProduct.category, pid);
-    } catch(err) {
-      showError(err.message || 'পণ্য লোড করতে ব্যর্থ।');
-    }
-  }
-
-  function renderProduct(p) {
-    document.title = `${p.name} — BeeHarvest`;
-    const finalPrice = p.discountPrice || p.price;
-    const discount   = p.discountPrice ? Math.round(((p.price - p.discountPrice) / p.price) * 100) : 0;
-    const ph = 'https://via.placeholder.com/600x420?text=BeeHarvest';
-
-    document.getElementById('breadcrumbName').textContent = p.name.length > 40 ? p.name.slice(0,40)+'…' : p.name;
-
-    if (p.category?.name || p.category) {
-      document.getElementById('categoryTag').innerHTML =
-        `<div class="product-category-tag"><i class="fas fa-tag"></i> ${esc(p.category?.name || p.category)}</div>`;
-    }
-
-    document.getElementById('productName').textContent = p.name;
-    document.getElementById('priceMain').textContent = `৳${finalPrice.toLocaleString('bn-BD')}`;
-
-    if (p.discountPrice) {
-      const origEl = document.getElementById('priceOrig');
-      origEl.textContent = `৳${p.price.toLocaleString('bn-BD')}`;
-      origEl.style.display = 'inline';
-      const offEl = document.getElementById('priceOff');
-      offEl.textContent = `${discount}% ছাড়`;
-      offEl.style.display = 'inline-block';
-    }
-
-    const stock = p.stock || 0;
-    const qtyInput = document.getElementById('qtyInput');
-    qtyInput.max = Math.max(1, stock);
-
-    if (stock > 10) {
-      document.getElementById('stockStatus').innerHTML = `<div class="stock-pill in"><i class="fas fa-check-circle"></i> স্টকে আছে (${stock} টি)</div>`;
-      setProductBtnsDisabled(false);
-      document.getElementById('qtyNote').textContent = `সর্বোচ্চ ${stock} টি`;
-    } else if (stock > 0) {
-      document.getElementById('stockStatus').innerHTML = `<div class="stock-pill low"><i class="fas fa-exclamation-triangle"></i> মাত্র ${stock} টি বাকি</div>`;
-      setProductBtnsDisabled(false);
-      document.getElementById('qtyNote').textContent = `সর্বোচ্চ ${stock} টি`;
-    } else {
-      document.getElementById('stockStatus').innerHTML = `<div class="stock-pill out"><i class="fas fa-times-circle"></i> স্টক শেষ</div>`;
-      setProductBtnsDisabled(true);
-      document.getElementById('qtyNote').textContent = 'পুনরায় স্টক আসবে শীঘ্রই';
-    }
-
-    const metas = [];
-    if (p.sku)    metas.push(`<span class="meta-tag"><i class="fas fa-barcode"></i> SKU: ${esc(p.sku)}</span>`);
-    if (p.brand)  metas.push(`<span class="meta-tag"><i class="fas fa-trademark"></i> ${esc(p.brand)}</span>`);
-    if (p.weight) metas.push(`<span class="meta-tag"><i class="fas fa-weight-hanging"></i> ${esc(String(p.weight))}g</span>`);
-    if (p.isFeatured) metas.push(`<span class="meta-tag"><i class="fas fa-star"></i> ফিচার্ড পণ্য</span>`);
-    document.getElementById('metaTags').innerHTML = metas.join('');
-
-    const imgs = p.images || [];
-    const mi = document.getElementById('mainImage');
-    mi.src = imgs.length ? imgs[0].url : ph;
-    mi.alt = p.name;
-    mi.onerror = () => { mi.src = ph; };
-
-    const badges = [];
-    if (discount) badges.push(`<span class="img-badge discount">${discount}% ছাড়</span>`);
-    if (stock <= 0) badges.push(`<span class="img-badge out">স্টক শেষ</span>`);
-    if (p.isFeatured) badges.push(`<span class="img-badge featured"><i class="fas fa-star"></i> Featured</span>`);
-    document.getElementById('imgBadges').innerHTML = badges.join('');
-
-    const strip = document.getElementById('thumbnailStrip');
-    if (imgs.length > 1) {
-      strip.innerHTML = imgs.map((img,i) => `
-        <img src="${esc(img.url)}" class="thumbnail ${i===0?'active':''}"
-             alt="${esc(p.name)}" onclick="setImage('${esc(img.url)}',${i})"
-             onerror="this.src='${ph}'">`).join('');
-    }
-
-    let extras = '';
-    if (p.description) {
-      extras += `
-        <div class="extra-card">
-          <div class="extra-header"><i class="fas fa-align-left"></i> পণ্যের বিবরণ</div>
-          <div class="extra-body"><p>${esc(p.description)}</p></div>
-        </div>`;
-    }
-    if (p.features?.length) {
-      extras += `
-        <div class="extra-card" style="margin-top:1rem;">
-          <div class="extra-header"><i class="fas fa-star"></i> বিশেষ সুবিধাসমূহ</div>
-          <div class="extra-body">
-            <ul class="features-list">${p.features.map(f=>`<li><i class="fas fa-check-circle"></i>${esc(f)}</li>`).join('')}</ul>
-          </div>
-        </div>`;
-    }
-    if (p.specifications && Object.keys(p.specifications).length) {
-      const rows = Object.entries(p.specifications).map(([k,v]) =>
-        `<tr><td>${esc(k)}</td><td>${esc(String(v))}</td></tr>`).join('');
-      extras += `
-        <div class="extra-card" style="margin-top:1rem;">
-          <div class="extra-header"><i class="fas fa-list-ul"></i> স্পেসিফিকেশন</div>
-          <div class="extra-body"><table class="spec-table">${rows}</table></div>
-        </div>`;
-    }
-    document.getElementById('productExtras').innerHTML = extras;
-
-    showDetail();
-  }
-
-  function setProductBtnsDisabled(disabled) {
-    ['btnAddCart','btnBuyNow'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.disabled = disabled;
-    });
-  }
-
-  function setImage(url, idx) {
-    document.getElementById('mainImage').src = url;
-    document.querySelectorAll('.thumbnail').forEach((t,i) => t.classList.toggle('active', i===idx));
-  }
-
-  async function loadRelated(categoryId, excludeId) {
-    if (!categoryId) return;
-    try {
-      const res  = await fetch(`${API_URL}/products?category=${categoryId}&limit=8`);
-      const data = await res.json();
-      if (!data.success) return;
-      const products = (data.data || []).filter(p => String(p._id) !== String(excludeId)).slice(0,4);
-      if (!products.length) return;
-      const ph = 'https://via.placeholder.com/300x200?text=BeeHarvest';
-      document.getElementById('relatedGrid').innerHTML = products.map(p => `
-        <div class="related-card" onclick="window.location.href='product-detail.html?id=${p._id}'">
-          <img src="${esc(p.images?.[0]?.url || ph)}" alt="${esc(p.name)}" onerror="this.src='${ph}'">
-          <div class="related-card-info">
-            <div class="related-card-name">${esc(p.name)}</div>
-            <div class="related-card-price">৳${(p.discountPrice || p.price).toLocaleString('bn-BD')}</div>
-          </div>
-        </div>`).join('');
-      document.getElementById('relatedSection').style.display = 'block';
-    } catch(e) {}
-  }
-
-  function changeQty(delta) {
-    const el = document.getElementById('qtyInput');
-    const max = parseInt(el.max) || 99;
-    const newVal = Math.min(max, Math.max(1, (parseInt(el.value)||1) + delta));
-    el.value = newVal;
-    document.getElementById('qtyMinus').disabled = newVal <= 1;
-    document.getElementById('qtyPlus').disabled  = newVal >= max;
-  }
-
-  function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
-
-  function updateCartCount() {
-    const count = cart.reduce((s,i) => s+i.quantity, 0);
-    document.getElementById('cartCount').textContent = count;
-  }
-
-  function addToCart() {
-    if (!currentProduct || currentProduct.stock <= 0) return;
-    const qty   = parseInt(document.getElementById('qtyInput').value) || 1;
-    const price = currentProduct.discountPrice || currentProduct.price;
-    const img   = currentProduct.images?.[0]?.url || '';
-    const id    = String(currentProduct._id);
-    const existing = cart.find(i => i.productId === id);
-    if (existing) {
-      existing.quantity = Math.min((currentProduct.stock || 99), existing.quantity + qty);
-    } else {
-      cart.push({ productId:id, name:currentProduct.name, price, image:img, quantity:qty });
-    }
-    saveCart();
-    updateCartCount();
-    showToast(`"${currentProduct.name}" কার্টে যোগ হয়েছে`, 'success');
-  }
-
-  function buyNow() {
-    if (!currentProduct || currentProduct.stock <= 0) return;
-    const qty   = parseInt(document.getElementById('qtyInput').value) || 1;
-    const price = currentProduct.discountPrice || currentProduct.price;
-    const img   = currentProduct.images?.[0]?.url || '';
-    checkoutItems = [{ productId: String(currentProduct._id), name: currentProduct.name, price, image: img, quantity: qty }];
-    populateCheckoutModal(checkoutItems);
-    openModal('checkoutModal');
-  }
-
-  function openCheckoutDirect() {
-    if (cart.length === 0) { showToast('কার্ট খালি! আগে পণ্য যোগ করুন', 'error'); return; }
-    checkoutItems = [...cart];
-    populateCheckoutModal(checkoutItems);
-    openModal('checkoutModal');
-  }
-
-  function populateCheckoutModal(items) {
-    const subtotal = items.reduce((s,i) => s + i.price * i.quantity, 0);
-    const shipping = 60;
-    const total    = subtotal + shipping;
-    const ph = 'https://via.placeholder.com/52?text=P';
-
-    document.getElementById('coItemsList').innerHTML = items.map(item => `
-      <div class="checkout-item">
-        <img src="${esc(item.image||ph)}" alt="${esc(item.name)}" onerror="this.src='${ph}'">
-        <div style="flex:1;min-width:0;">
-          <div class="checkout-item-name">${esc(item.name)}</div>
-          <div class="checkout-item-meta">৳${item.price.toLocaleString()} × ${item.quantity}</div>
-        </div>
-        <div class="checkout-item-total">৳${(item.price*item.quantity).toLocaleString()}</div>
-      </div>`).join('');
-
-    document.getElementById('coSubtotal').textContent = `৳${subtotal.toLocaleString()}`;
-    document.getElementById('coShipping').textContent  = `৳${shipping.toLocaleString()}`;
-    document.getElementById('coTotal').textContent     = `৳${total.toLocaleString()}`;
-  }
-
-  async function placeOrder() {
-    const fullName = val('coName');
-    const email    = val('coEmail');
-    const phone    = val('coPhone');
-    const address  = val('coAddress');
-    const city     = val('coCity');
-    const zipCode  = val('coZip');
-    const notes    = val('coNotes');
-    const payMethod= document.querySelector('input[name="payMethod"]:checked')?.value || 'COD';
-    const accepted = document.getElementById('coTerms')?.checked;
-
-    if (!fullName || !email || !phone || !address || !city) {
-      showToast('সব প্রয়োজনীয় তথ্য পূরণ করুন (*)', 'error'); return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showToast('সঠিক ইমেইল ঠিকানা দিন', 'error'); return;
-    }
-    if (!/^01[3-9]\d{8}$/.test(phone)) {
-      showToast('সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)', 'error'); return;
-    }
-    if (!accepted) { showToast('শর্তাবলী মেনে নিন', 'error'); return; }
-    if (!checkoutItems.length) { showToast('কোনো পণ্য নেই!', 'error'); return; }
-
-    const pmMap = { COD:'cash_on_delivery', bkash:'bkash', nagad:'nagad' };
-    const subtotal = checkoutItems.reduce((s,i) => s + i.price * i.quantity, 0);
-
-    const orderData = {
-      items: checkoutItems.map(i => ({ product:i.productId, name:i.name, price:i.price, quantity:i.quantity })),
-      customer: {
-        name:fullName, email, phone,
-        address:{ street:address, city, area:city, district:city, division:city, postalCode:zipCode||'' }
-      },
-      paymentMethod: pmMap[payMethod] || 'cash_on_delivery',
-      deliveryCharge: 60,
-      notes: notes || ''
-    };
-
-    const btn = document.getElementById('confirmBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রক্রিয়াকরণ...';
-    showOverlay();
-
-    try {
-      const res  = await fetch(`${API_URL}/orders`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(orderData)
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'অর্ডার দেওয়া যায়নি');
-
-      const orderNum = data.data?.orderNumber || data.data?._id?.slice(-8) || 'SUCCESS';
-
-      const orderedIds = checkoutItems.map(i => i.productId);
-      cart = cart.filter(i => !orderedIds.includes(i.productId));
-      saveCart();
-      updateCartCount();
-
-      hideOverlay();
-      closeModal('checkoutModal');
-
-      document.getElementById('successOrderNum').textContent = `#${orderNum}`;
-      setTimeout(() => {
-        openModal('successModal');
-        startConfetti();
-        setTimeout(stopConfetti, 4000);
-      }, 300);
-
-      showToast('অর্ডার সফল হয়েছে! 🎉', 'success');
-      document.getElementById('checkoutForm').reset();
-
-    } catch(err) {
-      hideOverlay();
-      showToast(err.message || 'অর্ডার দেওয়া যায়নি। আবার চেষ্টা করুন।', 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-check-circle"></i> অর্ডার কনফার্ম করুন';
-    }
-  }
-
-  let _raf = null;
-  function startConfetti() {
-    const canvas = document.getElementById('confettiCanvas');
-    if (!canvas) return;
-    canvas.classList.add('active');
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    const ctx = canvas.getContext('2d');
-    const colors = ['#F5A623','#FDD882','#C47F11','#0D1B3E','#1A2E5A','#28a745','#ff6b6b'];
-    const particles = Array.from({length:160}, () => ({
-      x:Math.random()*canvas.width, y:-20-Math.random()*canvas.height,
-      size:Math.random()*9+4, color:colors[Math.floor(Math.random()*colors.length)],
-      vy:Math.random()*5+3, vx:(Math.random()-0.5)*3,
-      rot:Math.random()*360, rotV:(Math.random()-0.5)*8
-    }));
-    function draw() {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      let alive=0;
-      for (const p of particles) {
-        p.y+=p.vy; p.x+=p.vx; p.rot+=p.rotV;
-        if (p.y < canvas.height) alive++;
-        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
-        ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
-        ctx.restore();
-      }
-      if (alive>0) _raf=requestAnimationFrame(draw); else stopConfetti();
-    }
-    draw();
-  }
-  function stopConfetti() {
-    const canvas = document.getElementById('confettiCanvas');
-    if (canvas) { canvas.classList.remove('active'); canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height); }
-    if (_raf) { cancelAnimationFrame(_raf); _raf=null; }
-  }
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.modal.active').forEach(m => closeModal(m.id));
-    }
-  });
-  document.querySelectorAll('.modal').forEach(m => {
-    m.addEventListener('click', e => { if (e.target===m) closeModal(m.id); });
-  });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    updateCartCount();
-    loadProduct();
-    document.getElementById('qtyMinus').disabled = true;
-  });
-</script>
-</body>
+    <script src="js/details.min.js"></script>
+  </body>
 </html>
