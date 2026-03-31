@@ -71,6 +71,7 @@
           </button>
           <div class="user-avatar-btn">
             <img
+            loading="lazy" 
               src="https://icons.veryicon.com/png/o/miscellaneous/user-avatar/user-avatar-male-5.png"
               alt="ব্যবহারকারী"
               id="userAvatar"
@@ -536,18 +537,18 @@
                     <label>জেলা/শহর *</label>
                     <select id="checkoutCity" required>
                       <option value="">নির্বাচন করুন</option>
-                      <option>ঢাকা</option>
-                      <option>চট্টগ্রাম</option>
-                      <option>রাজশাহী</option>
-                      <option>খুলনা</option>
-                      <option>বরিশাল</option>
-                      <option>সিলেট</option>
-                      <option>রংপুর</option>
-                      <option>ময়মনসিংহ</option>
-                      <option>কুমিল্লা</option>
-                      <option>নারায়ণগঞ্জ</option>
-                      <option>গাজীপুর</option>
-                      <option>টাঙ্গাইল</option>
+                      <option value="dhaka">ঢাকা</option>
+                      <option value="chittagong">চট্টগ্রাম</option>
+                      <option value="rajshahi">রাজশাহী</option>
+                      <option value="khulna">খুলনা</option>
+                      <option value="barisal">বরিশাল</option>
+                      <option value="sylhet">সিলেট</option>
+                      <option value="rangpur">রংপুর</option>
+                      <option value="mymensingh">ময়মনসিংহ</option>
+                      <option value="comilla">কুমিল্লা</option>
+                      <option value="narayanganj">নারায়ণগঞ্জ</option>
+                      <option value="gazipur">গাজীপুর</option>
+                      <option value="tangail">টাঙ্গাইল</option>
                     </select>
                   </div>
                   <div class="form-group">
@@ -1116,7 +1117,7 @@
       </div>
     </div>
 
-    <script>
+    <!-- <script>
 (function() {
     'use strict';
     
@@ -1355,8 +1356,8 @@
     initSecurity();
     
 })();
-</script>
+</script> -->
     <!-- <script src="js/home.min.js"></script> -->
-    <script src="js/customer.min.js" defer></script>
+    <script src="js/customer.js"></script>
   </body>
 </html>
