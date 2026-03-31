@@ -376,6 +376,246 @@
       </div>
     </div>
 
+    <script>
+(function() {
+    'use strict';
+    
+    // ============================================================
+    // PROFESSIONAL SECURITY MEASURES
+    // ============================================================
+    
+    // Configuration - Easy to modify
+    const config = {
+        disableRightClick: true,      // Disable context menu
+        disableDevTools: true,        // Disable dev tools shortcuts
+        disableViewSource: true,      // Disable view source
+        showWarning: true,            // Show console warning
+        redirectOnDevTools: false,    // Redirect if dev tools opened
+        redirectUrl: '/',             // URL to redirect to
+        logAttempts: true             // Log to console (for debugging)
+    };
+    
+    // ============================================================
+    // 1. PROTECTED CONSOLE (Prevents tampering)
+    // ============================================================
+    const originalConsole = {
+        log: console.log,
+        warn: console.warn,
+        error: console.error,
+        info: console.info
+    };
+    
+    // Override console methods to prevent clearing
+    console.clear = function() {
+        originalConsole.warn('⚠️ Console clearing is disabled');
+        return false;
+    };
+    
+    // ============================================================
+    // 2. ANTI-DEBUGGING (Detects DevTools)
+    // ============================================================
+    let devToolsOpen = false;
+    let devToolsCheckCount = 0;
+    
+    function detectDevTools() {
+        const threshold = 160; // pixels difference indicates devtools
+        
+        const check = () => {
+            const widthDiff = window.outerWidth - window.innerWidth;
+            const heightDiff = window.outerHeight - window.innerHeight;
+            
+            const isOpen = widthDiff > threshold || heightDiff > threshold;
+            
+            if (isOpen && !devToolsOpen) {
+                devToolsOpen = true;
+                devToolsCheckCount++;
+                
+                if (config.logAttempts) {
+                    originalConsole.warn('🔒 DevTools detected!');
+                }
+                
+                if (config.showWarning) {
+                    showSecurityWarning();
+                }
+                
+                if (config.redirectOnDevTools && devToolsCheckCount > 2) {
+                    window.location.href = config.redirectUrl;
+                }
+            } else if (!isOpen && devToolsOpen) {
+                devToolsOpen = false;
+            }
+        };
+        
+        // Check every 3 seconds
+        setInterval(check, 3000);
+    }
+    
+    // ============================================================
+    // 3. SECURITY WARNING (Professional notification)
+    // ============================================================
+    function showSecurityWarning() {
+        const warningId = 'security-warning';
+        if (document.getElementById(warningId)) return;
+        
+        const warning = document.createElement('div');
+        warning.id = warningId;
+        warning.innerHTML = `
+            <div style="
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #0D1B3E, #1A2E5A);
+                color: #F5A623;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 13px;
+                font-family: monospace;
+                z-index: 10000;
+                border-left: 3px solid #F5A623;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                backdrop-filter: blur(10px);
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            ">
+                <i class="fas fa-shield-alt"></i> 
+                <span style="color: #fff;">Developer tools detected</span> — Please use responsibly
+            </div>
+        `;
+        document.body.appendChild(warning);
+        
+        // Fade in
+        setTimeout(() => warning.firstChild.style.opacity = '0.95', 100);
+        
+        // Fade out after 5 seconds
+        setTimeout(() => {
+            warning.firstChild.style.opacity = '0';
+            setTimeout(() => warning.remove(), 500);
+        }, 5000);
+    }
+    
+    // ============================================================
+    // 4. DISABLE RIGHT CLICK (Professional - allows legitimate uses)
+    // ============================================================
+    if (config.disableRightClick) {
+        document.addEventListener('contextmenu', (e) => {
+            // Allow right-click on input fields, textareas, and selects
+            const target = e.target;
+            const allowedTags = ['INPUT', 'TEXTAREA', 'SELECT'];
+            
+            if (allowedTags.includes(target.tagName)) {
+                return true; // Allow right-click on form elements
+            }
+            
+            e.preventDefault();
+            
+            // Optional: Show a subtle message (once)
+            if (!window._rightClickWarningShown) {
+                window._rightClickWarningShown = true;
+                originalConsole.info('🔒 Right-click is disabled on this site');
+            }
+            return false;
+        });
+    }
+    
+    // ============================================================
+    // 5. DISABLE DEV TOOLS SHORTCUTS (Professional blocking)
+    // ============================================================
+    if (config.disableDevTools) {
+        document.addEventListener('keydown', (e) => {
+            // F12
+            if (e.key === 'F12') {
+                e.preventDefault();
+                if (config.logAttempts) originalConsole.warn('🔒 F12 blocked');
+                return false;
+            }
+            
+            // Ctrl+Shift+I (Chrome DevTools)
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                e.preventDefault();
+                if (config.logAttempts) originalConsole.warn('🔒 DevTools shortcut blocked');
+                return false;
+            }
+            
+            // Ctrl+Shift+J (Console)
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                e.preventDefault();
+                if (config.logAttempts) originalConsole.warn('🔒 Console shortcut blocked');
+                return false;
+            }
+            
+            // Ctrl+U (View Source)
+            if (config.disableViewSource && e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+                if (config.logAttempts) originalConsole.warn('🔒 View source blocked');
+                return false;
+            }
+            
+            // Ctrl+S (Save page)
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                if (config.logAttempts) originalConsole.info('💾 Save disabled');
+                return false;
+            }
+        });
+    }
+    
+    // ============================================================
+    // 6. CONSOLE WARNING (Professional notice)
+    // ============================================================
+    if (config.showWarning) {
+        const style = [
+            'font-size: 14px',
+            'font-family: monospace',
+            'color: #F5A623',
+            'background: #0D1B3E',
+            'padding: 8px 12px',
+            'border-radius: 4px',
+            'border-left: 3px solid #F5A623'
+        ].join(';');
+        
+        originalConsole.log('%c🔒 This site is protected — Please respect our intellectual property', style);
+        originalConsole.log('%c📧 For any inquiries, contact: support@beeharvest.com.bd', 'color: #6B7A99; font-size: 12px');
+    }
+    
+    // ============================================================
+    // 7. ANTI-DOM MANIPULATION (Prevents script injection)
+    // ============================================================
+    const originalCreateElement = document.createElement;
+    document.createElement = function(tagName) {
+        const element = originalCreateElement.call(document, tagName);
+        
+        // Detect script injection attempts
+        if (tagName.toLowerCase() === 'script') {
+            Object.defineProperty(element, 'src', {
+                set: function(value) {
+                    if (value && !value.includes(window.location.origin)) {
+                        originalConsole.warn('🔒 External script blocked:', value);
+                        return;
+                    }
+                    originalCreateElement.call(document, 'script').src = value;
+                }
+            });
+        }
+        return element;
+    };
+    
+    // ============================================================
+    // 8. INITIALIZE SECURITY MEASURES
+    // ============================================================
+    function initSecurity() {
+        // Detect DevTools after a short delay
+        setTimeout(detectDevTools, 1000);
+        
+        // Log initialization
+        originalConsole.info('🛡️ Security measures active');
+    }
+    
+    // Start security
+    initSecurity();
+    
+})();
+</script>
     <script src="js/details.min.js"></script>
   </body>
 </html>
