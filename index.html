@@ -610,16 +610,47 @@
                 </div>
                 <div class="order-summary-box">
                   <div class="summary-line">
-                    <span>পণ্যের মূল্য</span
-                    ><span id="summarySubtotal">৳০</span>
+                    <span>পণ্যের মূল্য</span><span id="summarySubtotal">৳০</span>
                   </div>
                   <div class="summary-line">
-                    <span>ডেলিভারি চার্জ</span
-                    ><span id="summaryShipping">৳৬০</span>
+                    <span>ডেলিভারি চার্জ</span><span id="summaryShipping">৳৬০</span>
+                  </div>
+                  <div class="summary-line" id="summaryDiscountRow" style="display:none">
+                    <span style="color:#c6f135">কুপন ছাড়</span>
+                    <span id="summaryDiscount" style="color:#c6f135">-৳০</span>
                   </div>
                   <div class="summary-line total">
                     <span>মোট প্রদেয়</span><span id="summaryTotal">৳৬০</span>
                   </div>
+                </div>
+                <div class="coupon-row">
+                  <div class="coupon-label">
+                    <i class="fas fa-ticket"></i> কুপন কোড আছে?
+                  </div>
+                  <div class="coupon-input-wrap">
+                    <input
+                      type="text"
+                      id="couponCodeInput"
+                      placeholder="কুপন কোড লিখুন (যেমন: HARVEST20)"
+                      autocomplete="off"
+                      spellcheck="false"
+                      style="text-transform:uppercase"
+                      oninput="this.value=this.value.toUpperCase()"
+                      onkeydown="if(event.key==='Enter'){event.preventDefault();applyCouponFromUI();}"
+                    />
+                    <button
+                      type="button"
+                      id="couponApplyBtn"
+                      onclick="applyCouponFromUI()"
+                    >প্রয়োগ করুন</button>
+                    <button
+                      type="button"
+                      id="couponRemoveBtn"
+                      onclick="removeCouponFromUI()"
+                      style="display:none"
+                    ><i class="fas fa-times"></i> বাদ দিন</button>
+                  </div>
+                  <div id="couponMsg" class="coupon-msg"></div>
                 </div>
                 <div class="terms-row">
                   <input type="checkbox" id="acceptTerms" /><span
