@@ -1354,6 +1354,16 @@
     
 })();
 </script>
+<script>
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const trackNum = params.get('track');
+    if (trackNum) {
+      window._autoTrackOrderNumber = trackNum.toUpperCase();
+      window.history.replaceState({}, '', '/');
+    }
+  })();
+</script>
     <!-- <script src="js/home.min.js"></script> -->
     <script src="js/customer.js"></script>
   </body>
