@@ -1326,3 +1326,168 @@ select {
     height: 60px;
   }
 }
+
+/* ══════════════════════════════════════════════════════════
+   COUPON ROW — Light theme fix
+══════════════════════════════════════════════════════════ */
+
+/* ─── Coupon container ──────────────────────────────────── */
+.coupon-row {
+  margin: 0.75rem 0 1rem;
+  padding: 1rem;
+  background: rgba(245, 166, 35, 0.06);        /* subtle honey tint */
+  border: 1.5px dashed rgba(245, 166, 35, 0.45);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.coupon-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--honey-dark, #c47f00);            /* visible on light bg */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.3px;
+}
+
+.coupon-label i { color: var(--honey, #f5a623); font-size: 0.75rem; }
+
+/* ─── Input row ─────────────────────────────────────────── */
+.coupon-input-wrap {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.coupon-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1.5px solid rgba(0, 0, 0, 0.18);     /* dark border on light bg */
+  border-radius: var(--radius-sm);
+  background: #ffffff;                           /* solid white */
+  color: #1a1a2e;                               /* dark text */
+  font-family: 'DM Sans', monospace;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  transition: all var(--transition);
+}
+
+.coupon-input-wrap input::placeholder {
+  color: rgba(0, 0, 0, 0.35);                  /* visible placeholder */
+  font-weight: 400;
+  letter-spacing: 0;
+  font-size: 0.82rem;
+}
+
+.coupon-input-wrap input:focus {
+  outline: none;
+  border-color: var(--honey, #f5a623);
+  background: #fffdf5;
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.2);
+}
+
+/* ─── Apply button ──────────────────────────────────────── */
+#couponApplyBtn {
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--honey, #f5a623) 0%, var(--honey-dark, #c47f00) 100%);
+  color: #ffffff;                               /* white text on amber */
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#couponApplyBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(245, 166, 35, 0.45);
+}
+
+#couponApplyBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Remove button ─────────────────────────────────────── */
+#couponRemoveBtn {
+  padding: 10px 12px;
+  background: rgba(244, 63, 94, 0.1);
+  color: #dc2626;                               /* red visible on light */
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#couponRemoveBtn:hover {
+  background: rgba(244, 63, 94, 0.2);
+  border-color: rgba(244, 63, 94, 0.5);
+}
+
+/* ─── Message ───────────────────────────────────────────── */
+.coupon-msg {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  min-height: 0;
+  transition: all 0.2s ease;
+}
+
+.coupon-msg:empty { display: none; }
+
+.coupon-msg-success {
+  color: #16a34a;                               /* green visible on light */
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.coupon-msg-error {
+  color: #dc2626;                               /* red visible on light */
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+/* ─── Discount row in summary box ───────────────────────── */
+.order-summary-box .summary-line#summaryDiscountRow {
+  animation: discountPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes discountPop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+/* ─── Mobile ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .coupon-input-wrap {
+    flex-direction: column;
+  }
+
+  #couponApplyBtn,
+  #couponRemoveBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
