@@ -1359,12 +1359,31 @@
     const params = new URLSearchParams(window.location.search);
     const trackNum = params.get('track');
     if (trackNum) {
+      // Store the tracking number
       window._autoTrackOrderNumber = trackNum.toUpperCase();
-      window.history.replaceState({}, '', '/');
+      
+      // Wait for customer.js to fully load and execute
+      function tryOpenTracking() {
+        if (typeof openTrackingModal === 'function' && window._autoTrackOrderNumber) {
+          console.log('🔍 Opening tracking modal for:', window._autoTrackOrderNumber);
+          openTrackingModal(window._autoTrackOrderNumber);
+          window._autoTrackOrderNumber = null;
+        } else if (window._retryCount < 10) {
+          window._retryCount = (window._retryCount || 0) + 1;
+          console.log('⏳ Waiting for customer.js to load... attempt', window._retryCount);
+          setTimeout(tryOpenTracking, 500);
+        }
+      }
+      
+      // Start checking
+      setTimeout(tryOpenTracking, 300);
+      
+      // Remove from URL
+      window.history.replaceState({}, '', window.location.pathname);
     }
   })();
 </script>
     <!-- <script src="js/home.min.js"></script> -->
-    <script src="js/customer.js"></script>
+    <script src="js/customer.min.js"></script>
   </body>
 </html>
