@@ -4929,21 +4929,29 @@ body.modal-open {
   border-radius: 4px;
 }
 /* ═══════════════════════════════════════════════════════════
-   CHECKOUT MODAL — ULTRA SMOOTH MOBILE PERFORMANCE FIX
-   Eliminates lag, glitching, and stuttering on mobile
+   CHECKOUT MODAL — MOBILE PERFORMANCE OPTIMIZATION (CSS ONLY)
+   Fixes lag, stuttering, and glitching completely
 ═══════════════════════════════════════════════════════════ */
 
-/* Force hardware acceleration and prevent repaint lag */
+/* Force GPU acceleration on modal */
 #checkoutModal {
-  will-change: transform, opacity;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
 }
 
-/* Mobile-specific optimizations */
+/* Mobile-specific optimizations - ONLY CSS, no JS */
 @media (max-width: 768px) {
+  /* Disable backdrop-filter on mobile to prevent lag */
+  #checkoutModal.modal {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(13, 27, 62, 0.85) !important;
+  }
+  
   /* Override modal-large max-width constraint */
   #checkoutModal.modal .modal-large,
   .modal#checkoutModal .modal-content {
@@ -4954,72 +4962,63 @@ body.modal-open {
     max-height: 90vh !important;
     margin: 0 !important;
     
-    /* CRITICAL: Performance optimizations */
+    /* Performance optimizations */
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
     will-change: transform;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    
+    /* Remove shadows on mobile for performance */
+    box-shadow: none !important;
   }
   
   /* Position modal at bottom for better mobile UX */
   #checkoutModal.modal {
     align-items: flex-end !important;
     padding: 0 !important;
-    background: rgba(13, 27, 62, 0.7) !important;
-    
-    /* Prevent backdrop filter lag on mobile */
-    backdrop-filter: blur(2px) !important;
-    -webkit-backdrop-filter: blur(2px) !important;
+    background: rgba(13, 27, 62, 0.85) !important;
   }
   
-  /* FASTER, SMOOTHER animation - no scaling, just slide up */
+  /* SIMPLER animation - just slide up, no scale */
   #checkoutModal.modal .modal-content {
-    animation: modalSlideUpFast 0.25s cubic-bezier(0.2, 0.9, 0.4, 1) forwards !important;
+    animation: modalSlideUpSimple 0.2s ease-out forwards !important;
     border-radius: 28px 28px 0 0 !important;
     overflow-y: auto !important;
-    
-    /* GPU acceleration */
-    transform: translate3d(0, 100%, 0);
-    -webkit-transform: translate3d(0, 100%, 0);
+    transition: none !important;
   }
   
-  @keyframes modalSlideUpFast {
+  @keyframes modalSlideUpSimple {
     0% {
-      transform: translate3d(0, 100%, 0);
-      opacity: 0.95;
+      transform: translateY(100%);
     }
     100% {
-      transform: translate3d(0, 0, 0);
-      opacity: 1;
+      transform: translateY(0);
     }
   }
   
-  /* Remove the default modalSlide animation which causes lag */
+  /* Remove complex animations that cause repaints */
   #checkoutModal.modal.active .modal-content {
-    animation: modalSlideUpFast 0.25s cubic-bezier(0.2, 0.9, 0.4, 1) forwards !important;
+    animation: modalSlideUpSimple 0.2s ease-out forwards !important;
   }
   
-  /* Make modal body scrollable with better padding and smoother scroll */
+  /* Make modal body scrollable with better padding */
   #checkoutModal .modal-body {
-    padding: 1.25rem !important;
-    max-height: calc(90vh - 70px) !important;
+    padding: 1rem !important;
+    max-height: calc(90vh - 60px) !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
-    
-    /* Smoother scrolling */
-    scroll-behavior: smooth;
   }
   
   /* Convert checkout grid to single column (full width) */
   #checkoutModal .checkout-grid {
     grid-template-columns: 1fr !important;
-    gap: 1rem !important;
+    gap: 0.875rem !important;
   }
   
   /* Make checkout sections full width */
   #checkoutModal .checkout-section {
-    padding: 1.25rem !important;
+    padding: 1rem !important;
     border-radius: var(--radius-lg) !important;
   }
   
@@ -5034,18 +5033,18 @@ body.modal-open {
   #checkoutModal .form-group textarea,
   #checkoutModal .form-group select {
     padding: 12px 14px !important;
-    font-size: 16px !important; /* Prevents zoom on iOS */
+    font-size: 16px !important;
   }
   
   /* Payment methods full width */
   #checkoutModal .payment-method {
-    padding: 0.875rem 1rem !important;
+    padding: 0.75rem 1rem !important;
   }
   
   /* Coupon input row stacks vertically */
   #checkoutModal .coupon-input-wrap {
     flex-direction: column !important;
-    gap: 0.625rem !important;
+    gap: 0.5rem !important;
   }
   
   #checkoutModal .coupon-input-wrap input {
@@ -5063,7 +5062,7 @@ body.modal-open {
   
   /* Checkout items list - better spacing */
   #checkoutModal .checkout-items-list {
-    max-height: 280px !important;
+    max-height: 260px !important;
   }
   
   #checkoutModal .checkout-item {
@@ -5072,13 +5071,13 @@ body.modal-open {
   }
   
   #checkoutModal .checkout-item img {
-    width: 56px !important;
-    height: 56px !important;
+    width: 52px !important;
+    height: 52px !important;
   }
   
   /* Order summary box - full width */
   #checkoutModal .order-summary-box {
-    padding: 1rem !important;
+    padding: 0.875rem !important;
   }
   
   /* Terms row - better alignment */
@@ -5096,44 +5095,54 @@ body.modal-open {
   
   /* Modal header adjustments for mobile */
   #checkoutModal .modal-header {
-    padding: 1rem 1.25rem !important;
+    padding: 0.875rem 1rem !important;
     border-radius: 28px 28px 0 0 !important;
-    
-    /* Prevent header lag */
-    will-change: auto;
-    transform: none;
+    min-height: auto !important;
   }
   
   #checkoutModal .modal-header h3 {
-    font-size: 1.1rem !important;
+    font-size: 1rem !important;
   }
   
   #checkoutModal .close-modal {
-    width: 36px !important;
-    height: 36px !important;
+    width: 32px !important;
+    height: 32px !important;
   }
   
   /* Section titles - smaller on mobile */
   #checkoutModal .checkout-section-title {
-    font-size: 1rem !important;
-    margin-bottom: 1rem !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 0.875rem !important;
+    padding-bottom: 0.5rem !important;
   }
   
   /* Payment method icons slightly smaller */
   #checkoutModal .payment-method-icon {
     width: 32px !important;
     height: 32px !important;
+    font-size: 0.85rem !important;
+  }
+  
+  /* Summary lines - more compact */
+  #checkoutModal .summary-line {
+    font-size: 0.8rem !important;
+    padding: 4px 0 !important;
+  }
+  
+  #checkoutModal .summary-line.total {
     font-size: 0.9rem !important;
+    padding-top: 8px !important;
+    margin-top: 6px !important;
   }
   
   /* Fix for very small screens */
   @media (max-width: 480px) {
     #checkoutModal .modal-body {
-      padding: 1rem !important;
+      padding: 0.875rem !important;
     }
     
     #checkoutModal .checkout-section {
-      padding: 1rem !important;
+      padding: 0.875rem !important;
     }
     
     #checkoutModal .checkout-item-name {
@@ -5142,25 +5151,27 @@ body.modal-open {
     
     #checkoutModal .checkout-item-meta,
     #checkoutModal .checkout-item-total {
-      font-size: 0.8rem !important;
-    }
-    
-    #checkoutModal .summary-line {
-      font-size: 0.8rem !important;
-    }
-    
-    #checkoutModal .summary-line.total {
-      font-size: 0.95rem !important;
+      font-size: 0.75rem !important;
     }
     
     /* Make coupon row more compact */
     #checkoutModal .coupon-row {
-      padding: 0.75rem !important;
-      margin: 0.5rem 0 0.75rem !important;
+      padding: 0.625rem !important;
+      margin: 0.5rem 0 0.625rem !important;
     }
     
-    .coupon-label {
-      font-size: 0.75rem !important;
+    #checkoutModal .coupon-label {
+      font-size: 0.7rem !important;
+    }
+    
+    /* Smaller form group spacing */
+    #checkoutModal .form-group {
+      margin-bottom: 0.75rem !important;
+    }
+    
+    #checkoutModal .form-group label {
+      font-size: 0.7rem !important;
+      margin-bottom: 4px !important;
     }
   }
 }
@@ -5177,13 +5188,18 @@ body.modal-open {
   }
 }
 
-/* Ensure modal backdrop covers everything without lag */
+/* Remove backdrop-filter for better performance on all modals */
 .modal.active {
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-/* Prevent body scroll when modal is open - NO LAG */
+/* Simplify modal background transition */
+.modal {
+  transition: none !important;
+}
+
+/* Prevent body scroll when modal is open - smooth */
 body.modal-open {
   overflow: hidden;
   position: fixed;
@@ -5191,31 +5207,13 @@ body.modal-open {
   height: 100%;
 }
 
-/* Smooth scroll inside modal with hardware acceleration */
-#checkoutModal .modal-body::-webkit-scrollbar {
-  width: 4px;
+/* Smooth scroll inside modal with native performance */
+#checkoutModal .modal-body {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
-#checkoutModal .modal-body::-webkit-scrollbar-track {
-  background: var(--cream-dark);
-  border-radius: 4px;
-}
-
-#checkoutModal .modal-body::-webkit-scrollbar-thumb {
-  background: var(--honey);
-  border-radius: 4px;
-}
-
-/* CRITICAL: Remove transition from modal background to prevent lag */
-#checkoutModal.modal {
-  transition: none !important;
-}
-
-#checkoutModal.modal.active {
-  transition: none !important;
-}
-
-/* Ensure all form elements have proper rendering */
+/* Ensure all form elements have proper rendering without lag */
 #checkoutModal input,
 #checkoutModal select,
 #checkoutModal textarea,
@@ -5223,6 +5221,8 @@ body.modal-open {
   -webkit-appearance: none;
   appearance: none;
   border-radius: var(--radius-sm);
+  /* Prevent tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Fix for iOS input zoom - prevent layout shifts */
@@ -5232,4 +5232,34 @@ body.modal-open {
   #checkoutModal textarea {
     font-size: 16px !important;
   }
+}
+
+/* Disable all transitions on modal elements for performance */
+#checkoutModal * {
+  transition-property: none !important;
+}
+
+/* Re-enable only essential transitions */
+#checkoutModal .btn-primary,
+#checkoutModal .btn-outline,
+#checkoutModal .btn-ghost {
+  transition: transform 0.15s ease, background 0.15s ease !important;
+}
+
+/* Prevent FOUC (Flash of Unstyled Content) */
+#checkoutModal {
+  visibility: visible !important;
+}
+
+/* Optimize scrollbar for performance */
+#checkoutModal .modal-body::-webkit-scrollbar {
+  width: 3px;
+}
+
+#checkoutModal .modal-body::-webkit-scrollbar-track {
+  background: var(--cream-dark);
+}
+
+#checkoutModal .modal-body::-webkit-scrollbar-thumb {
+  background: var(--honey);
 }
