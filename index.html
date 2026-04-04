@@ -157,7 +157,7 @@
                       <div class="hc-product-price">৳২২০</div>
                     </div>
                     <div class="hc-product" onclick="navigateTo('products')">
-                      <span class="hc-product-emoji">🫙</span>
+                      <span class="hc-product-emoji">🧴</span>
                       <div class="hc-product-name">দেশি ঘি</div>
                       <div class="hc-product-price">৳৫৮০</div>
                     </div>
@@ -1144,7 +1144,58 @@
         </button>
       </div>
     </div>
+    <!-- ═══ BEEHARVEST CHATBOT WIDGET ════════════════════════ -->
+<div id="beeChatFab" class="bee-fab" onclick="toggleBeeChat()" aria-label="চ্যাটবট খুলুন">
+  <div class="bee-fab-ring"></div>
+  <div class="bee-fab-icon open-icon">🐝</div>
+  <div class="bee-fab-icon close-icon"><i class="fas fa-times"></i></div>
+  <span class="bee-fab-badge" id="beeFabBadge" style="display:none">1</span>
+  <div class="bee-fab-tooltip">সাহায্য দরকার?</div>
+</div>
 
+<div class="bee-chat-window" id="beeChatWindow">
+  <!-- Header -->
+  <div class="bee-chat-header">
+    <div class="bee-header-left">
+      <div class="bee-avatar-wrap">
+        <div class="bee-avatar">🐝</div>
+        <span class="bee-status-dot"></span>
+      </div>
+      <div class="bee-header-info">
+        <div class="bee-header-name">Bee সহকারী</div>
+        <div class="bee-header-status"><span class="bee-pulse"></span> অনলাইন · সবসময় প্রস্তুত</div>
+      </div>
+    </div>
+    <div class="bee-header-actions">
+      <button class="bee-head-btn" onclick="clearBeeChat()" title="পরিষ্কার করুন"><i class="fas fa-rotate-right"></i></button>
+      <button class="bee-head-btn" onclick="toggleBeeChat()" title="বন্ধ করুন"><i class="fas fa-chevron-down"></i></button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="bee-messages" id="beeChatMessages"></div>
+
+  <!-- Quick Suggestions -->
+  <div class="bee-suggestions" id="beeSuggestions"></div>
+
+  <!-- Input -->
+  <div class="bee-input-area">
+    <div class="bee-input-wrap">
+      <input 
+        type="text" 
+        id="beeChatInput" 
+        class="bee-input"
+        placeholder="আপনার প্রশ্ন লিখুন..."
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendBeeMessage();}"
+      />
+      <button class="bee-send-btn" id="beeSendBtn" onclick="sendBeeMessage()">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+    <div class="bee-input-footer">🔒 সুরক্ষিত · BeeHarvest AI</div>
+  </div>
+</div>
     <script>
 (function() {
     'use strict';
