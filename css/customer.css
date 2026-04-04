@@ -5268,7 +5268,7 @@ body.modal-open {
    Restores hidden form controls after performance optimizations
 ═══════════════════════════════════════════════════════════ */
 
-/* Restore checkbox visibility */
+/* Restore checkbox visibility - NO pseudo-elements */
 #checkoutModal input[type="checkbox"] {
   -webkit-appearance: checkbox !important;
   appearance: checkbox !important;
@@ -5276,30 +5276,23 @@ body.modal-open {
   height: 18px !important;
   min-width: 18px !important;
   margin: 0 !important;
-  position: relative !important;
+  margin-right: 8px !important;
   cursor: pointer !important;
-  background: white !important;
-  border: 2px solid var(--border) !important;
-  border-radius: 4px !important;
   flex-shrink: 0 !important;
-}
-
-#checkoutModal input[type="checkbox"]:checked {
-  background: var(--honey) !important;
-  border-color: var(--honey) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
+  pointer-events: auto !important;
   position: relative !important;
+  background: transparent !important;
+  border: none !important;
 }
 
-#checkoutModal input[type="checkbox"]:checked::before {
-  content: '\f00c' !important;
-  font-family: 'Font Awesome 6 Free' !important;
-  font-weight: 900 !important;
-  font-size: 11px !important;
-  color: var(--navy) !important;
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
+/* Remove ANY pseudo-elements that might be adding the arrow */
+#checkoutModal input[type="checkbox"]::before,
+#checkoutModal input[type="checkbox"]::after {
+  display: none !important;
+  content: none !important;
 }
 
 /* Restore radio button visibility */
@@ -5310,12 +5303,16 @@ body.modal-open {
   height: 18px !important;
   min-width: 18px !important;
   margin: 0 !important;
-  position: relative !important;
+  margin-right: 8px !important;
   cursor: pointer !important;
-  background: white !important;
-  border: 2px solid var(--border) !important;
-  border-radius: 50% !important;
   flex-shrink: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  background: transparent !important;
+  border: none !important;
 }
 
 #checkoutModal input[type="radio"]:checked {
@@ -5341,7 +5338,7 @@ body.modal-open {
   width: 18px !important;
   height: 18px !important;
   min-width: 18px !important;
-  margin-right: 0 !important;
+  margin-right: 12px !important;
 }
 
 /* Ensure checkbox in terms row is visible */
