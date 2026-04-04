@@ -5263,3 +5263,127 @@ body.modal-open {
 #checkoutModal .modal-body::-webkit-scrollbar-thumb {
   background: var(--honey);
 }
+/* ═══════════════════════════════════════════════════════════
+   CHECKOUT MODAL — FIX CHECKBOX & RADIO BUTTON VISIBILITY
+   Restores hidden form controls after performance optimizations
+═══════════════════════════════════════════════════════════ */
+
+/* Restore checkbox visibility */
+#checkoutModal input[type="checkbox"] {
+  -webkit-appearance: checkbox !important;
+  appearance: checkbox !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  margin: 0 !important;
+  position: relative !important;
+  cursor: pointer !important;
+  background: white !important;
+  border: 2px solid var(--border) !important;
+  border-radius: 4px !important;
+  flex-shrink: 0 !important;
+}
+
+#checkoutModal input[type="checkbox"]:checked {
+  background: var(--honey) !important;
+  border-color: var(--honey) !important;
+  position: relative !important;
+}
+
+#checkoutModal input[type="checkbox"]:checked::before {
+  content: '\f00c' !important;
+  font-family: 'Font Awesome 6 Free' !important;
+  font-weight: 900 !important;
+  font-size: 11px !important;
+  color: var(--navy) !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+/* Restore radio button visibility */
+#checkoutModal input[type="radio"] {
+  -webkit-appearance: radio !important;
+  appearance: radio !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  margin: 0 !important;
+  position: relative !important;
+  cursor: pointer !important;
+  background: white !important;
+  border: 2px solid var(--border) !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+}
+
+#checkoutModal input[type="radio"]:checked {
+  border-color: var(--honey) !important;
+  background: white !important;
+  position: relative !important;
+}
+
+#checkoutModal input[type="radio"]:checked::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: var(--honey) !important;
+  border-radius: 50% !important;
+}
+
+/* Fix for payment method radio buttons specifically */
+#checkoutModal .payment-method input[type="radio"] {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  margin-right: 0 !important;
+}
+
+/* Ensure checkbox in terms row is visible */
+#checkoutModal .terms-row input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  margin-right: 8px !important;
+}
+
+/* Override any conflicting styles from performance optimization */
+#checkoutModal input[type="checkbox"],
+#checkoutModal input[type="radio"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
+  pointer-events: auto !important;
+}
+
+/* Fix for payment method selected state */
+#checkoutModal .payment-method:has(input[type="radio"]:checked) {
+  border-color: var(--honey) !important;
+  background: rgba(245, 166, 35, 0.06) !important;
+}
+
+/* Ensure labels remain clickable */
+#checkoutModal .payment-method,
+#checkoutModal .terms-row {
+  cursor: pointer !important;
+}
+
+/* Fix for any appearance overrides on mobile */
+@media (max-width: 768px) {
+  #checkoutModal input[type="checkbox"],
+  #checkoutModal input[type="radio"] {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+  }
+  
+  #checkoutModal input[type="radio"]:checked::before {
+    width: 12px !important;
+    height: 12px !important;
+  }
+}
