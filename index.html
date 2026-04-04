@@ -452,31 +452,31 @@
     </main>
 
     <!-- ═══ CART SIDEBAR ═════════════════════════════════════ -->
-    <div class="cart-sidebar" id="cartSidebar">
-      <div class="cart-header">
-        <h3><i class="fas fa-shopping-cart"></i> আমার কার্ট</h3>
-        <button class="close-cart" id="closeCart" aria-label="কার্ট বন্ধ করুন">
-          <i class="fas fa-times"></i>
-        </button>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3><i class="fas fa-shopping-cart"></i> আমার কার্ট</h3>
+    <button class="close-cart" id="closeCart" aria-label="কার্ট বন্ধ করুন">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer">
+    <div class="cart-summary">
+      <div class="cart-summary-row">
+        <span>পণ্যের মূল্য</span><span id="cartSubtotal">৳০</span>
       </div>
-      <div class="cart-items" id="cartItems"></div>
-      <div class="cart-footer">
-        <div class="cart-summary">
-          <div class="cart-summary-row">
-            <span>পণ্যের মূল্য</span><span id="mobileCartSubtotal">৳০</span>
-          </div>
-          <div class="cart-summary-row">
-            <span>ডেলিভারি চার্জ</span><span id="mobileCartShipping">৳০</span>
-          </div>
-          <div class="cart-summary-row total">
-            <span>মোট</span><span id="cartTotal">৳০</span>
-          </div>
-        </div>
-        <button class="btn-primary btn-block btn-large" id="checkoutBtn">
-          <i class="fas fa-lock"></i> অর্ডার করুন
-        </button>
+      <div class="cart-summary-row">
+        <span>ডেলিভারি চার্জ</span><span id="cartShipping">৳০</span>
+      </div>
+      <div class="cart-summary-row total">
+        <span>মোট</span><span id="cartTotal">৳০</span>
       </div>
     </div>
+    <button class="btn-primary btn-block btn-large" id="checkoutBtn">
+      <i class="fas fa-lock"></i> অর্ডার করুন
+    </button>
+  </div>
+</div>
 
     <!-- ═══ CHECKOUT MODAL ════════════════════════════════════ -->
     <div class="modal" id="checkoutModal">
@@ -630,27 +630,27 @@
                   <div class="coupon-input-wrap">
                     <input
                       type="text"
-                      id="couponCodeInput"
+                      id="checkoutCouponInput"
                       placeholder="কুপন কোড লিখুন (যেমন: HARVEST20)"
                       autocomplete="off"
                       spellcheck="false"
                       style="text-transform:uppercase"
                       oninput="this.value=this.value.toUpperCase()"
-                      onkeydown="if(event.key==='Enter'){event.preventDefault();applyCouponFromUI();}"
+                      onkeydown="if(event.key==='Enter'){event.preventDefault();applyCheckoutCoupon();}"
                     />
                     <button
                       type="button"
                       id="couponApplyBtn"
-                      onclick="applyCouponFromUI()"
+                      onclick="applyCheckoutCoupon()"
                     >প্রয়োগ করুন</button>
                     <button
                       type="button"
                       id="couponRemoveBtn"
-                      onclick="removeCouponFromUI()"
+                      onclick="removeCheckoutCoupon()"
                       style="display:none"
                     ><i class="fas fa-times"></i> বাদ দিন</button>
                   </div>
-                  <div id="couponMsg" class="coupon-msg"></div>
+                  <div id="checkoutCouponMsg" class="coupon-msg"></div>
                 </div>
                 <div class="terms-row">
                   <input type="checkbox" id="acceptTerms" /><span
@@ -1077,35 +1077,34 @@
     </div>
 
     <!-- ═══ MOBILE CART BOTTOM SHEET ═══════════════════════ -->
-    <div class="bottom-sheet" id="mobileCartSheet">
-      <div class="bottom-sheet-handle"></div>
-      <div class="bottom-sheet-header">
-        <h3>
-          <i class="fas fa-shopping-cart" style="color: var(--honey)"></i> আমার
-          কার্ট
-        </h3>
-        <button class="bottom-sheet-close" id="closeMobileCart">
-          <i class="fas fa-times"></i>
-        </button>
+<div class="bottom-sheet" id="mobileCartSheet">
+  <div class="bottom-sheet-handle"></div>
+  <div class="bottom-sheet-header">
+    <h3>
+      <i class="fas fa-shopping-cart" style="color: var(--honey)"></i> আমার কার্ট
+    </h3>
+    <button class="bottom-sheet-close" id="closeMobileCart">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <div class="bottom-sheet-content" id="mobileCartItems"></div>
+  <div class="cart-footer" style="padding: 1rem">
+    <div class="cart-summary">
+      <div class="cart-summary-row">
+        <span>পণ্যের মূল্য</span><span id="mobileCartSubtotal">৳০</span>
       </div>
-      <div class="bottom-sheet-content" id="mobileCartItems"></div>
-      <div class="cart-footer" style="padding: 1rem">
-        <div class="cart-summary">
-          <div class="cart-summary-row">
-            <span>পণ্যের মূল্য</span><span id="cartSubtotal">৳০</span>
-          </div>
-          <div class="cart-summary-row">
-            <span>ডেলিভারি চার্জ</span><span id="cartShipping">৳০</span>
-          </div>
-          <div class="cart-summary-row total">
-            <span>মোট</span><span id="mobileCartTotal">৳০</span>
-          </div>
-        </div>
-        <button class="btn-primary btn-block btn-large" id="mobileCheckoutBtn">
-          <i class="fas fa-lock"></i> অর্ডার করুন
-        </button>
+      <div class="cart-summary-row">
+        <span>ডেলিভারি চার্জ</span><span id="mobileCartShipping">৳০</span>
+      </div>
+      <div class="cart-summary-row total">
+        <span>মোট</span><span id="mobileCartTotal">৳০</span>
       </div>
     </div>
+    <button class="btn-primary btn-block btn-large" id="mobileCheckoutBtn">
+      <i class="fas fa-lock"></i> অর্ডার করুন
+    </button>
+  </div>
+</div>
 
     <!-- ═══ MAINTENANCE / RATE LIMIT OVERLAY ═══════════════════════════════════ -->
     <div
@@ -1198,7 +1197,7 @@
     <div class="bee-input-footer">🔒 সুরক্ষিত · BeeHarvest AI</div>
   </div>
 </div>
-    <script>
+    <!-- <script>
 (function() {
     'use strict';
     
@@ -1466,7 +1465,7 @@
       window.history.replaceState({}, '', window.location.pathname);
     }
   })();
-</script>
+</script> -->
     <!-- <script src="js/home.min.js"></script> -->
     <script src="js/customer.min.js"></script>
   </body>
