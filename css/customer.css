@@ -4962,3 +4962,102 @@ body.cart-open:not(.modal-open) {
     overflow: hidden;
   }
 }
+
+/* Add to your customer.css - Performance optimized for mobile */
+@media (max-width: 768px) {
+  /* GPU acceleration for smoother animations */
+  .modal-checkout-mobile,
+  .co-panel,
+  .co-body,
+  .checkout-steps-bar {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Faster modal animation - reduce from 0.35s to 0.2s */
+  .modal.active .modal-checkout-mobile {
+    animation: modalSlideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  @keyframes modalSlideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  /* Reduce paint operations */
+  .co-order-summary,
+  .co-pay-card,
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    transform: translateZ(0);
+  }
+
+  /* Optimize scroll performance */
+  .co-body {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: auto; /* Disable smooth scroll for better performance */
+  }
+
+  /* Disable hover effects on mobile (they cause lag) */
+  .co-pay-card:active {
+    transform: scale(0.98);
+    transition: transform 0.05s ease;
+  }
+  
+  .co-pay-card:hover {
+    transform: none;
+  }
+
+  /* Reduce shadow complexity */
+  .modal-checkout-mobile {
+    box-shadow: 0 -2px 20px rgba(0,0,0,0.15);
+  }
+}
+
+/* Add to customer.css - Performance fixes */
+.co-panel {
+  will-change: opacity, visibility;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.co-panel:not(.active) {
+  display: none !important;
+}
+
+/* Reduce animation complexity on mobile */
+@media (max-width: 768px) {
+  .checkout-item {
+    animation: none !important;
+  }
+  
+  .modal-content {
+    animation: none !important;
+  }
+  
+  .modal.active {
+    animation: none !important;
+  }
+}
+
+/* Optimize form inputs for mobile */
+.form-group input,
+.form-group select,
+.form-group textarea {
+  font-size: 16px !important; /* Prevents iOS zoom on focus */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Disable heavy shadows on mobile */
+@media (max-width: 768px) {
+  .co-order-summary,
+  .co-pay-card {
+    box-shadow: none;
+  }
+}
