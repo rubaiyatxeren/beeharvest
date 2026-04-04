@@ -4662,3 +4662,29 @@ body.cart-open .bee-chat-window {
     transition: transform 0.05s ease;
   }
 }
+
+/* This prevents the page from jumping to top when modal/sidebar opens */
+.modal.active,
+.cart-sidebar.open,
+.mobile-cart-sheet.open {
+  --scroll-offset: 0px;
+}
+
+body.modal-open,
+body.cart-open {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+/* When modal closes, restore scroll */
+body.modal-open:not(.cart-open),
+body.cart-open:not(.modal-open) {
+  position: relative;
+  overflow: auto;
+}
+
+
