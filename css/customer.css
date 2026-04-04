@@ -4592,3 +4592,73 @@ body.cart-open .bee-chat-window {
     font-size: 0.7rem;
   }
 }
+
+/* ── Performance Optimizations for Mobile ───────────────── */
+@media (max-width: 768px) {
+  /* GPU acceleration for all animated elements */
+  .bee-chat-window,
+  .cart-sidebar,
+  .bottom-sheet,
+  .modal,
+  .bee-fab {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Faster transitions - reduced from 0.35s to 0.2s */
+  .bee-chat-window {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
+    transform-origin: top right;
+  }
+
+  .cart-sidebar {
+    transition: right 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .bottom-sheet {
+    transition: bottom 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Prevent body scroll jank */
+  body.modal-open,
+  body.cart-open,
+  body.chat-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Smooth scrolling for chat messages */
+  .bee-messages,
+  .cart-items,
+  .modal-body {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
+
+  /* Reduce paint operations */
+  .bee-bubble,
+  .bee-chip,
+  .bee-send-btn {
+    transform: translateZ(0);
+  }
+
+  /* Use active instead of hover for mobile */
+  .bee-chip:active {
+    transform: scale(0.96);
+    transition: transform 0.05s ease;
+  }
+
+  .bee-send-btn:active {
+    transform: scale(0.92);
+  }
+
+  /* FAB active state */
+  .bee-fab:active {
+    transform: scale(0.92);
+    transition: transform 0.05s ease;
+  }
+}
