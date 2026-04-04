@@ -478,189 +478,200 @@
   </div>
 </div>
 
-    <!-- ═══ CHECKOUT MODAL (Mobile-optimized) ════════════════════════ -->
-<div class="modal" id="checkoutModal">
-  <div class="modal-content modal-checkout-mobile">
-    <div class="bottom-sheet-handle" style="margin:10px auto 0"></div>
-
-    <!-- Header -->
-    <div class="modal-header">
-      <h3><i class="fas fa-lock"></i> অর্ডার কনফার্ম করুন</h3>
-      <button class="close-modal" onclick="closeModal('checkoutModal')">
-        <i class="fas fa-times"></i>
-      </button>
+    <!-- ═══ CHECKOUT MODAL ════════════════════════════════════ -->
+    <div class="modal" id="checkoutModal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3><i class="fas fa-truck"></i> অর্ডার কনফার্মেশন</h3>
+          <button class="close-modal" onclick="closeModal('checkoutModal')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="checkoutForm" novalidate>
+            <div class="checkout-grid">
+              <div class="checkout-section">
+                <div class="checkout-section-title">
+                  <i class="fas fa-user"></i> প্রাপকের তথ্য
+                </div>
+                <div class="form-group">
+                  <label>পূর্ণ নাম *</label
+                  ><input
+                    type="text"
+                    id="checkoutName"
+                    required
+                    placeholder="আপনার পূর্ণ নাম"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>ইমেইল ঠিকানা *</label
+                  ><input
+                    type="email"
+                    id="checkoutEmail"
+                    required
+                    placeholder="example@email.com"
+                  />
+                  <div class="form-hint">অর্ডার কনফার্মেশন ইমেইলে পাবেন</div>
+                </div>
+                <div class="form-group">
+                  <label>মোবাইল নম্বর *</label
+                  ><input
+                    type="tel"
+                    id="checkoutPhone"
+                    required
+                    placeholder="01XXXXXXXXX"
+                  />
+                  <div class="form-hint">বাংলাদেশি নম্বর (01X-XXXXXXXX)</div>
+                </div>
+                <div class="form-group">
+                  <label>বিস্তারিত ঠিকানা *</label
+                  ><textarea
+                    id="checkoutAddress"
+                    rows="3"
+                    required
+                    placeholder="বাড়ির নম্বর, রাস্তা, এলাকা..."
+                  ></textarea>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>জেলা/শহর *</label>
+                    <select id="checkoutCity" required>
+                      <option value="">নির্বাচন করুন</option>
+                      <option value="dhaka">ঢাকা</option>
+                      <option value="chittagong">চট্টগ্রাম</option>
+                      <option value="rajshahi">রাজশাহী</option>
+                      <option value="khulna">খুলনা</option>
+                      <option value="barisal">বরিশাল</option>
+                      <option value="sylhet">সিলেট</option>
+                      <option value="rangpur">রংপুর</option>
+                      <option value="mymensingh">ময়মনসিংহ</option>
+                      <option value="comilla">কুমিল্লা</option>
+                      <option value="narayanganj">নারায়ণগঞ্জ</option>
+                      <option value="gazipur">গাজীপুর</option>
+                      <option value="tangail">টাঙ্গাইল</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>জিপ কোড</label
+                    ><input
+                      type="text"
+                      id="checkoutZipCode"
+                      placeholder="ঐচ্ছিক"
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>বিশেষ নির্দেশনা</label
+                  ><textarea
+                    id="checkoutNotes"
+                    rows="2"
+                    placeholder="যেমন: গেটে কল করুন, দুপুরের পর দিন..."
+                  ></textarea>
+                </div>
+              </div>
+              <div class="checkout-section">
+                <div class="checkout-section-title">
+                  <i class="fas fa-box"></i> অর্ডার সারসংক্ষেপ
+                </div>
+                <div class="checkout-items-list" id="checkoutItems"></div>
+                <div class="checkout-section-title" style="margin-top: 1.25rem">
+                  <i class="fas fa-wallet"></i> পেমেন্ট পদ্ধতি
+                </div>
+                <div class="payment-methods">
+                  <label class="payment-method"
+                    ><input
+                      type="radio"
+                      name="paymentMethod"
+                      value="COD"
+                      checked
+                    /><span class="payment-method-icon pm-cod"
+                      ><i class="fas fa-hand-holding-usd"></i
+                    ></span>
+                    <div class="payment-method-text">
+                      <span>ক্যাশ অন ডেলিভারি</span
+                      ><small>ডেলিভারির সময় নগদ পরিশোধ</small>
+                    </div></label
+                  >
+                  <label class="payment-method" style="opacity:0.5;pointer-events:none;cursor:not-allowed;">
+                    <input type="radio" name="paymentMethod" value="bkash" disabled />
+                    <span class="payment-method-icon pm-bkash"><i class="fas fa-mobile-alt"></i></span>
+                    <div class="payment-method-text">
+                      <span>bKash</span><small>শীঘ্রই আসছে</small>
+                    </div>
+                  </label>
+                  
+                  <label class="payment-method" style="opacity:0.5;pointer-events:none;cursor:not-allowed;">
+                    <input type="radio" name="paymentMethod" value="nagad" disabled />
+                    <span class="payment-method-icon pm-nagad"><i class="fas fa-wallet"></i></span>
+                    <div class="payment-method-text">
+                      <span>Nagad</span><small>শীঘ্রই আসছে</small>
+                    </div>
+                  </label>
+                </div>
+                <div class="order-summary-box">
+                  <div class="summary-line">
+                    <span>পণ্যের মূল্য</span><span id="summarySubtotal">৳০</span>
+                  </div>
+                  <div class="summary-line">
+                    <span>ডেলিভারি চার্জ</span><span id="summaryShipping">৳৬০</span>
+                  </div>
+                  <div class="summary-line" id="summaryDiscountRow" style="display:none">
+                    <span style="color:#c6f135">কুপন ছাড়</span>
+                    <span id="summaryDiscount" style="color:#c6f135">-৳০</span>
+                  </div>
+                  <div class="summary-line total">
+                    <span>মোট প্রদেয়</span><span id="summaryTotal">৳৬০</span>
+                  </div>
+                </div>
+                <div class="coupon-row">
+                  <div class="coupon-label">
+                    <i class="fas fa-ticket"></i> কুপন কোড আছে?
+                  </div>
+                  <div class="coupon-input-wrap">
+                    <input
+                      type="text"
+                      id="checkoutCouponInput"
+                      placeholder="কুপন কোড লিখুন (যেমন: HARVEST20)"
+                      autocomplete="off"
+                      spellcheck="false"
+                      style="text-transform:uppercase"
+                      oninput="this.value=this.value.toUpperCase()"
+                      onkeydown="if(event.key==='Enter'){event.preventDefault();applyCheckoutCoupon();}"
+                    />
+                    <button
+                      type="button"
+                      id="couponApplyBtn"
+                      onclick="applyCheckoutCoupon()"
+                    >প্রয়োগ করুন</button>
+                    <button
+                      type="button"
+                      id="couponRemoveBtn"
+                      onclick="removeCheckoutCoupon()"
+                      style="display:none"
+                    ><i class="fas fa-times"></i> বাদ দিন</button>
+                  </div>
+                  <div id="checkoutCouponMsg" class="coupon-msg"></div>
+                </div>
+                <div class="terms-row">
+                  <input type="checkbox" id="acceptTerms" /><span
+                    >আমি
+                    <a href="#" onclick="return false;">শর্তাবলী ও নীতিমালা</a>
+                    মেনে নিচ্ছি</span
+                  >
+                </div>
+                <button
+                  type="submit"
+                  class="btn-primary btn-block btn-large"
+                  id="confirmOrderBtn"
+                >
+                  <i class="fas fa-check-circle"></i> অর্ডার কনফার্ম করুন
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-
-    <!-- Steps bar -->
-    <div class="checkout-steps-bar">
-      <div class="co-step" id="coStep1" data-step="1">
-        <div class="co-dot">১</div>
-        <span>তথ্য</span>
-      </div>
-      <div class="co-line" id="coLine1"></div>
-      <div class="co-step active" id="coStep2" data-step="2">
-        <div class="co-dot">২</div>
-        <span>পেমেন্ট</span>
-      </div>
-      <div class="co-line" id="coLine2"></div>
-      <div class="co-step" id="coStep3" data-step="3">
-        <div class="co-dot">৩</div>
-        <span>নিশ্চিত</span>
-      </div>
-    </div>
-
-    <form id="checkoutForm" novalidate>
-      <!-- ── STEP 1: Customer Info ─────────────────────────────── -->
-      <div class="co-panel active" id="coPanel1">
-        <div class="co-body">
-          <div class="co-sec-label"><i class="fas fa-user"></i> প্রাপকের তথ্য</div>
-
-          <div class="form-group">
-            <label>পূর্ণ নাম *</label>
-            <input type="text" id="checkoutName" required placeholder="আপনার পূর্ণ নাম">
-          </div>
-          <div class="form-group">
-            <label>ইমেইল ঠিকানা *</label>
-            <input type="email" id="checkoutEmail" required placeholder="example@email.com">
-            <div class="form-hint">অর্ডার কনফার্মেশন ইমেইলে পাবেন</div>
-          </div>
-          <div class="form-group">
-            <label>মোবাইল নম্বর *</label>
-            <input type="tel" id="checkoutPhone" required placeholder="01XXXXXXXXX">
-          </div>
-          <div class="form-group">
-            <label>বিস্তারিত ঠিকানা *</label>
-            <textarea id="checkoutAddress" rows="2" required placeholder="বাড়ির নম্বর, রাস্তা, এলাকা..."></textarea>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>জেলা/শহর *</label>
-              <select id="checkoutCity" required>
-                <option value="">নির্বাচন করুন</option>
-                <option value="dhaka">ঢাকা</option>
-                <option value="chittagong">চট্টগ্রাম</option>
-                <option value="rajshahi">রাজশাহী</option>
-                <option value="khulna">খুলনা</option>
-                <option value="barisal">বরিশাল</option>
-                <option value="sylhet">সিলেট</option>
-                <option value="rangpur">রংপুর</option>
-                <option value="mymensingh">ময়মনসিংহ</option>
-                <option value="comilla">কুমিল্লা</option>
-                <option value="narayanganj">নারায়ণগঞ্জ</option>
-                <option value="gazipur">গাজীপুর</option>
-                <option value="tangail">টাঙ্গাইল</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>জিপ কোড</label>
-              <input type="text" id="checkoutZipCode" placeholder="ঐচ্ছিক">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>বিশেষ নির্দেশনা</label>
-            <textarea id="checkoutNotes" rows="2" placeholder="যেমন: গেটে কল করুন..."></textarea>
-          </div>
-        </div>
-        <div class="co-cta">
-          <button type="button" class="btn-primary btn-block btn-large" onclick="checkoutGoTo(2)">
-            <i class="fas fa-arrow-right"></i> পরবর্তী ধাপ — পেমেন্ট
-          </button>
-          <div class="co-secure-hint"><i class="fas fa-shield-halved"></i> তথ্য এনক্রিপ্টেড ও সুরক্ষিত</div>
-        </div>
-      </div>
-
-      <!-- ── STEP 2: Payment + Summary ────────────────────────── -->
-      <div class="co-panel" id="coPanel2">
-        <div class="co-body">
-
-          <!-- Compact order summary -->
-          <div class="co-sec-label"><i class="fas fa-box"></i> অর্ডার সারসংক্ষেপ</div>
-          <div class="co-order-summary">
-            <div class="co-items-list" id="checkoutItems"></div>
-            <div class="co-sum-row"><span>পণ্যের মূল্য</span><span id="summarySubtotal">৳০</span></div>
-            <div class="co-sum-row"><span>ডেলিভারি চার্জ</span><span id="summaryShipping">৳৬০</span></div>
-            <div class="co-sum-row" id="summaryDiscountRow" style="display:none">
-              <span style="color:var(--success)">কুপন ছাড়</span>
-              <span id="summaryDiscount" style="color:var(--success)">-৳০</span>
-            </div>
-            <div class="co-sum-row co-sum-total"><span>মোট প্রদেয়</span><span id="summaryTotal">৳৬০</span></div>
-          </div>
-
-          <!-- Coupon -->
-          <div class="coupon-row">
-            <div class="coupon-label"><i class="fas fa-ticket"></i> কুপন কোড আছে?</div>
-            <div class="coupon-input-wrap">
-              <input type="text" id="checkoutCouponInput"
-                placeholder="কুপন কোড লিখুন (যেমন: HARVEST20)"
-                autocomplete="off" spellcheck="false"
-                style="text-transform:uppercase"
-                oninput="this.value=this.value.toUpperCase()"
-                onkeydown="if(event.key==='Enter'){event.preventDefault();applyCheckoutCoupon();}">
-              <button type="button" id="couponApplyBtn" onclick="applyCheckoutCoupon()">প্রয়োগ করুন</button>
-              <button type="button" id="couponRemoveBtn" onclick="removeCheckoutCoupon()" style="display:none">
-                <i class="fas fa-times"></i> বাদ দিন
-              </button>
-            </div>
-            <div id="checkoutCouponMsg" class="coupon-msg"></div>
-          </div>
-
-          <!-- Payment methods -->
-          <div class="co-sec-label" style="margin-top:0.875rem"><i class="fas fa-wallet"></i> পেমেন্ট পদ্ধতি</div>
-          <div class="co-pay-grid">
-            <label class="co-pay-card">
-              <input type="radio" name="paymentMethod" value="COD" checked>
-              <span class="co-pay-icon pm-cod"><i class="fas fa-hand-holding-usd"></i></span>
-              <div>
-                <span class="co-pay-name">ক্যাশ অন ডেলিভারি</span>
-                <small class="co-pay-desc">ডেলিভারির সময় নগদ দিন</small>
-              </div>
-            </label>
-            <label class="co-pay-card co-pay-disabled">
-              <input type="radio" name="paymentMethod" value="bkash" disabled>
-              <span class="co-pay-icon pm-bkash"><i class="fas fa-mobile-alt"></i></span>
-              <div>
-                <span class="co-pay-name">bKash</span>
-                <small class="co-pay-desc">শীঘ্রই আসছে</small>
-              </div>
-            </label>
-            <label class="co-pay-card co-pay-disabled">
-              <input type="radio" name="paymentMethod" value="nagad" disabled>
-              <span class="co-pay-icon pm-nagad"><i class="fas fa-wallet"></i></span>
-              <div>
-                <span class="co-pay-name">Nagad</span>
-                <small class="co-pay-desc">শীঘ্রই আসছে</small>
-              </div>
-            </label>
-            <label class="co-pay-card co-pay-disabled">
-              <input type="radio" name="paymentMethod" value="card" disabled>
-              <span class="co-pay-icon pm-card"><i class="fas fa-credit-card"></i></span>
-              <div>
-                <span class="co-pay-name">কার্ড</span>
-                <small class="co-pay-desc">শীঘ্রই আসছে</small>
-              </div>
-            </label>
-          </div>
-
-          <!-- Terms -->
-          <div class="terms-row">
-            <input type="checkbox" id="acceptTerms">
-            <span>আমি <a href="#" onclick="return false;">শর্তাবলী ও নীতিমালা</a> মেনে নিচ্ছি</span>
-          </div>
-
-        </div>
-        <div class="co-cta">
-          <button type="button" class="btn-ghost" style="padding:10px;font-size:0.8rem;margin-bottom:0.375rem" onclick="checkoutGoTo(1)">
-            <i class="fas fa-arrow-left"></i> আগের ধাপ
-          </button>
-          <button type="button" class="btn-primary btn-block btn-large" id="confirmOrderBtn" onclick="placeOrder(event)">
-            <i class="fas fa-check-circle"></i> অর্ডার কনফার্ম করুন
-          </button>
-          <div class="co-secure-hint"><i class="fas fa-shield-halved"></i> ১০০% নিরাপদ · SSL এনক্রিপ্টেড</div>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
 
     <!-- ═══ SUCCESS MODAL ═════════════════════════════════════ -->
     <div class="modal" id="successModal">
@@ -1455,7 +1466,7 @@
     }
   })();
 </script>
-    <!-- <script src="js/home.min.js"></script> -->
-    <script src="js/customer.min.js"></script>
+    <script src="js/home.min.js"></script>
+    <script src="js/customer.js"></script>
   </body>
 </html>
