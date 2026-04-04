@@ -1491,3 +1491,379 @@ select {
     justify-content: center;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   CHECKOUT MODAL — MOBILE FULL RESPONSIVE FIX
+   Add this entire block to your existing product-details.css
+   ═══════════════════════════════════════════════════════════ */
+
+/* Force checkout modal to be 100% width on all mobile devices */
+@media (max-width: 768px) {
+  /* Override modal-large max-width constraint */
+  #checkoutModal.modal .modal-large,
+  .modal#checkoutModal .modal-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important;
+    max-height: 90vh !important;
+    margin: 0 !important;
+    
+    /* Performance optimizations */
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+  
+  /* Position modal at bottom for better mobile UX */
+  #checkoutModal.modal {
+    align-items: flex-end !important;
+    padding: 0 !important;
+    background: rgba(13, 27, 62, 0.85) !important;
+    backdrop-filter: none !important;
+  }
+  
+  /* Smooth slide-up animation */
+  #checkoutModal.modal .modal-content {
+    animation: modalSlideUpSimple 0.25s ease-out forwards !important;
+    overflow-y: auto !important;
+  }
+  
+  @keyframes modalSlideUpSimple {
+    0% {
+      transform: translateY(100%);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+  
+  /* Make modal body scrollable */
+  #checkoutModal .modal-body {
+    padding: 1rem !important;
+    max-height: calc(90vh - 60px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Convert checkout grid to single column */
+  #checkoutModal .checkout-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.875rem !important;
+  }
+  
+  /* Make checkout sections full width */
+  #checkoutModal .checkout-section {
+    padding: 1rem !important;
+    border-radius: var(--radius-lg) !important;
+  }
+  
+  /* Form row becomes vertical */
+  #checkoutModal .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  
+  /* Make form inputs full width with larger touch targets */
+  #checkoutModal .form-group input,
+  #checkoutModal .form-group textarea,
+  #checkoutModal .form-group select {
+    padding: 12px 14px !important;
+    font-size: 16px !important;
+  }
+  
+  /* Payment methods full width */
+  #checkoutModal .payment-method {
+    padding: 0.75rem 1rem !important;
+  }
+  
+  /* Coupon input row stacks vertically */
+  #checkoutModal .coupon-input-wrap {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  #checkoutModal .coupon-input-wrap input {
+    width: 100% !important;
+    padding: 12px 14px !important;
+    font-size: 16px !important;
+  }
+  
+  #checkoutModal #couponApplyBtn,
+  #checkoutModal #couponRemoveBtn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 12px !important;
+  }
+  
+  /* Checkout items list */
+  #checkoutModal .checkout-items-list {
+    max-height: 260px !important;
+  }
+  
+  #checkoutModal .checkout-item {
+    padding: 0.75rem !important;
+    gap: 0.75rem !important;
+  }
+  
+  #checkoutModal .checkout-item img {
+    width: 52px !important;
+    height: 52px !important;
+  }
+  
+  #checkoutModal .checkout-item-name {
+    font-size: 0.8rem !important;
+  }
+  
+  #checkoutModal .checkout-item-meta,
+  #checkoutModal .checkout-item-total {
+    font-size: 0.75rem !important;
+  }
+  
+  /* Order summary box */
+  #checkoutModal .order-summary-box {
+    padding: 0.875rem !important;
+  }
+  
+  /* Terms row */
+  #checkoutModal .terms-row {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Confirm button */
+  #checkoutModal #confirmOrderBtn {
+    padding: 14px !important;
+    font-size: 1rem !important;
+    margin-top: 0.5rem !important;
+  }
+  
+  /* Modal header adjustments */
+  #checkoutModal .modal-header {
+    padding: 0.875rem 1rem !important;
+    border-radius: 28px 28px 0 0 !important;
+    min-height: auto !important;
+  }
+  
+  #checkoutModal .modal-header h3 {
+    font-size: 1rem !important;
+  }
+  
+  #checkoutModal .close-modal {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  
+  /* Section titles */
+  #checkoutModal .checkout-section-title {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.875rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+  
+  /* Payment method icons */
+  #checkoutModal .payment-method-icon {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.85rem !important;
+  }
+  
+  /* Summary lines */
+  #checkoutModal .summary-line {
+    font-size: 0.8rem !important;
+    padding: 4px 0 !important;
+  }
+  
+  #checkoutModal .summary-line.total {
+    font-size: 0.9rem !important;
+    padding-top: 8px !important;
+    margin-top: 6px !important;
+  }
+  
+  /* Coupon row compact */
+  #checkoutModal .coupon-row {
+    padding: 0.75rem !important;
+    margin: 0.5rem 0 0.75rem !important;
+  }
+  
+  #checkoutModal .coupon-label {
+    font-size: 0.75rem !important;
+  }
+  
+  /* Form group spacing */
+  #checkoutModal .form-group {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  #checkoutModal .form-group label {
+    font-size: 0.7rem !important;
+    margin-bottom: 4px !important;
+  }
+}
+
+/* Fix for very small screens (≤480px) */
+@media (max-width: 480px) {
+  #checkoutModal .modal-body {
+    padding: 0.875rem !important;
+  }
+  
+  #checkoutModal .checkout-section {
+    padding: 0.875rem !important;
+  }
+  
+  #checkoutModal .checkout-item-name {
+    font-size: 0.75rem !important;
+  }
+  
+  #checkoutModal .checkout-item-meta,
+  #checkoutModal .checkout-item-total {
+    font-size: 0.7rem !important;
+  }
+  
+  /* Even more compact coupon row */
+  #checkoutModal .coupon-row {
+    padding: 0.625rem !important;
+    margin: 0.5rem 0 0.625rem !important;
+  }
+  
+  #checkoutModal .coupon-label {
+    font-size: 0.7rem !important;
+  }
+  
+  #checkoutModal .form-group {
+    margin-bottom: 0.625rem !important;
+  }
+  
+  #checkoutModal .form-group label {
+    font-size: 0.65rem !important;
+    margin-bottom: 3px !important;
+  }
+  
+  #checkoutModal .payment-method-text span {
+    font-size: 0.8rem !important;
+  }
+  
+  #checkoutModal .payment-method-text small {
+    font-size: 0.65rem !important;
+  }
+}
+
+/* Also fix for tablet landscape (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  #checkoutModal .modal-large {
+    max-width: 90% !important;
+    width: 90% !important;
+  }
+  
+  #checkoutModal .checkout-grid {
+    gap: 1.25rem !important;
+  }
+}
+
+/* Fix checkbox and radio button visibility */
+#checkoutModal input[type="checkbox"] {
+  -webkit-appearance: checkbox !important;
+  appearance: checkbox !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  margin: 0 !important;
+  margin-right: 8px !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
+}
+
+#checkoutModal input[type="radio"] {
+  -webkit-appearance: radio !important;
+  appearance: radio !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  margin: 0 !important;
+  margin-right: 12px !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
+}
+
+#checkoutModal input[type="radio"]:checked {
+  position: relative !important;
+}
+
+#checkoutModal input[type="radio"]:checked::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: var(--honey) !important;
+  border-radius: 50% !important;
+}
+
+/* Fix payment method selected state */
+#checkoutModal .payment-method:has(input[type="radio"]:checked) {
+  border-color: var(--honey) !important;
+  background: rgba(245, 166, 35, 0.06) !important;
+}
+
+/* Ensure labels remain clickable */
+#checkoutModal .payment-method,
+#checkoutModal .terms-row {
+  cursor: pointer !important;
+}
+
+/* Mobile-specific radio/checkbox sizing */
+@media (max-width: 768px) {
+  #checkoutModal input[type="checkbox"],
+  #checkoutModal input[type="radio"] {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+  }
+  
+  #checkoutModal input[type="radio"]:checked::before {
+    width: 12px !important;
+    height: 12px !important;
+  }
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+/* Smooth scroll inside modal */
+#checkoutModal .modal-body {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for modal */
+#checkoutModal .modal-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+#checkoutModal .modal-body::-webkit-scrollbar-track {
+  background: var(--cream-dark);
+  border-radius: 4px;
+}
+
+#checkoutModal .modal-body::-webkit-scrollbar-thumb {
+  background: var(--honey);
+  border-radius: 4px;
+}
+
+/* Ensure proper z-index stacking */
+#checkoutModal.modal {
+  z-index: 1300;
+}
