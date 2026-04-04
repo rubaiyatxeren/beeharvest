@@ -4471,3 +4471,124 @@ body.cart-open .bee-chat-window {
     max-width: calc(100% - 34px);
   }
 }
+
+/* ── Mobile Specific Chatbot Fixes ───────────────────────── */
+@media (max-width: 768px) {
+  /* Move FAB to navbar area on mobile */
+  .bee-fab {
+    position: fixed;
+    top: auto;
+    bottom: auto;
+    right: 16px;
+    top: 12px;
+    width: 42px;
+    height: 42px;
+    z-index: 1001;
+    box-shadow: 0 4px 16px rgba(245,166,35,0.4);
+  }
+  
+  .bee-fab .bee-fab-icon {
+    font-size: 1.2rem;
+  }
+  
+  .bee-fab-tooltip {
+    display: none;
+  }
+  
+  .bee-fab-ring {
+    inset: -3px;
+  }
+  
+  /* Chat window positioned below navbar */
+  .bee-chat-window {
+    position: fixed;
+    top: 70px;
+    bottom: auto;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-height: calc(100dvh - 90px);
+    bottom: auto;
+    z-index: 1000;
+    border-radius: 20px;
+  }
+  
+  /* Hide FAB badge on mobile if needed */
+  .bee-fab-badge {
+    width: 16px;
+    height: 16px;
+    font-size: 9px;
+    top: -2px;
+    right: -2px;
+  }
+}
+
+/* For very small screens (<=480px) */
+@media (max-width: 480px) {
+  .bee-fab {
+    width: 38px;
+    height: 38px;
+    right: 12px;
+    top: 10px;
+  }
+  
+  .bee-fab .bee-fab-icon {
+    font-size: 1rem;
+  }
+  
+  .bee-chat-window {
+    top: 65px;
+    right: 8px;
+    left: 8px;
+    max-height: calc(100dvh - 80px);
+    border-radius: 18px;
+  }
+  
+  .bee-chat-header {
+    min-height: 56px;
+    padding: 10px 12px;
+  }
+  
+  .bee-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+  
+  .bee-header-name {
+    font-size: 0.85rem;
+  }
+  
+  .bee-header-status {
+    font-size: 0.6rem;
+  }
+  
+  .bee-head-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Ensure chatbot doesn't overlap with mobile bottom nav */
+@media (max-width: 768px) {
+  body:not(.cart-open):not(.modal-open) .bee-chat-window {
+    margin-bottom: 0;
+  }
+  
+  /* Adjust chat input area for better touch targets */
+  .bee-input-wrap {
+    padding: 6px 6px 6px 12px;
+  }
+  
+  .bee-send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+  }
+  
+  .bee-chip {
+    padding: 6px 14px;
+    font-size: 0.7rem;
+  }
+}
