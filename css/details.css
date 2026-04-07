@@ -1305,7 +1305,9 @@ select {
     grid-template-columns: 1fr;
   }
   .logo-tagline {
-    display: none;
+    display: block !important;
+    font-size: 0.55rem;
+    max-width: 120px;
   }
   .btn-back span {
     display: none;
@@ -2259,3 +2261,295 @@ body.modal-open {
   background: linear-gradient(90deg, var(--honey), var(--honey-light), transparent);
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
+
+/* ══════════════════════════════════════════════════════
+   MOBILE RESPONSIVE FIXES — BeeHarvest Product Detail
+   Add/merge this into your product-details.css
+   ══════════════════════════════════════════════════════ */
+
+/* ── NAVBAR MOBILE FIX ─────────────────────────────── */
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 0 0.875rem;
+    height: 60px;
+    gap: 0.5rem;
+    overflow: hidden; /* prevent horizontal bleed */
+  }
+
+  /* Logo: shrink so it doesn't push buttons off-screen */
+  .logo {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .logo-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .logo-name {
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .logo-tagline {
+    display: none; /* already hidden but reinforce */
+  }
+
+  /* Right side: prevent overflow */
+  .nav-right {
+    flex-shrink: 0;
+    gap: 0.5rem;
+  }
+
+  /* Back button: icon-only on mobile */
+  .btn-back {
+    padding: 0.4rem 0.6rem;
+    min-width: 36px;
+    justify-content: center;
+  }
+
+  .btn-back span {
+    display: none; /* hide text, keep icon */
+  }
+
+  /* Cart button: tighter padding */
+  .cart-nav-btn {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.82rem;
+    gap: 5px;
+  }
+
+  /* Cart badge: keep it inside viewport */
+  .cart-badge {
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
+  }
+}
+
+/* ── EXTRA SMALL SCREENS (≤ 380px) ─────────────────── */
+@media (max-width: 380px) {
+  .nav-container {
+    padding: 0 0.625rem;
+    height: 56px;
+  }
+
+  .logo-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+  }
+
+  .logo-name {
+    font-size: 1rem;
+  }
+  .logo-tagline {
+    display: block !important;
+    font-size: 0.5rem;
+    max-width: 105px;
+  }
+  .cart-nav-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.78rem;
+  }
+}
+
+/* ── META TAGS — fix empty hashtag pill ─────────────── */
+/* Hide any meta-tag that has no visible text in mt-val */
+.meta-tag .mt-val:empty {
+  display: none;
+}
+
+/* Hide the entire pill if the tag has no label and no value */
+.meta-tag:not([data-tag]):has(.mt-val:empty) {
+  display: none;
+}
+
+/* Fallback: tag-pills with only # icon and no value should be hidden */
+.tag-pill .mt-val:empty,
+.meta-tag .mt-val:empty {
+  display: none;
+}
+
+/* If the whole pill is effectively empty (just icon), hide it */
+.tag-pill:not(:has(.mt-val:not(:empty))) {
+  display: none;
+}
+
+/* ── BREADCRUMB MOBILE ──────────────────────────────── */
+@media (max-width: 768px) {
+  .breadcrumb {
+    font-size: 0.78rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* Truncate long product names in breadcrumb */
+  .breadcrumb span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 160px;
+    display: inline-block;
+  }
+}
+
+/* ── MAIN CONTENT MOBILE ────────────────────────────── */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0.875rem;
+  }
+
+  /* Info card: tighter on mobile */
+  .info-card {
+    padding: 1.1rem;
+  }
+
+  /* Price: slightly smaller to prevent overflow */
+  .price-main {
+    font-size: 1.85rem;
+  }
+
+  /* Price row wraps cleanly */
+  .price-row {
+    gap: 8px;
+  }
+
+  /* Qty row full width */
+  .qty-row {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  /* Trust grid: ensure 3 columns don't overflow */
+  .trust-grid {
+    gap: 0.5rem;
+  }
+
+  .trust-item {
+    padding: 0.75rem 0.25rem;
+  }
+
+  .trust-item span {
+    font-size: 0.65rem;
+  }
+}
+
+/* ── WEIGHT / META TAG ROW ──────────────────────────── */
+@media (max-width: 480px) {
+  .weight-row {
+    gap: 0.5rem;
+  }
+
+  .weight-badge,
+  .per-kg-badge {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+
+  /* Meta tags wrap cleanly */
+  .meta-tags {
+    gap: 0.4rem;
+  }
+
+  .meta-tag {
+    font-size: 0.7rem;
+  }
+
+  .meta-tag i {
+    width: 24px;
+    height: 24px;
+    font-size: 0.6rem;
+  }
+
+  .mt-label {
+    font-size: 0.62rem;
+    padding: 0 4px 0 6px;
+  }
+
+  .mt-val {
+    font-size: 0.72rem;
+    padding: 0 8px;
+  }
+}
+
+/* ── COMPARE PRICE BANNER MOBILE ────────────────────── */
+@media (max-width: 480px) {
+  .compare-price-banner {
+    padding: 0.625rem 0.875rem;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .cpb-saving-pct {
+    font-size: 0.7rem;
+  }
+
+  .cpb-compare {
+    font-size: 0.9rem;
+  }
+}
+
+/* ── PRODUCT ACTION BUTTONS ─────────────────────────── */
+@media (max-width: 480px) {
+  .btn-cart,
+  .btn-buy {
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* ── RELATED SECTION MOBILE ─────────────────────────── */
+@media (max-width: 480px) {
+  .related-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.875rem;
+  }
+
+  .related-card img {
+    height: 120px;
+  }
+
+  .related-card-name {
+    font-size: 0.8rem;
+  }
+
+  .related-card-price {
+    font-size: 1rem;
+  }
+}
+
+.nav-container {
+  padding: 0 2rem;
+}
+ 
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 0 1rem;
+  }
+ 
+  .logo {
+    padding-left: 0.25rem;
+  }
+}
+ 
+@media (max-width: 380px) {
+  .nav-container {
+    padding: 0 0.75rem;
+  }
+ 
+  .logo {
+    padding-left: 0.25rem;
+  }
+}
+ 
