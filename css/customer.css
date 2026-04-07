@@ -6000,3 +6000,238 @@ body.modal-open {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.6; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE PRODUCT CARD FIX
+   Paste this at the BOTTOM of customer.css
+   ═══════════════════════════════════════════════════════════ */
+
+   @media (max-width: 640px) {
+
+    /* ── Grid: 2 columns, tighter gap ─────────────────────── */
+    .products-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 0.625rem !important;
+    }
+  
+    /* ── Card ──────────────────────────────────────────────── */
+    .pc-premium {
+      border-radius: 14px !important;
+      border-width: 1px !important;
+    }
+  
+    /* ── Image zone: fixed height, nothing blocking it ─────── */
+    .pc-image-zone {
+      aspect-ratio: unset !important;
+      height: 140px !important;
+      overflow: hidden !important;
+    }
+  
+    .pc-img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+    }
+  
+    /* ── Discount ribbon: smaller, tucked in corner ────────── */
+    .pc-discount-ribbon {
+      top: 6px !important;
+      right: -1px !important;
+      padding: 4px 7px 4px 9px !important;
+      clip-path: polygon(6px 0%, 100% 0%, 100% 100%, 6px 100%, 0% 50%) !important;
+    }
+  
+    .pc-discount-pct {
+      font-size: 0.8rem !important;
+    }
+  
+    .pc-discount-label {
+      font-size: 0.5rem !important;
+    }
+  
+    /* ── Top badges: smaller ───────────────────────────────── */
+    .pc-top-badges {
+      top: 6px !important;
+      left: 6px !important;
+      gap: 3px !important;
+    }
+  
+    .pc-badge {
+      font-size: 0.58rem !important;
+      padding: 2px 6px !important;
+      gap: 3px !important;
+    }
+  
+    /* ── Hide savings chip — clutters small image ──────────── */
+    .pc-savings-chip {
+      display: none !important;
+    }
+  
+    /* ── Hide stock badge on image — shown in info zone ───── */
+    .pc-stock-badge {
+      display: none !important;
+    }
+  
+    /* ── Hover CTA: always visible on mobile (no hover) ───── */
+    .pc-hover-cta {
+      display: none !important;
+    }
+  
+    /* ── Info zone: compact padding ───────────────────────── */
+    .pc-info-zone {
+      padding: 0.625rem 0.7rem 0.7rem !important;
+      gap: 0.3rem !important;
+    }
+  
+    /* ── Category tag ──────────────────────────────────────── */
+    .pc-category-tag {
+      font-size: 0.6rem !important;
+      padding: 1px 6px !important;
+    }
+  
+    /* ── Product name ──────────────────────────────────────── */
+    .pc-name {
+      font-size: 0.78rem !important;
+      -webkit-line-clamp: 2 !important;
+      line-height: 1.35 !important;
+    }
+  
+    /* ── Rating: hide on mobile to save space ──────────────── */
+    .pc-rating-row {
+      display: none !important;
+    }
+  
+    /* ── Price block ───────────────────────────────────────── */
+    .pc-price-main {
+      align-items: baseline !important;
+      flex-wrap: wrap !important;
+      gap: 2px !important;
+    }
+  
+    .pc-price-currency {
+      font-size: 0.75rem !important;
+    }
+  
+    .pc-price-amount {
+      font-size: 1.05rem !important;
+      letter-spacing: -0.3px !important;
+    }
+  
+    .pc-price-off-badge {
+      font-size: 0.58rem !important;
+      padding: 1px 5px !important;
+    }
+  
+    /* ── Strikethroughs: compact ───────────────────────────── */
+    .pc-price-strikethroughs {
+      gap: 4px !important;
+      flex-wrap: wrap !important;
+    }
+  
+    .pc-price-compare-label {
+      font-size: 0.55rem !important;
+    }
+  
+    .pc-price-compare-val,
+    .pc-price-base {
+      font-size: 0.68rem !important;
+    }
+  
+    .pc-price-saved {
+      font-size: 0.58rem !important;
+      padding: 1px 5px !important;
+    }
+  
+    /* ── Stock bar: compact ────────────────────────────────── */
+    .pc-stock-bar-wrap {
+      gap: 3px !important;
+    }
+  
+    .pc-stock-label {
+      font-size: 0.62rem !important;
+      gap: 3px !important;
+    }
+  
+    .pc-stock-bar {
+      height: 3px !important;
+    }
+  
+    /* ── Chips: hidden on mobile ───────────────────────────── */
+    .pc-chips {
+      display: none !important;
+    }
+  
+    /* ── Action row: single full-width button + small icon ── */
+    .pc-action-row {
+      gap: 5px !important;
+      margin-top: 4px !important;
+    }
+  
+    .pc-btn-cart {
+      flex: 1 !important;
+      padding: 8px 6px !important;
+      font-size: 0.72rem !important;
+      gap: 4px !important;
+      border-radius: 8px !important;
+      /* Force single line */
+      white-space: nowrap !important;
+      overflow: hidden !important;
+    }
+  
+    /* Shorten the label text on very small screens */
+    .pc-btn-cart i {
+      font-size: 0.8rem !important;
+    }
+  
+    .pc-btn-view {
+      width: 34px !important;
+      height: 34px !important;
+      border-radius: 8px !important;
+      font-size: 0.75rem !important;
+      flex-shrink: 0 !important;
+    }
+  
+    .pc-btn-disabled {
+      padding: 8px 6px !important;
+      font-size: 0.72rem !important;
+      border-radius: 8px !important;
+      gap: 4px !important;
+    }
+  
+  }
+  
+  /* Extra small phones (≤360px) */
+  @media (max-width: 360px) {
+  
+    .pc-image-zone {
+      height: 110px !important;
+    }
+  
+    .pc-price-amount {
+      font-size: 0.95rem !important;
+    }
+  
+    .pc-name {
+      font-size: 0.72rem !important;
+    }
+  
+    .pc-btn-cart {
+      font-size: 0.65rem !important;
+      padding: 7px 4px !important;
+    }
+  
+    .pc-btn-view {
+      width: 30px !important;
+      height: 30px !important;
+    }
+  
+    /* Hide discount ribbon label, keep % */
+    .pc-discount-label {
+      display: none !important;
+    }
+  
+    .pc-discount-pct {
+      font-size: 0.75rem !important;
+    }
+  
+  }
