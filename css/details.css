@@ -94,7 +94,8 @@ body {
 .logo-text {
   display: flex;
   flex-direction: column;
-  line-height: 1.1;
+  line-height: 1.3;
+  padding-left: 0.3rem;
 }
 .logo-name {
   font-family: "DM Serif Display", serif;
