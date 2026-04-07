@@ -3050,7 +3050,10 @@
      .product-image { height: 140px; }
      .categories-grid { grid-template-columns: repeat(2, 1fr); }
      .hero-content h1 { font-size: 1.5rem; }
-     .logo-tagline { display: none; }
+     .logo-tagline {
+      display: block; 
+      font-size: 0.6rem;
+    }
    }
    
    /* ─── Btn Loading State ─────────────────────────────────── */
