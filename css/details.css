@@ -2554,3 +2554,28 @@ body.modal-open {
   }
 }
  
+.download-slip-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: #f5a623;
+  border: none;
+  border-radius: 10px;
+  color: #0D1B3E;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.download-slip-btn:hover {
+  background: #fdd882;
+}
+
+.download-slip-btn:active {
+  transform: scale(0.98);
+}
