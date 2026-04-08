@@ -16,6 +16,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/details.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   </head>
   <body>
     <!-- Loading Overlay -->
@@ -32,7 +34,7 @@
       <div class="nav-container">
         <div class="logo" onclick="goBack()">
           <div class="logo-icon">
-            <img src="https://res.cloudinary.com/dddqkqlh8/image/upload/v1775508635/logo_cvgmqn.png" alt="BeeHarvest Logo" style="height: 40px; width: auto; border-radius: 50%;">
+            <img src="assets/icon/logo.png" alt="BeeHarvest Logo" style="height: 40px; width: auto; border-radius: 50%;">
           </div>
           <div class="logo-text">
             <div class="logo-name">Beeyond<span style="font-size: 0.75em; font-weight: 500; color: #f5a623; margin-left: 4px;">Harvest</span></div>
@@ -375,37 +377,53 @@
       </div>
     </div>
 
-    <!-- ═══ SUCCESS MODAL ════════════════════════════════════ -->
-    <div class="modal" id="successModal">
-      <div class="modal-content modal-small">
-        <div class="success-content">
-          <div class="success-icon"><i class="fas fa-check"></i></div>
-          <h3>অর্ডার সফল হয়েছে!</h3>
-          <p>
-            আপনার অর্ডারটি গ্রহণ করা হয়েছে।<br />শীঘ্রই আপনার সাথে যোগাযোগ করা
-            হবে।
-          </p>
-          <div class="order-chip">
-            <i class="fas fa-ticket-alt"></i><span id="successOrderNum"></span>
-          </div>
-          <div class="success-actions">
-            <button
-              class="btn-primary"
-              style="width: auto"
-              onclick="
-                closeModal('successModal');
-                goBack();
-              "
-            >
-              <i class="fas fa-arrow-left"></i> কেনাকাটা চালিয়ে যান
-            </button>
-            <button class="btn-ghost" onclick="closeModal('successModal')">
-              <i class="fas fa-times"></i> বন্ধ করুন
-            </button>
-          </div>
+<!-- ═══ SUCCESS MODAL ════════════════════════════════════ -->
+<div class="modal" id="successModal">
+  <div class="modal-content modal-small">
+    <div class="success-content">
+      <div class="success-icon"><i class="fas fa-check"></i></div>
+      <h3>অর্ডার সফল হয়েছে!</h3>
+      <p>
+        আপনার অর্ডারটি গ্রহণ করা হয়েছে।<br />শীঘ্রই আপনার সাথে যোগাযোগ করা
+        হবে।
+      </p>
+      <div class="order-chip">
+        <i class="fas fa-ticket-alt"></i><span id="successOrderNum"></span>
+      </div>
+      
+      <!-- Premium Download Button Section -->
+      <div class="download-slip-section" style="margin:0.75rem 0;padding:0.875rem;background:var(--cream);border-radius:10px;border:1px dashed var(--border);">
+        <div style="display:flex;align-items:center;margin-bottom:0.5rem">
+          <i class="fas fa-receipt" style="color:var(--honey);margin-right:6px;font-size:1rem;"></i>
+          <span style="font-weight:600;color:var(--text-primary);font-size:0.9rem;">অর্ডার স্লিপ ডাউনলোড করুন</span>
         </div>
+        <button class="download-slip-btn" id="downloadSlipBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 3V16M12 16L9 13M12 16L15 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 17V18C5 19.1046 5.89543 20 7 20H17C18.1046 20 19 19.1046 19 18V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>স্লিপ ডাউনলোড</span>
+        </button>
+      </div>
+      
+      <div style="margin:0.5rem 0">
+        <button class="btn-ghost btn-block" id="trackSuccessOrderBtn" style="font-size:0.875rem;padding:0.7rem 1rem;width:100%;">
+          <i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক করুন
+        </button>
+      </div>
+      <div class="success-actions" style="margin-top:0.75rem;display:flex;gap:0.75rem;">
+        <button class="btn-primary" style="width:auto;padding:0.75rem 1rem;font-size:0.9rem;flex:1;"
+          onclick="closeModal('successModal'); window.location.href='index.html#orders'">
+          <i class="fas fa-satellite-dish"></i> ট্র্যাক করুন
+        </button>
+        <button class="btn-ghost" style="padding:0.75rem 1rem;font-size:0.9rem;flex:1;"
+          onclick="closeModal('successModal'); goBack()">
+          <i class="fas fa-arrow-right"></i> আরও কেনাকাটা
+        </button>
       </div>
     </div>
+  </div>
+</div>
     <script>
       (function() {
           'use strict';
