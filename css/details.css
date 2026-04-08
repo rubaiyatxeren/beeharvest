@@ -2783,3 +2783,49 @@ body.modal-open {
   -webkit-transform: translateZ(0);
   backface-visibility: hidden;
 }
+
+/* Performance optimizations */
+.lazy-img {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.lazy-img.loaded {
+  opacity: 1;
+}
+
+/* Will-change optimization for animations */
+.product-card,
+.btn,
+.modal-content {
+  will-change: transform;
+}
+
+/* Reduce paint on scroll */
+.product-card-img img {
+  content-visibility: auto;
+}
+
+/* Cart button animation */
+.cart-animate {
+  animation: cartShake 0.3s ease-in-out;
+}
+
+@keyframes cartShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* Hardware acceleration */
+.product-grid,
+.products-grid-home {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Limit max-width of large images */
+img {
+  max-width: 100%;
+  height: auto;
+}
