@@ -42,7 +42,7 @@
       <div class="nav-container">
         <div class="logo" onclick="navigateTo('home')">
           <div class="logo-icon">
-            <img src="https://res.cloudinary.com/dddqkqlh8/image/upload/v1775508635/logo_cvgmqn.png" alt="BeeHarvest Logo" style="height: 40px; width: auto; border-radius: 50%;">
+            <img src="assets/icon/logo.png" alt="BeeHarvest Logo" style="height: 40px; width: auto; border-radius: 50%;">
           </div>
           <div>
             <div class="logo-name">Beeyond<span style="font-size: 0.75em; font-weight: 500; color: #f5a623; margin-left: 4px;">Harvest</span></div>
@@ -206,7 +206,7 @@
             </div>
             <div class="ticker-dot"></div>
             <div class="ticker-item">
-              <i class="fas fa-gift"></i> ৳৫০০+ অর্ডারে ফ্রি ডেলিভারি
+              <i class="fas fa-gift"></i> ৳ ১৫০০+ অর্ডারে ফ্রি ডেলিভারি
             </div>
             <div class="ticker-dot"></div>
             <div class="ticker-item">
@@ -836,7 +836,7 @@
           <div class="footer-col footer-brand-col">
             <div class="footer-logo">
               <div class="footer-logo-icon">
-                <img src="https://res.cloudinary.com/dddqkqlh8/image/upload/v1775508635/logo_cvgmqn.png" alt="BeeHarvest Logo" style="height: 40px; width: auto; border-radius: 50%;">
+                <img src="assets/icon/logo.png" alt="BeeHarvest Logo" style="height: 40px; width: auto; border-radius: 50%;">
               </div>
               
               <div>
@@ -1201,6 +1201,11 @@
     <div class="bee-input-footer">🔒 সুরক্ষিত · BeeHarvest AI</div>
   </div>
 </div>
+
+<!-- Add this inside cart-footer div -->
+<button class="btn-ghost btn-block" style="margin-top: 8px;" onclick="showDeliveryChargesInfoManual()">
+  <i class="fas fa-info-circle"></i> ডেলিভারি চার্জের তথ্য
+</button>
     <script>
 (function() {
     'use strict';
@@ -1470,7 +1475,7 @@
     }
   })();
 </script>
-    <!-- <script src="js/home.min.js"></script> -->
-    <script src="js/customer.min.js"></script>
+    <script src="js/home.min.js"></script>
+    <script src="js/customer.js"></script>
   </body>
 </html>
