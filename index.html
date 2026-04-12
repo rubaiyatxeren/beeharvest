@@ -232,7 +232,7 @@
             </div>
             <div class="ticker-dot"></div>
             <div class="ticker-item">
-              <i class="fas fa-gift"></i> ৳৫০০+ অর্ডারে ফ্রি ডেলিভারি
+              <i class="fas fa-gift"></i> ৳১৫০০+ অর্ডারে ফ্রি ডেলিভারি
             </div>
             <div class="ticker-dot"></div>
             <div class="ticker-item">
@@ -675,87 +675,73 @@
       </div>
     </div>
 
-    <!-- ═══ SUCCESS MODAL ═════════════════════════════════════ -->
-    <div class="modal" id="successModal">
-      <div class="modal-content modal-small">
-        <div class="success-modal-content">
-          <div class="success-icon"><i class="fas fa-check"></i></div>
-          <h3>অর্ডার সফল হয়েছে!</h3>
-          <p>
-            আপনার অর্ডারটি গ্রহণ করা হয়েছে।<br />শীঘ্রই আপনার সাথে যোগাযোগ করা
-            হবে।
-          </p>
-          <div class="order-id-chip">
-            <i class="fas fa-ticket-alt"></i><span id="orderNumber"></span>
-          </div>
-          <div
-            class="download-slip-section"
-            style="
-              margin: 0.75rem 0;
-              padding: 0.875rem;
-              background: var(--cream);
-              border-radius: 10px;
-              border: 1px dashed var(--border);
-            "
-          >
-            <div
-              style="display: flex; align-items: center; margin-bottom: 0.5rem"
-            >
-              <i
-                class="fas fa-receipt"
-                style="color: var(--honey); margin-right: 6px; font-size: 1rem"
-              ></i
-              ><span
-                style="
-                  font-weight: 600;
-                  color: var(--text-primary);
-                  font-size: 0.9rem;
-                "
-                >অর্ডার স্লিপ ডাউনলোড করুন</span
-              >
-            </div>
-            <button
-              class="btn-outline btn-block"
-              id="downloadSlipBtn"
-              style="padding: 0.625rem; font-size: 0.85rem"
-            >
-              <i class="fas fa-download"></i> PNG স্লিপ ডাউনলোড করুন
-            </button>
-          </div>
-          <div style="margin: 0.5rem 0">
-            <button
-              class="btn-ghost btn-block"
-              id="trackSuccessOrderBtn"
-              style="font-size: 0.875rem; padding: 0.7rem 1rem"
-            >
-              <i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক করুন
-            </button>
-          </div>
-          <div class="success-actions" style="margin-top: 0.75rem">
-            <button
-              class="btn-primary"
-              onclick="
-                closeModal('successModal');
-                navigateTo('orders');
-              "
-              style="padding: 0.75rem 1rem; font-size: 0.9rem"
-            >
-              <i class="fas fa-satellite-dish"></i> ট্র্যাক করুন
-            </button>
-            <button
-              class="btn-ghost"
-              onclick="
-                closeModal('successModal');
-                navigateTo('products');
-              "
-              style="padding: 0.75rem 1rem; font-size: 0.9rem"
-            >
-              <i class="fas fa-arrow-right"></i> আরও কেনাকাটা
-            </button>
-          </div>
+<!-- ═══ SUCCESS MODAL ═════════════════════════════════════ -->
+<div class="modal" id="successModal">
+  <div class="modal-content modal-small">
+    <div class="success-modal-content">
+
+      <!-- Icon changes based on fraud verdict -->
+      <div class="success-icon" id="successIcon">
+        <i class="fas fa-check" id="successIconInner"></i>
+      </div>
+
+      <h3 id="successModalTitle">অর্ডার সফল হয়েছে!</h3>
+
+      <p id="successModalSubtitle">
+        আপনার অর্ডারটি গ্রহণ করা হয়েছে।<br />শীঘ্রই আপনার সাথে যোগাযোগ করা হবে।
+      </p>
+
+      <!-- Fraud hold banner — hidden by default -->
+      <div id="successFraudBanner" style="display:none;
+        background:#EEF2FF; border:1.5px solid #6366F1;
+        border-radius:12px; padding:0.875rem 1rem;
+        margin:0.75rem 0; text-align:left;
+        display:none; gap:10px; align-items:flex-start;">
+        <i class="fas fa-shield-halved" style="color:#4338CA;margin-top:2px;flex-shrink:0;font-size:1rem;"></i>
+        <div>
+          <strong style="color:#3730A3;display:block;margin-bottom:3px;font-size:0.875rem;">
+            অর্ডার যাচাই প্রক্রিয়ায় আছে
+          </strong>
+          <span style="color:#4338CA;font-size:0.8rem;line-height:1.6;">
+            আমাদের টিম আপনার অর্ডারটি যাচাই করছে।
+            সাধারণত <strong>২৪ ঘণ্টার</strong> মধ্যে নিশ্চিত করা হবে।
+            সাহায্যের জন্য কল করুন: <strong>01700-000000</strong>
+          </span>
         </div>
       </div>
+
+      <div class="order-id-chip">
+        <i class="fas fa-ticket-alt"></i><span id="orderNumber"></span>
+      </div>
+
+      <div class="download-slip-section" style="margin:0.75rem 0;padding:0.875rem;background:var(--cream);border-radius:10px;border:1px dashed var(--border);">
+        <div style="display:flex;align-items:center;margin-bottom:0.5rem;">
+          <i class="fas fa-receipt" style="color:var(--honey);margin-right:6px;font-size:1rem;"></i>
+          <span style="font-weight:600;color:var(--text-primary);font-size:0.9rem;">অর্ডার স্লিপ ডাউনলোড করুন</span>
+        </div>
+        <button class="btn-outline btn-block" id="downloadSlipBtn" style="padding:0.625rem;font-size:0.85rem;">
+          <i class="fas fa-download"></i> PNG স্লিপ ডাউনলোড করুন
+        </button>
+      </div>
+
+      <div style="margin:0.5rem 0">
+        <button class="btn-ghost btn-block" id="trackSuccessOrderBtn" style="font-size:0.875rem;padding:0.7rem 1rem;">
+          <i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক করুন
+        </button>
+      </div>
+
+      <div class="success-actions" style="margin-top:0.75rem">
+        <button class="btn-primary" onclick="closeModal('successModal');navigateTo('orders');" style="padding:0.75rem 1rem;font-size:0.9rem;">
+          <i class="fas fa-satellite-dish"></i> ট্র্যাক করুন
+        </button>
+        <button class="btn-ghost" onclick="closeModal('successModal');navigateTo('products');" style="padding:0.75rem 1rem;font-size:0.9rem;">
+          <i class="fas fa-arrow-right"></i> আরও কেনাকাটা
+        </button>
+      </div>
+
     </div>
+  </div>
+</div>
 
     <!-- ═══ ORDER TRACKING MODAL ════════════════════════════════ -->
     <div class="modal" id="trackingModal">
