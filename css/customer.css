@@ -6238,3 +6238,46 @@ body.modal-open {
     }
   
   }
+
+  /* Fraud UI — customer-facing only */
+.fraud-verified-badge {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.68rem; font-weight: 600;
+  color: #059669; background: #ECFDF5;
+  padding: 4px 10px; border-radius: 50px;
+  border: 1px solid #10B981;
+}
+.fraud-banner {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 0.875rem 1rem; border-radius: 10px;
+  margin-bottom: 0.75rem; font-size: 0.82rem;
+}
+.fraud-banner strong { display: block; margin-bottom: 2px; }
+.fraud-banner-warn {
+  background: #FEF3CD; border: 1px solid #F5C518; color: #92400E;
+}
+.fraud-banner-warn i { color: #B7770D; margin-top: 2px; }
+.fraud-banner-hold {
+  background: #EEF2FF; border: 1px solid #6366F1; color: #3730A3;
+}
+.fraud-banner-hold i { color: #4338CA; margin-top: 2px; }
+
+.order-fraud-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.62rem; font-weight: 600; padding: 2px 7px;
+  border-radius: 50px;
+}
+.chip-safe    { background:#ECFDF5; color:#059669; border:1px solid #10B981; }
+.chip-hold    { background:#EEF2FF; color:#4338CA; border:1px solid #6366F1; }
+.chip-blocked { background:#FDEDEC; color:#C0392B; border:1px solid #E74C3C; }
+
+.tl-dot-hold {
+  background: linear-gradient(135deg, #6366F1, #4338CA) !important;
+  border-color: #6366F1 !important;
+}
+
+body { padding-bottom: 0; }
+
+@media (max-width: 768px) {
+  body { padding-bottom: 72px; }
+}
