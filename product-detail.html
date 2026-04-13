@@ -17,6 +17,7 @@
     />
     <link rel="stylesheet" href="css/details.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
   </head>
   <body>
@@ -169,6 +170,77 @@
                   <i class="fas fa-rotate-left"></i><span>৭ দিনের রিটার্ন</span>
                 </div>
               </div>
+
+              <!-- SHARE SECTION - Add after trust-grid or before divider -->
+<div class="share-section" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+  <div class="section-label" style="margin-bottom: 0.75rem;">
+    <i class="fas fa-share-alt"></i> শেয়ার করুন
+  </div>
+  <div class="share-buttons">
+    <button class="share-btn" onclick="shareProduct('facebook')">
+      <i class="fab fa-facebook-f"></i>
+    </button>
+    <button class="share-btn" onclick="shareProduct('whatsapp')">
+      <i class="fab fa-whatsapp"></i>
+    </button>
+    <button class="share-btn" onclick="shareProduct('twitter')">
+      <i class="fab fa-twitter"></i>
+    </button>
+    <button class="share-btn" onclick="shareProduct('messenger')">
+      <i class="fab fa-facebook-messenger"></i>
+    </button>
+    <button class="share-btn" onclick="copyProductLink()">
+      <i class="fas fa-link"></i>
+    </button>
+    <button class="share-btn" onclick="openQRModal()">
+      <i class="fas fa-qrcode"></i>
+    </button>
+    <button class="share-btn" onclick="openShareImageModal()">
+      <i class="fas fa-image"></i>
+    </button>
+  </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal" id="qrModal">
+  <div class="modal-content modal-small">
+    <div class="modal-header">
+      <h3><i class="fas fa-qrcode"></i> পণ্যের QR কোড</h3>
+      <button class="close-modal" onclick="closeModal('qrModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" style="text-align: center;">
+      <div id="qrCodeContainer" style="display: flex; justify-content: center; margin: 1rem 0;"></div>
+      <p style="margin: 0.5rem 0; font-size: 0.8rem; color: var(--text-muted);">
+        স্ক্যান করে পণ্যটি দেখুন
+      </p>
+      <button class="btn-primary" onclick="downloadQRCode()" style="margin-top: 0.5rem;">
+        <i class="fas fa-download"></i> QR কোড ডাউনলোড
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Share Image Modal -->
+<div class="modal" id="shareImageModal">
+  <div class="modal-content modal-small">
+    <div class="modal-header">
+      <h3><i class="fas fa-image"></i> পণ্যের ছবি শেয়ার</h3>
+      <button class="close-modal" onclick="closeModal('shareImageModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" style="text-align: center;">
+      <canvas id="shareImageCanvas" style="width: 100%; max-width: 350px; margin: 0 auto; border-radius: 12px; box-shadow: var(--shadow-md);"></canvas>
+      <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+        <button class="btn-primary" onclick="downloadShareImage()" style="flex:1;">
+          <i class="fas fa-download"></i> ছবি ডাউনলোড
+        </button>
+        <button class="btn-primary" onclick="shareImageViaWhatsApp()" style="flex:1; background: #25D366;">
+          <i class="fab fa-whatsapp"></i> হোয়াটসঅ্যাপ
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
             </div>
 
             <div id="productExtras"></div>
@@ -742,6 +814,6 @@
           }
         })();
       </script>
-    <script src="js/details.min.js"></script>
+    <script src="js/details.js"></script>
   </body>
 </html>
