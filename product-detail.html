@@ -455,6 +455,30 @@
     </div>
   </div>
 </div>
+
+<div class="modal" id="detailOrderRejectModal">
+  <div class="modal-content modal-small">
+    <div class="reject-modal-content">
+      <div class="reject-icon">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <h3>অর্ডার প্রক্রিয়া ব্যর্থ হয়েছে</h3>
+      <p id="detailRejectModalMsg">আপনার অর্ডারটি প্রক্রিয়া করা যায়নি। সহায়তার জন্য যোগাযোগ করুন।</p>
+      <div class="reject-contact-bar">
+        <i class="fas fa-headset"></i>
+        <span>সাপোর্ট: <strong>01700-000000</strong></span>
+      </div>
+      <div class="reject-actions">
+        <button class="btn-primary" onclick="closeModal('detailOrderRejectModal')">
+          <i class="fas fa-redo"></i> আবার চেষ্টা করুন
+        </button>
+        <button class="btn-ghost" onclick="closeModal('detailOrderRejectModal'); window.location.href='index.html#orders';">
+          <i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক করুন
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
     <script>
       (function() {
           'use strict';
