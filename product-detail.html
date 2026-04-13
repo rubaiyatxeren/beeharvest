@@ -443,15 +443,39 @@
 
       <div class="success-actions" style="margin-top:0.75rem;display:flex;gap:0.75rem;">
         <button class="btn-primary" style="width:auto;padding:0.75rem 1rem;font-size:0.9rem;flex:1;"
-          onclick="closeModal('successModal'); window.location.href='index.html#orders'">
-          <i class="fas fa-satellite-dish"></i> ট্র্যাক করুন
-        </button>
+  onclick="closeModal('successModal'); localStorage.setItem('trackAfterRedirect', document.getElementById('successOrderNum')?.innerText?.replace('#', '') || ''); window.location.href='index.html';">
+  <i class="fas fa-satellite-dish"></i> ট্র্যাক করুন
+</button>
         <button class="btn-ghost" style="padding:0.75rem 1rem;font-size:0.9rem;flex:1;"
           onclick="closeModal('successModal'); goBack()">
           <i class="fas fa-arrow-right"></i> আরও কেনাকাটা
         </button>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="detailOrderRejectModal">
+  <div class="modal-content modal-small">
+    <div class="reject-modal-content">
+      <div class="reject-icon">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <h3>অর্ডার প্রক্রিয়া ব্যর্থ হয়েছে</h3>
+      <p id="detailRejectModalMsg">আপনার অর্ডারটি প্রক্রিয়া করা যায়নি। সহায়তার জন্য যোগাযোগ করুন।</p>
+      <div class="reject-contact-bar">
+        <i class="fas fa-headset"></i>
+        <span>সাপোর্ট: <strong>01700-000000</strong></span>
+      </div>
+      <div class="reject-actions">
+        <button class="btn-primary" onclick="closeModal('detailOrderRejectModal')">
+          <i class="fas fa-redo"></i> আবার চেষ্টা করুন
+        </button>
+        <button class="btn-ghost" onclick="closeModal('detailOrderRejectModal'); window.location.href='index.html#orders';">
+          <i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক করুন
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -694,6 +718,29 @@
           initSecurity();
           
       })();
+      </script>
+      <script>
+        (function() {
+          const params = new URLSearchParams(window.location.search);
+          const trackNum = params.get('track');
+          if (trackNum) {
+            window._autoTrackOrderNumber = trackNum.toUpperCase();
+            
+            function tryOpenTracking() {
+              if (typeof openTrackingModal === 'function' && window._autoTrackOrderNumber) {
+                console.log('🔍 Opening tracking modal for:', window._autoTrackOrderNumber);
+                openTrackingModal(window._autoTrackOrderNumber);
+                window._autoTrackOrderNumber = null;
+              } else if (window._retryCount < 10) {
+                window._retryCount = (window._retryCount || 0) + 1;
+                setTimeout(tryOpenTracking, 500);
+              }
+            }
+            
+            setTimeout(tryOpenTracking, 300);
+            window.history.replaceState({}, '', window.location.pathname);
+          }
+        })();
       </script>
     <script src="js/details.min.js"></script>
   </body>
