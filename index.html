@@ -730,11 +730,11 @@
         </button>
       </div>
 
-      <div class="success-actions" style="margin-top:0.75rem">
-        <button class="btn-primary" onclick="closeModal('successModal');navigateTo('orders');" style="padding:0.75rem 1rem;font-size:0.9rem;">
+      <div class="success-actions" style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
+        <button class="btn-primary" onclick="closeModal('successModal');localStorage.setItem('trackAfterRedirect', document.getElementById('successOrderNum')?.innerText?.replace('#', '') || ''); window.location.href='index.html';" style="width:100%; padding:0.875rem 1rem; font-size:0.9rem;">
           <i class="fas fa-satellite-dish"></i> ট্র্যাক করুন
         </button>
-        <button class="btn-ghost" onclick="closeModal('successModal');navigateTo('products');" style="padding:0.75rem 1rem;font-size:0.9rem;">
+        <button class="btn-ghost" onclick="closeModal('successModal'); navigateTo('products');" style="width:100%; padding:0.875rem 1rem; font-size:0.9rem;">
           <i class="fas fa-arrow-right"></i> আরও কেনাকাটা
         </button>
       </div>
