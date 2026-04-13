@@ -6276,6 +6276,75 @@ body.modal-open {
   border-color: #6366F1 !important;
 }
 
+.reject-modal-content {
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+
+.reject-icon {
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2.5rem;
+  color: white;
+  animation: rejectPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes rejectPop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.reject-modal-content h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.4rem;
+  color: var(--danger);
+  margin-bottom: 0.75rem;
+}
+
+.reject-modal-content p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+}
+
+.reject-contact-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--danger-bg);
+  border: 1px solid rgba(197,48,48,0.2);
+  border-radius: 50px;
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  color: var(--danger);
+  margin-bottom: 1.5rem;
+}
+
+.reject-contact-bar i { font-size: 0.9rem; }
+.reject-contact-bar strong { color: var(--text-primary); }
+
+.reject-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.reject-actions .btn-primary {
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+}
+
+.reject-actions .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(197,48,48,0.4);
+}
+
 body { padding-bottom: 0; }
 
 @media (max-width: 768px) {
