@@ -661,13 +661,25 @@
                     মেনে নিচ্ছি</span
                   >
                 </div>
-                <button
-                  type="submit"
-                  class="btn-primary btn-block btn-large"
-                  id="confirmOrderBtn"
-                >
-                  <i class="fas fa-check-circle"></i> অর্ডার কনফার্ম করুন
-                </button>
+                <div class="slider-order-container" style="margin-top: 1rem;">
+                  <div class="slider-order-wrapper" id="sliderOrderWrapper">
+                    <div class="slider-track" id="sliderTrack">
+                      <div class="slider-thumb" id="sliderThumb">
+                        <i class="fas fa-arrow-right"></i>
+                      </div>
+                      <div class="slider-progress-fill" id="sliderProgressFill"></div>
+                      <span class="slider-label" id="sliderLabel">
+                        <i class="fas fa-arrow-right-to-bracket"></i> স্লাইড করে অর্ডার কনফার্ম করুন
+                      </span>
+                      <span class="slider-success-label" id="sliderSuccessLabel" style="display: none;">
+                        <i class="fas fa-check-circle"></i> অর্ডার হচ্ছে...
+                      </span>
+                    </div>
+                  </div>
+                  <div class="slider-hint" id="sliderHint">
+                    <i class="fas fa-hand-pointer"></i> ডান দিকে স্লাইড করুন অর্ডার কনফার্ম করতে
+                  </div>
+                </div>
               </div>
             </div>
           </form>
