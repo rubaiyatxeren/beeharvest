@@ -2756,6 +2756,182 @@
   margin-top: 8px;
 }
 
+/* ==============================================
+   SLIDER PLACE ORDER BUTTON - Premium Animation
+   ============================================== */
+   .slider-order-container {
+    width: 100%;
+    user-select: none;
+  }
+  
+  .slider-order-wrapper {
+    background: linear-gradient(135deg, #e8eaf0 0%, #d4d8e3 100%);
+    border-radius: 60px;
+    padding: 4px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.05);
+  }
+  
+  .slider-track {
+    position: relative;
+    background: rgba(255,255,255,0.5);
+    border-radius: 60px;
+    height: 58px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+  
+  .slider-progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(135deg, #F5A623 0%, #C47F11 100%);
+    border-radius: 60px;
+    transition: width 0.05s linear;
+    z-index: 1;
+    box-shadow: 0 0 8px rgba(245,166,35,0.5);
+  }
+  
+  .slider-thumb {
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    z-index: 3;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
+    font-size: 1.2rem;
+    color: #C47F11;
+  }
+  
+  .slider-thumb:active {
+    cursor: grabbing;
+    transform: translateY(-50%) scale(0.96);
+  }
+  
+  .slider-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #5a687c;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    z-index: 2;
+    font-family: 'Hind Siliguri', sans-serif;
+    white-space: nowrap;
+  }
+  
+  .slider-success-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: white;
+    pointer-events: none;
+    z-index: 2;
+    font-family: 'Hind Siliguri', sans-serif;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    white-space: nowrap;
+  }
+  
+  .slider-success-label i {
+    margin-right: 6px;
+    animation: spinCheck 0.6s ease;
+  }
+  
+  @keyframes spinCheck {
+    0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  
+  .slider-hint {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #6B7A99;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    animation: hintPulse 1.8s ease-in-out infinite;
+  }
+  
+  @keyframes hintPulse {
+    0%, 100% { opacity: 0.6; transform: translateX(0); }
+    50% { opacity: 1; transform: translateX(3px); }
+  }
+  
+  /* Disabled state (after order placed, while processing) */
+  .slider-track.processing {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  
+  .slider-track.processing .slider-thumb {
+    cursor: not-allowed;
+    background: #ddd;
+    color: #999;
+  }
+  
+  .slider-track.processing .slider-progress-fill {
+    background: linear-gradient(135deg, #aaa 0%, #888 100%);
+  }
+  
+  /* Success animation when order is triggered */
+  @keyframes slideFlash {
+    0% { box-shadow: 0 0 0 0 rgba(245,166,35,0.7); }
+    70% { box-shadow: 0 0 0 12px rgba(245,166,35,0); }
+    100% { box-shadow: 0 0 0 0 rgba(245,166,35,0); }
+  }
+  
+  .slider-order-wrapper.flash-success {
+    animation: slideFlash 0.6s ease;
+  }
+  
+  /* Mobile touch optimization */
+  @media (max-width: 640px) {
+    .slider-track {
+      height: 52px;
+    }
+    .slider-thumb {
+      width: 44px;
+      height: 44px;
+      font-size: 1rem;
+    }
+    .slider-label, .slider-success-label {
+      font-size: 0.8rem;
+      white-space: nowrap;
+      padding: 0 10px;
+    }
+    .slider-label {
+      white-space: normal;
+      font-size: 0.7rem;
+      padding: 0 50px;
+    }
+    .slider-hint {
+      font-size: 0.65rem;
+    }
+  }
+
 /* Show only on mobile */
 @media (max-width: 768px) {
   .premium-mobile-nav { display: flex; }
