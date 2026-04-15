@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="css/layer.css" />
     <link rel="stylesheet" href="css/customer.css" />
   </head>
-  <body>
+  <body style="padding-bottom: 0 !important; margin-bottom: 0 !important;">
     <!-- ═══ LOADING OVERLAY ═══════════════════════════════════ -->
     <div class="loading-overlay" id="loadingOverlay">
       <div class="loading-spinner-ring">
@@ -1047,10 +1047,11 @@
       </div>
       <div class="footer-bottom">
         <div class="footer-bottom-inner">
-          <span>© ২০২৫ BeeHarvest. সর্বস্বত্ব সংরক্ষিত।</span>
-          <span class="footer-made"
-            >বাংলাদেশে তৈরি <i class="fas fa-heart" style="color: #f5a623"></i
-          ></span>
+          <span>© <span id="currentYear">২০২৫</span> BeeHarvest. সর্বস্বত্ব সংরক্ষিত।</span>
+          <span class="footer-made">
+            <span id="currentTime"></span> · 
+            বাংলাদেশে তৈরি <i class="fas fa-heart" style="color: #f5a623"></i>
+          </span>
         </div>
       </div>
     </footer>
