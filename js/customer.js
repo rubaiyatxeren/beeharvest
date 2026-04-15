@@ -6,6 +6,38 @@
    let cart = [];
    let currentProductsPage = 1;
    let totalProductsPages = 1;
+
+   /* ════════════════════════════════════════════════════════════
+      CHECKOUT FORM — AUTO-SAVE / RESTORE  (localStorage)
+   ════════════════════════════════════════════════════════════ */
+const CHECKOUT_FIELDS = [
+  "checkoutName",
+  "checkoutEmail",
+  "checkoutPhone",
+  "checkoutAddress",
+  "checkoutCity",
+  "checkoutZipCode",
+];
+const CHECKOUT_STORAGE_KEY = "bh_checkout_info";
+
+function saveCheckoutInfo() {
+  const data = {};
+  CHECKOUT_FIELDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) data[id] = el.value;
+  });
+  localStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(data));
+}
+
+function restoreCheckoutInfo() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CHECKOUT_STORAGE_KEY) || "{}");
+    CHECKOUT_FIELDS.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el && saved[id]) el.value = saved[id];
+    });
+  } catch (e) {}
+}
    
    /* ─── Init cart from localStorage ─────────────────────── */
    try {
@@ -286,6 +318,8 @@
        }
        
        const products = res.data || [];
+
+       window.GodTracker?.search(search, products.length);
    
        grid.innerHTML =
          products.length === 0
@@ -344,70 +378,222 @@
     });
   }
 
-// Call this after loading products
-function renderProductCard(p) {
-  if (!p?._id) return "";
-  const id = String(p._id);
-  const safeName = escHtml(p.name || "");
-  const price = p.discountPrice || p.price;
-  const imgUrl = p.images?.[0]?.url || "https://via.placeholder.com/400x300?text=No+Image";
-  const discount = p.discountPrice ? Math.round(((p.price - p.discountPrice) / p.price) * 100) : 0;
+  function renderProductCard(p) {
+    if (!p?._id) return "";
+    const id = String(p._id);
+    const safeName = escHtml(p.name || p.nameBn || "");
+    
+
+    const salePrice    = p.discountPrice || p.price;
+    const comparePrice = p.comparePrice;   // MRP / strikethrough
+    const basePrice    = p.price;
   
-  // Placeholder SVG for lazy loading
-  const placeholder = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999'%3E📷%3C/text%3E%3C/svg%3E";
+    // Discount % — prefer comparePrice over basePrice as reference
+    const refPrice = comparePrice || basePrice;
+    const discount = (comparePrice || p.discountPrice)
+      ? Math.round(((refPrice - salePrice) / refPrice) * 100)
+      : 0;
   
-  let stockClass = "", stockText = "", stockIcon = "fa-check-circle";
-  if (p.stock <= 0) {
-    stockClass = "out";
-    stockText = "স্টকে নেই";
-    stockIcon = "fa-times-circle";
-  } else if (p.stock <= 10) {
-    stockClass = "low";
-    stockText = `শেষ ${p.stock} টি`;
-    stockIcon = "fa-exclamation-circle";
-  } else {
-    stockText = "স্টকে আছে";
+    const savings = discount > 0 ? (refPrice - salePrice) : 0;
+    const hasAnyDiscount = discount > 0;
+  
+    const imgUrl = p.images?.[0]?.url || "https://via.placeholder.com/400x300?text=No+Image";
+    const placeholder = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f0ebe0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23c9b99a' font-size='40'%3E🍯%3C/text%3E%3C/svg%3E";
+  
+    const isOutOfStock = p.stock <= 0;
+    const isLowStock   = p.stock > 0 && p.stock <= 10;
+    const isFeatured   = p.isFeatured;
+  
+    const rating      = p.ratings?.average || 0;
+    const ratingCount = p.ratings?.count   || 0;
+  
+    // ── Badges ───────────────────────────────────────────────
+    let topBadgesHtml = "";
+    if (isFeatured)    topBadgesHtml += `<div class="pc-badge pc-badge-featured"><i class="fas fa-star"></i> ফিচার্ড</div>`;
+    if (discount >= 30) topBadgesHtml += `<div class="pc-badge pc-badge-hot"><i class="fas fa-bolt"></i> সেরা ডিল</div>`;
+  
+    const stockBadgeHtml = isOutOfStock
+      ? `<div class="pc-stock-badge pc-stock-out"><i class="fas fa-times-circle"></i> স্টক শেষ</div>`
+      : isLowStock
+      ? `<div class="pc-stock-badge pc-stock-low"><i class="fas fa-fire"></i> মাত্র ${p.stock}টি বাকি!</div>`
+      : "";
+  
+    // ── Stars ────────────────────────────────────────────────
+    const starsHtml = (() => {
+      if (!rating) return '<span style="font-size:0.68rem;color:var(--text-muted)">রেটিং নেই</span>';
+      const full  = Math.floor(rating);
+      const half  = rating % 1 >= 0.5 ? 1 : 0;
+      const empty = 5 - full - half;
+      return `${'<i class="fas fa-star"></i>'.repeat(full)}${half ? '<i class="fas fa-star-half-alt"></i>' : ''}${'<i class="far fa-star"></i>'.repeat(empty)}`;
+    })();
+  
+    window[`__p_${id}`] = p;
+  
+    return `
+      <div class="product-card pc-premium" onclick="viewProduct('${id}')">
+  
+        <!-- ── IMAGE ZONE ── -->
+        <div class="pc-image-zone">
+          <img class="pc-img" data-src="${escHtml(imgUrl)}" src="${placeholder}" alt="${safeName}" loading="lazy">
+          <div class="pc-img-overlay"></div>
+  
+          <!-- Discount ribbon -->
+          ${discount ? `
+            <div class="pc-discount-ribbon">
+              <span class="pc-discount-pct">${discount}%</span>
+              <span class="pc-discount-label">ছাড়</span>
+            </div>` : ""}
+  
+          <!-- Top badges -->
+          ${topBadgesHtml ? `<div class="pc-top-badges">${topBadgesHtml}</div>` : ""}
+  
+          <!-- Stock badge -->
+          ${stockBadgeHtml}
+  
+          <!-- Savings chip -->
+          ${savings > 0 ? `
+            <div class="pc-savings-chip">
+              <i class="fas fa-tag"></i> ৳${savings.toLocaleString("bn-BD")} সাশ্রয়
+            </div>` : ""}
+  
+          <!-- Hover CTA -->
+          ${!isOutOfStock ? `
+            <div class="pc-hover-cta" onclick="event.stopPropagation(); addToCart('${id}', ${salePrice}, '${escHtml(imgUrl)}')">
+              <i class="fas fa-shopping-cart"></i>
+              <span>কার্টে যোগ করুন</span>
+            </div>` : `
+            <div class="pc-hover-cta pc-cta-disabled">
+              <i class="fas fa-ban"></i>
+              <span>স্টক নেই</span>
+            </div>`}
+        </div>
+  
+        <!-- ── INFO ZONE ── -->
+        <div class="pc-info-zone">
+  
+          <!-- Category -->
+          ${p.category?.name ? `<div class="pc-category-tag"><i class="fas fa-tag"></i> ${escHtml(p.category.name)}</div>` : ""}
+  
+          <!-- Name -->
+          <h3 class="pc-name">${safeName}</h3>
+  
+          <!-- Rating -->
+          ${rating ? `
+            <div class="pc-rating-row">
+              <div class="pc-stars">${starsHtml}</div>
+              <span class="pc-rating-num">${rating.toFixed(1)}</span>
+              <span class="pc-rating-count">(${ratingCount.toLocaleString("bn-BD")} রিভিউ)</span>
+            </div>` : ""}
+  
+          <!-- ── PRICE BLOCK ── -->
+          <div class="pc-price-block">
+  
+            <!-- Sale / current price -->
+            <div class="pc-price-main">
+              <span class="pc-price-currency">৳</span>
+              <span class="pc-price-amount">${salePrice.toLocaleString("bn-BD")}</span>
+              ${discount ? `<span class="pc-price-off-badge">${discount}% ছাড়</span>` : ""}
+            </div>
+  
+            <!-- Compare & base strikethroughs -->
+            ${hasAnyDiscount ? `
+              <div class="pc-price-strikethroughs">
+                ${comparePrice ? `
+                  <span class="pc-price-compare" title="বাজার মূল্য (MRP)">
+                    <span class="pc-price-compare-label">MRP</span>
+                    <span class="pc-price-compare-val">৳${comparePrice.toLocaleString("bn-BD")}</span>
+                  </span>` : ""}
+                ${p.discountPrice && basePrice !== salePrice ? `
+                  <span class="pc-price-base" title="মূল মূল্য">
+                    ৳${basePrice.toLocaleString("bn-BD")}
+                  </span>` : ""}
+                ${savings > 0 ? `
+                  <span class="pc-price-saved">
+                    <i class="fas fa-piggy-bank"></i> ৳${savings.toLocaleString("bn-BD")} সাশ্রয়
+                  </span>` : ""}
+              </div>` : ""}
+          </div>
+  
+          <!-- Stock bar — dynamic based on real stock -->
+        <div class="pc-stock-bar-wrap">
+          ${(() => {
+            if (isOutOfStock) {
+              return `<div class="pc-stock-label pc-stock-out-txt">
+                        <i class="fas fa-times-circle"></i> স্টকে নেই
+                      </div>
+                      <div class="pc-stock-bar">
+                        <div class="pc-stock-fill pc-fill-out" style="width:0%"></div>
+                      </div>`;
+            }
+
+            // Determine fill level and tier
+            // Cap reference at 100 for bar calculation
+            const stockRef  = 100;
+            const rawPct    = Math.min((p.stock / stockRef) * 100, 100);
+
+            // Tier thresholds
+            const isCritical = p.stock <= 5;
+            const isLow      = p.stock <= 20;
+            const isMed      = p.stock <= 60;
+            // else: high
+
+            const fillClass = isCritical ? "pc-fill-critical"
+                            : isLow      ? "pc-fill-low"
+                            : isMed      ? "pc-fill-med"
+                            :              "pc-fill-ok";
+
+            const labelClass = isCritical ? "pc-stock-critical-txt"
+                             : isLow      ? "pc-stock-low-txt"
+                             : isMed      ? "pc-stock-med-txt"
+                             :              "pc-stock-ok-txt";
+
+            const icon = isCritical ? "fas fa-exclamation-circle"
+                       : isLow      ? "fas fa-fire"
+                       : isMed      ? "fas fa-box"
+                       :              "fas fa-check-circle";
+
+            const labelText = isCritical
+              ? `স্টক শেষ হওয়ার পথে! মাত্র ${p.stock}টি আছে`
+              : isLow
+              ? `দ্রুত শেষ হচ্ছে — ${p.stock}টি বাকি`
+              : isMed
+              ? `সীমিত স্টক — ${p.stock}টি আছে`
+              : `স্টকে আছে (${p.stock}+)`;
+
+            return `<div class="pc-stock-label ${labelClass}">
+                      <i class="${icon}"></i> ${labelText}
+                    </div>
+                    <div class="pc-stock-bar">
+                      <div class="pc-stock-fill ${fillClass}" style="width:${rawPct}%"></div>
+                    </div>`;
+          })()}
+        </div>
+  
+          <!-- Chips -->
+          <div class="pc-chips">
+            <span class="pc-chip"><i class="fas fa-truck"></i> ডেলিভারি</span>
+            <span class="pc-chip pc-chip-cod"><i class="fas fa-money-bill-wave"></i> COD</span>
+            ${hasAnyDiscount ? `<span class="pc-chip pc-chip-deal"><i class="fas fa-bolt"></i> অফার</span>` : ""}
+            
+          </div>
+  
+          <!-- Action buttons -->
+          <div class="pc-action-row">
+            ${!isOutOfStock
+              ? `<button class="pc-btn-cart" onclick="event.stopPropagation(); addToCart('${id}', ${salePrice}, '${escHtml(imgUrl)}')">
+                  <i class="fas fa-cart-plus"></i> কার্টে যোগ করুন
+                 </button>
+                 <button class="pc-btn-view" onclick="event.stopPropagation(); viewProduct('${id}')">
+                  <i class="fas fa-up-right-and-down-left-from-center"></i>
+                 </button>`
+              : `<button class="pc-btn-disabled" disabled>
+                  <i class="fas fa-times"></i> স্টকে নেই
+                 </button>`}
+          </div>
+  
+        </div>
+      </div>`;
   }
-
-  window[`__p_${id}`] = p;
-
-  return `
-    <div class="product-card" onclick="viewProduct('${id}')">
-      <div class="product-image-wrap">
-        <img class="product-image" data-src="${escHtml(imgUrl)}" src="${placeholder}" alt="${safeName}">
-        ${discount ? `<div class="product-badge">${discount}% ছাড়</div>` : ""}
-        ${p.stock <= 0 ? `<div class="product-badge out">স্টক শেষ</div>` : ""}
-        ${p.stock > 0 ? `
-          <button class="product-quick-add" onclick="event.stopPropagation(); addToCart('${id}', ${price}, '${escHtml(imgUrl)}')">
-            <i class="fas fa-cart-plus"></i> কার্টে যোগ করুন
-          </button>
-        ` : ""}
-      </div>
-      <div class="product-info">
-        <div class="product-name">${safeName}</div>
-        <div class="product-price-row">
-          <span class="price-final">৳${price.toLocaleString("bn-BD")}</span>
-          ${p.discountPrice ? `<span class="price-original">৳${p.price.toLocaleString("bn-BD")}</span>` : ""}
-          ${discount ? `<span class="price-off">${discount}% ছাড়</span>` : ""}
-        </div>
-        <div class="product-stock-row ${stockClass}">
-          <i class="fas ${stockIcon}"></i> ${stockText}
-        </div>
-        <div class="product-actions">
-          ${p.stock > 0 ? `
-            <button class="btn-primary btn-block" onclick="event.stopPropagation(); addToCart('${id}', ${price}, '${escHtml(imgUrl)}')">
-              <i class="fas fa-cart-plus"></i> কার্টে যোগ করুন
-            </button>
-          ` : `
-            <button class="btn-ghost btn-block" disabled style="opacity:.5; cursor:not-allowed;">
-              <i class="fas fa-times"></i> স্টকে নেই
-            </button>
-          `}
-        </div>
-      </div>
-    </div>
-  `;
-}
    
    /* ════════════════════════════════════════════════════════════
          DELIVERY CHARGE + CART TOTALS  (FIXED)
@@ -498,36 +684,206 @@ async function cartTotalsAsync(city = null, suppressToast = false) {
    /* ════════════════════════════════════════════════════════════
          CART
       ════════════════════════════════════════════════════════════ */
-   function addToCart(productId, price, imageUrl) {
-     const pData = window[`__p_${productId}`];
-     const name = pData?.name || "পণ্য";
-     const existing = cart.find((i) => i.productId === productId);
-     if (existing) {
-       existing.quantity++;
-     } else {
-       cart.push({ productId, name, price, image: imageUrl, quantity: 1 });
-     }
-     saveCart();
-     updateCartUI();
-     showToast(`"${name}" কার্টে যোগ হয়েছে`, "success");
-   }
+      async function addToCart(productId, price, imageUrl) {
+        const pData = window[`__p_${productId}`];
+        const name = pData?.name || "পণ্য";
+      
+        // ── Live stock check before adding ──────────────────────
+        try {
+          const res = await fetch(`${API_URL}/products/${productId}`);
+          const data = await res.json();
+      
+          if (!data.success || !data.data) {
+            showToast("পণ্যের তথ্য পাওয়া যায়নি", "error");
+            return;
+          }
+      
+          const liveProduct = data.data;
+          const liveStock   = liveProduct.stock ?? 0;
+      
+          // Update cached product data with fresh info
+          window[`__p_${productId}`] = liveProduct;
+      
+          if (liveStock <= 0) {
+            showToast(`"${name}" এখন স্টকে নেই`, "error");
+            // Refresh the card visually if possible
+            _refreshProductCardStock(productId, 0);
+            return;
+          }
+      
+          // Check how many already in cart
+          const existing    = cart.find((i) => i.productId === productId);
+          const inCartQty   = existing ? existing.quantity : 0;
+      
+          if (inCartQty >= liveStock) {
+            showToast(
+              `সর্বোচ্চ ${liveStock}টি কার্টে যোগ করা যাবে — স্টক সীমিত`,
+              "error"
+            );
+            return;
+          }
+      
+          // ── All good — add to cart ───────────────────────────
+          if (existing) {
+            existing.quantity++;
+          } else {
+            cart.push({ productId, name, price, image: imageUrl, quantity: 1 });
+          }
+      
+          saveCart();
+          updateCartUI();
+          window.GodTracker?.addToCart(productId, name, price, 1);
+
+          showToast(`"${name}" কার্টে যোগ হয়েছে`, "success");
+      
+        } catch (err) {
+          console.error("Stock check failed:", err);
+          // Fail open — let it add but warn
+          const existing = cart.find((i) => i.productId === productId);
+          if (existing) {
+            existing.quantity++;
+          } else {
+            cart.push({ productId, name, price, image: imageUrl, quantity: 1 });
+          }
+          saveCart();
+          updateCartUI();
+          showToast(`"${name}" কার্টে যোগ হয়েছে (স্টক যাচাই করা যায়নি)`, "info");
+        }
+      }
+      
+      /** Visually refresh the product card stock UI without full reload */
+      function _refreshProductCardStock(productId, newStock) {
+        // Find every card that has onclick="viewProduct('id')"
+        document.querySelectorAll(`.pc-premium`).forEach((card) => {
+          const onclick = card.getAttribute("onclick") || "";
+          if (!onclick.includes(`'${productId}'`)) return;
+      
+          // Update stock bar label
+          const label = card.querySelector(".pc-stock-label");
+          if (label) {
+            label.className = "pc-stock-label pc-stock-out-txt";
+            label.innerHTML = `<i class="fas fa-times-circle"></i> স্টকে নেই`;
+          }
+      
+          // Update stock bar fill
+          const fill = card.querySelector(".pc-stock-fill");
+          if (fill) {
+            fill.className = "pc-stock-fill pc-fill-out";
+            fill.style.width = "0%";
+          }
+      
+          // Replace cart button with disabled
+          const actionRow = card.querySelector(".pc-action-row");
+          if (actionRow) {
+            actionRow.innerHTML = `
+              <button class="pc-btn-disabled" disabled>
+                <i class="fas fa-times"></i> স্টকে নেই
+              </button>`;
+          }
+      
+          // Remove hover CTA
+          const cta = card.querySelector(".pc-hover-cta");
+          if (cta) {
+            cta.className = "pc-hover-cta pc-cta-disabled";
+            cta.innerHTML = `<i class="fas fa-ban"></i><span>স্টক নেই</span>`;
+            cta.onclick = null;
+          }
+      
+          // Remove image stock badge if low stock badge showing
+          const stockBadge = card.querySelector(".pc-stock-badge");
+          if (stockBadge) {
+            stockBadge.className = "pc-stock-badge pc-stock-out";
+            stockBadge.innerHTML = `<i class="fas fa-times-circle"></i> স্টক শেষ`;
+          }
+        });
+      }
    
-   function updateQuantity(index, delta) {
-     if (!cart[index]) return;
-     const newQty = cart[index].quantity + delta;
-     if (newQty <= 0) {
-       removeFromCart(index);
-     } else {
-       cart[index].quantity = newQty;
-       saveCart();
-       updateCartUI();
-     }
-   }
+      async function updateQuantity(index, delta) {
+        if (!cart[index]) return;
+      
+        const item   = cart[index];
+        const newQty = item.quantity + delta;
+      
+        // ── Removing / decrementing — no stock check needed ─────
+        if (delta < 0) {
+          if (newQty <= 0) {
+            removeFromCart(index);
+          } else {
+            item.quantity = newQty;
+            saveCart();
+            updateCartUI();
+          }
+          return;
+        }
+      
+        // ── Incrementing — check live stock ─────────────────────
+        const cachedProduct = window[`__p_${item.productId}`];
+      
+        // Try cached stock first for instant feedback, then verify live
+        const cachedStock = cachedProduct?.stock ?? Infinity;
+      
+        if (newQty > cachedStock) {
+          showToast(`সর্বোচ্চ ${cachedStock}টি যোগ করা যাবে — স্টক সীমিত`, "error");
+          return;
+        }
+      
+        // Optimistically update UI first for snappy feel
+        item.quantity = newQty;
+        saveCart();
+        updateCartUI();
+      
+        // Then verify against live API in background
+        try {
+          const res  = await fetch(`${API_URL}/products/${item.productId}`);
+          const data = await res.json();
+      
+          if (!data.success || !data.data) return; // API issue — keep optimistic update
+      
+          const liveStock = data.data.stock ?? 0;
+      
+          // Update cache
+          window[`__p_${item.productId}`] = data.data;
+      
+          if (liveStock <= 0) {
+            // Product went out of stock — revert
+            item.quantity = newQty - 1;
+            if (item.quantity <= 0) {
+              cart.splice(index, 1);
+              showToast(`"${item.name}" স্টকে নেই, কার্ট থেকে সরানো হয়েছে`, "error");
+            } else {
+              showToast(`"${item.name}" এখন স্টকে নেই`, "error");
+            }
+            saveCart();
+            updateCartUI();
+            _refreshProductCardStock(item.productId, 0);
+            return;
+          }
+      
+          if (newQty > liveStock) {
+            // Exceeded live stock — revert to max
+            item.quantity = liveStock;
+            saveCart();
+            updateCartUI();
+            showToast(
+              `সর্বোচ্চ ${liveStock}টি কার্টে রাখা যাবে — স্টক সীমিত`,
+              "error"
+            );
+            // Also refresh card UI with real stock
+            _refreshProductCardStock(item.productId, liveStock);
+          }
+      
+        } catch (err) {
+          // Network issue — keep the optimistic update, warn silently
+          console.warn("Live stock verify failed for quantity update:", err);
+        }
+      }
    
    function removeFromCart(index) {
+    const item = cart[index];
      cart.splice(index, 1);
      saveCart();
      updateCartUI();
+     window.GodTracker?.removeFromCart(item.productId, item.name);
      showToast("পণ্য কার্ট থেকে সরানো হয়েছে", "info");
    }
    
@@ -604,6 +960,12 @@ async function updateCartUI() {
   updates.push(() => setText("mobileCartShipping", shippingFormatted));
   updates.push(() => setText("mobileCartTotal", totalFormatted));
 
+  const sub = document.getElementById("sheetHeaderSub");
+  if (sub) updates.push(() => sub.textContent = count > 0 ? `${count}টি পণ্য · সাশ্রয় আছে কিনা দেখুন` : "কার্ট খালি");
+
+  const badge = document.getElementById("sheetTotalBadge");
+  if (badge) updates.push(() => badge.textContent = `৳${total.toLocaleString("bn-BD")}`);
+
   // Apply all updates in next frame
   requestAnimationFrame(() => {
     updates.forEach(update => update());
@@ -629,6 +991,8 @@ async function updateCartUI() {
 
      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>'; }
 
+     window.GodTracker?.couponAttempt(code);
+
      const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
 
      try {
@@ -640,6 +1004,7 @@ async function updateCartUI() {
        const data = await res.json();
 
        if (!data.success) {
+        window.GodTracker?.couponFail(code, data.message);
          _setCheckoutCouponMsg(msgEl, data.message || "কুপন প্রয়োগ হয়নি", "error");
          checkoutAppliedCoupon = null;
          return;
@@ -651,6 +1016,8 @@ async function updateCartUI() {
          discountType:  data.data.discountType,
          discountValue: data.data.discountValue,
        };
+
+       window.GodTracker?.couponSuccess(checkoutAppliedCoupon.code, checkoutAppliedCoupon.discount);
 
        const label = data.data.discountType === "percentage"
          ? `${data.data.discountValue}% ছাড়`
@@ -727,49 +1094,50 @@ async function updateCartUI() {
    /* ════════════════════════════════════════════════════════════
          CHECKOUT
       ════════════════════════════════════════════════════════════ */
-      async function openCheckout() {
-        if (cart.length === 0) {
-          showToast("কার্ট খালি! আগে পণ্য যোগ করুন", "error");
-          return;
-        }
-      
-        // Reset coupon state whenever checkout opens
-        removeCheckoutCoupon();
-      
-        // ✅ ADD THIS — always start at step 1
-        checkoutGoTo(1);
-      
-        const list = document.getElementById("checkoutItems");
-        if (list) {
-          list.innerHTML = cart
-            .map(
-              (item) => `
-              <div class="checkout-item">
-                <img src="${escHtml(item.image || "https://via.placeholder.com/60")}" alt="${escHtml(item.name)}"
-                     onerror="this.src='https://via.placeholder.com/60'">
-                <div class="checkout-item-details">
-                  <div class="checkout-item-name">${escHtml(item.name)}</div>
-                  <div class="checkout-item-meta">৳${item.price.toLocaleString()} × ${item.quantity}</div>
-                </div>
-                <div class="checkout-item-total">৳${(item.price * item.quantity).toLocaleString()}</div>
-              </div>`,
-            )
-            .join("");
-        }
-      
-        const citySelect = document.getElementById("checkoutCity");
-        const selectedCity = citySelect ? citySelect.value : null;
-        const { subtotal, shipping, discount, total } = await cartTotalsAsync(selectedCity, true);
-        
-        setText("summarySubtotal", `৳${subtotal.toLocaleString()}`);
-        setText("summaryShipping", `৳${shipping.toLocaleString()}`);
-        setText("summaryTotal", `৳${total.toLocaleString()}`);
-      
-        const discountRow = document.getElementById("summaryDiscountRow");
-        if (discountRow) discountRow.style.display = "none";
-      
-        openModal("checkoutModal");
-      }
+   async function openCheckout() {
+     if (cart.length === 0) {
+       showToast("কার্ট খালি! আগে পণ্য যোগ করুন", "error");
+       return;
+     }
+
+     // Reset coupon state whenever checkout opens
+     removeCheckoutCoupon();
+   
+     const list = document.getElementById("checkoutItems");
+     if (list) {
+       list.innerHTML = cart
+         .map(
+           (item) => `
+           <div class="checkout-item">
+             <img src="${escHtml(item.image || "https://via.placeholder.com/60")}" alt="${escHtml(item.name)}"
+                  onerror="this.src='https://via.placeholder.com/60'">
+             <div class="checkout-item-details">
+               <div class="checkout-item-name">${escHtml(item.name)}</div>
+               <div class="checkout-item-meta">৳${item.price.toLocaleString()} × ${item.quantity}</div>
+             </div>
+             <div class="checkout-item-total">৳${(item.price * item.quantity).toLocaleString()}</div>
+           </div>`,
+         )
+         .join("");
+     }
+   
+     const citySelect = document.getElementById("checkoutCity");
+     const selectedCity = citySelect ? citySelect.value : null;
+     const { subtotal, shipping, discount, total } = await cartTotalsAsync(selectedCity, true);
+     
+     setText("summarySubtotal", `৳${subtotal.toLocaleString()}`);
+     setText("summaryShipping", `৳${shipping.toLocaleString()}`);
+     setText("summaryTotal", `৳${total.toLocaleString()}`);
+
+     window.GodTracker?.checkoutOpen(cart.length, subtotal);
+
+     // Hide discount row by default
+     const discountRow = document.getElementById("summaryDiscountRow");
+     if (discountRow) discountRow.style.display = "none";
+   
+     openModal("checkoutModal");
+     restoreCheckoutInfo();
+   }
    
    async function placeOrder(e) {
     if (e) e.preventDefault();
@@ -785,6 +1153,7 @@ async function updateCartUI() {
     const city = val("checkoutCity");
     const zipCode = val("checkoutZipCode");
     const notes = val("checkoutNotes");
+    
     const payMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || "COD";
     const accepted = document.getElementById("acceptTerms")?.checked;
     
@@ -817,6 +1186,8 @@ async function updateCartUI() {
     // Get cached totals
     const { subtotal, shipping, discount, total } = await cartTotalsAsync(city, true);
     
+    window.GodTracker?.orderAttempt(subtotal, cart.length, city, payMethod);
+
     const pmMap = {
       COD: "cash_on_delivery",
       bkash: "bkash",
@@ -872,6 +1243,8 @@ async function updateCartUI() {
       }
   
       const orderNum = data.data?.orderNumber || data.data?._id?.slice(-8) || "SUCCESS";
+const fraudVerdict    = data.data?.fraudVerdict    || null;
+const fraudAutoAction = data.data?.fraudAutoAction || null;
   
       window.lastOrderData = {
         orderNumber: orderNum,
@@ -887,9 +1260,48 @@ async function updateCartUI() {
       saveCart();
       await updateCartUI();
       hideLoadingOverlay();
-  
+      
+      window.GodTracker?.orderSuccess(orderNum, total, orderData.paymentMethod);
+
       setText("orderNumber", `#${orderNum}`);
-  
+
+// ── Fraud-aware success modal update ─────────────────────────
+const successIcon       = document.getElementById("successIcon");
+const successIconInner  = document.getElementById("successIconInner");
+const successTitle      = document.getElementById("successModalTitle");
+const successSubtitle   = document.getElementById("successModalSubtitle");
+const successFraudBanner = document.getElementById("successFraudBanner");
+
+if (fraudVerdict === "review" || fraudAutoAction === "held") {
+  // Review state — amber icon, hold banner visible
+  if (successIcon) {
+    successIcon.style.background = "linear-gradient(135deg, #6366F1, #4338CA)";
+  }
+  if (successIconInner) {
+    successIconInner.className = "fas fa-shield-halved";
+  }
+  if (successTitle)   successTitle.textContent = "অর্ডার গৃহীত হয়েছে";
+  if (successSubtitle) successSubtitle.innerHTML =
+    "আপনার অর্ডারটি সফলভাবে জমা হয়েছে।<br>আমরা শীঘ্রই যোগাযোগ করব।";
+  if (successFraudBanner) successFraudBanner.style.display = "flex";
+  window.GodTracker?.orderFraudHeld(orderNum);
+
+} else {
+  // Normal success — honey icon, no banner
+  if (successIcon) {
+    successIcon.style.background = "linear-gradient(135deg, var(--honey) 0%, var(--honey-dark) 100%)";
+  }
+  if (successIconInner) {
+    successIconInner.className = "fas fa-check";
+  }
+  if (successTitle)   successTitle.textContent = "অর্ডার সফল হয়েছে!";
+  if (successSubtitle) successSubtitle.innerHTML =
+    "আপনার অর্ডারটি গ্রহণ করা হয়েছে।<br>শীঘ্রই আপনার সাথে যোগাযোগ করা হবে।";
+  if (successFraudBanner) successFraudBanner.style.display = "none";
+}
+// ─────────────────────────────────────────────────────────────
+
+      
       const downloadBtn = document.getElementById("downloadSlipBtn");
       if (downloadBtn) {
         downloadBtn.onclick = () => generateOrderSlipPNG(window.lastOrderData);
@@ -914,7 +1326,10 @@ async function updateCartUI() {
       document.getElementById("checkoutForm")?.reset();
     } catch (err) {
       hideLoadingOverlay();
-      showToast(err.message || "অর্ডার দেওয়া যায়নি। আবার চেষ্টা করুন।", "error");
+      window.GodTracker?.orderFail(err.message);
+      const rejectMsg = document.getElementById("rejectModalMsg");
+if (rejectMsg) rejectMsg.textContent = err.message || "আপনার অর্ডারটি প্রক্রিয়া করা যায়নি। সহায়তার জন্য যোগাযোগ করুন।";
+setTimeout(() => openModal("orderRejectModal"), 200);
       console.error("Order error:", err);
     } finally {
       setButtonLoading(btn, false);
@@ -1086,11 +1501,14 @@ async function updateCartUI() {
        return;
      }
      const id = String(productId).trim();
+     const pData = window[`__p_${id}`]; // ADD THIS LINE to get cached data
+  window.GodTracker?.productView(id, pData?.name, pData?.price, pData?.category?.name);
      localStorage.setItem("lastViewedProductId", id);
      window.location.href = `product-detail.html?id=${encodeURIComponent(id)}`;
    }
    
    function filterByCategory(categoryId) {
+    window.GodTracker?.categoryFilter(categoryId, "");
      navigateTo("products");
      setTimeout(() => {
        const sel = document.getElementById("categoryFilter");
@@ -1159,6 +1577,8 @@ window.addEventListener('scroll', throttle(() => {
 function openMobileCart() {
   const sheet = document.getElementById("mobileCartSheet");
   if (!sheet) return;
+
+  window.GodTracker?.cartOpen();
   
   updateCartUI();
   
@@ -1299,7 +1719,9 @@ function closeMobileCart() {
        _showTrackError(resultEl, "অর্ডার নম্বর দিন", "অনুগ্রহ করে আপনার অর্ডার নম্বরটি উপরের বক্সে টাইপ করুন।");
        return;
      }
-   
+     
+     window.GodTracker?.trackOrder(orderNum);
+
      if (btn) {
        btn.querySelector(".track-btn-text").style.display = "none";
        btn.querySelector(".track-btn-loading").style.display = "inline-flex";
@@ -1344,144 +1766,205 @@ function closeMobileCart() {
    }
    
    function _renderTrackingResult(el, order) {
-     if (!el) return;
-     const isCancelled = order.orderStatus === "cancelled";
-     const currentIdx = isCancelled ? -1 : getStatusIndex(order.orderStatus);
-   
-     const displayDate = (d) => {
-       if (!d) return "—";
-       return new Date(d).toLocaleString("en-BD", {
-         day: "2-digit", month: "short", year: "numeric",
-         hour: "2-digit", minute: "2-digit",
-       });
-     };
-   
-     const payMethodLabel = {
-       cash_on_delivery: "ক্যাশ অন ডেলিভারি",
-       bkash: "bKash",
-       nagad: "Nagad",
-       card: "কার্ড পেমেন্ট",
-     };
-   
-     const statusColorMap = {
-       pending:    { bg: "#FEF3CD", color: "#B7770D", border: "#F5C518" },
-       confirmed:  { bg: "#E8F5EE", color: "#1E8A4A", border: "#2ECC71" },
-       processing: { bg: "#EEF2FF", color: "#4338CA", border: "#6366F1" },
-       shipped:    { bg: "#E0F2FE", color: "#0369A1", border: "#0EA5E9" },
-       delivered:  { bg: "#ECFDF5", color: "#059669", border: "#10B981" },
-       cancelled:  { bg: "#FDEDEC", color: "#C0392B", border: "#E74C3C" },
-     };
-     const sc = statusColorMap[order.orderStatus] || statusColorMap.pending;
-   
-     const statusBn = {
-       cancelled:  "বাতিল",
-       delivered:  "ডেলিভারি সম্পন্ন",
-       shipped:    "পাঠানো হয়েছে",
-       processing: "প্রস্তুত হচ্ছে",
-       confirmed:  "কনফার্মড",
-       pending:    "অপেক্ষায়",
-     };
-   
-     const stepsHTML = ORDER_STATUS_STEPS.map((step, i) => {
-       let state = "future";
-       if (!isCancelled) {
-         if (i < currentIdx) state = "done";
-         else if (i === currentIdx) state = "active";
-       }
-       return `
-            <div class="tl-step tl-${state}" style="--step-delay:${i * 0.08}s">
-              <div class="tl-dot-wrap">
-                <div class="tl-dot">
-                  <i class="fas ${step.icon}"></i>
-                  ${state === "active" ? '<span class="tl-pulse"></span>' : ""}
-                </div>
-                ${i < ORDER_STATUS_STEPS.length - 1 ? `<div class="tl-connector"></div>` : ""}
-              </div>
-              <div class="tl-label">
-                <div class="tl-step-name">${step.label}</div>
-                <div class="tl-step-desc">${step.desc}</div>
-              </div>
-            </div>`;
-     }).join("");
-   
-     const cancelledHTML = isCancelled
-       ? `<div class="track-cancelled-banner">
-            <i class="fas fa-ban"></i>
-            <div>
-              <strong>এই অর্ডারটি বাতিল করা হয়েছে।</strong>
-              <span>যেকোনো সহায়তার জন্য আমাদের সাথে যোগাযোগ করুন।</span>
+    if (!el) return;
+    const isCancelled = order.orderStatus === "cancelled";
+    const currentIdx = isCancelled ? -1 : getStatusIndex(order.orderStatus);
+  
+    const displayDate = (d) => {
+      if (!d) return "—";
+      return new Date(d).toLocaleString("en-BD", {
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      });
+    };
+  
+    const payMethodLabel = {
+      cash_on_delivery: "ক্যাশ অন ডেলিভারি",
+      bkash: "bKash", nagad: "Nagad", card: "কার্ড পেমেন্ট",
+    };
+  
+    const statusColorMap = {
+      pending:    { bg: "#FEF3CD", color: "#B7770D", border: "#F5C518" },
+      confirmed:  { bg: "#E8F5EE", color: "#1E8A4A", border: "#2ECC71" },
+      processing: { bg: "#EEF2FF", color: "#4338CA", border: "#6366F1" },
+      shipped:    { bg: "#E0F2FE", color: "#0369A1", border: "#0EA5E9" },
+      delivered:  { bg: "#ECFDF5", color: "#059669", border: "#10B981" },
+      cancelled:  { bg: "#FDEDEC", color: "#C0392B", border: "#E74C3C" },
+    };
+    const sc = statusColorMap[order.orderStatus] || statusColorMap.pending;
+  
+    const statusBn = {
+      cancelled: "বাতিল", delivered: "ডেলিভারি সম্পন্ন",
+      shipped: "পাঠানো হয়েছে", processing: "প্রস্তুত হচ্ছে",
+      confirmed: "কনফার্মড", pending: "অপেক্ষায়",
+    };
+  
+    // ── FRAUD SIGNALS (new) ──────────────────────────────────────────
+    const isVerified = order.fraudVerdict === "safe" && !isCancelled;
+    const isFraudCancelled =
+      isCancelled && order.fraudAutoAction === "cancelled";
+    const isOnHold =
+      order.fraudVerdict === "review" &&
+      order.fraudAutoAction === "held" &&
+      !isCancelled;
+  
+    const verifiedBadgeHTML = isVerified
+      ? `<div class="fraud-verified-badge">
+          <i class="fas fa-shield-check"></i> যাচাইকৃত অর্ডার
+         </div>`
+      : "";
+  
+    const fraudCancelHTML = isFraudCancelled
+      ? `<div class="fraud-banner fraud-banner-warn">
+          <i class="fas fa-shield-halved"></i>
+          <div>
+            <strong>নিরাপত্তা যাচাইয়ে অর্ডার বাতিল হয়েছে</strong>
+            <span>কোনো ভুল হলে সাপোর্টে যোগাযোগ করুন: <strong>01700-000000</strong></span>
+          </div>
+         </div>`
+      : "";
+  
+    const holdBannerHTML = isOnHold
+      ? `<div class="fraud-banner fraud-banner-hold">
+          <i class="fas fa-clock"></i>
+          <div>
+            <strong>অর্ডারটি যাচাই প্রক্রিয়ায় আছে</strong>
+            <span>আমরা শীঘ্রই নিশ্চিত করব। সাধারণত ২৪ ঘণ্টার মধ্যে সম্পন্ন হয়।</span>
+          </div>
+         </div>`
+      : "";
+    // ────────────────────────────────────────────────────────────────
+  
+    const cancelledHTML = isCancelled
+      ? `<div class="track-cancelled-banner">
+          <i class="fas fa-ban"></i>
+          <div>
+            <strong>এই অর্ডারটি বাতিল করা হয়েছে।</strong>
+            <span>যেকোনো সহায়তার জন্য আমাদের সাথে যোগাযোগ করুন।</span>
+          </div>
+         </div>`
+      : "";
+
+      
+  
+    // ── Inject hold step when order is on fraud hold ─────────
+  let displaySteps = [...ORDER_STATUS_STEPS];
+  if (isOnHold) {
+    const confirmedIdx = displaySteps.findIndex(s => s.key === "confirmed");
+    displaySteps.splice(confirmedIdx + 1, 0, {
+      key:  "hold",
+      icon: "fa-shield-halved",
+      label: "নিরাপত্তা যাচাই",
+      desc:  "অর্ডারটি যাচাই প্রক্রিয়ায় আছে — সাধারণত ২৪ঘ লাগে",
+    });
+  }
+
+  const stepsHTML = displaySteps.map((step, i) => {
+    let state = "future";
+    if (!isCancelled) {
+      if (step.key === "hold") {
+        state = "active";
+      } else if (i < currentIdx) {
+        state = "done";
+      } else if (i === currentIdx) {
+        state = "active";
+      }
+    }
+    return `
+      <div class="tl-step tl-${state}" style="--step-delay:${i * 0.08}s">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot ${step.key === "hold" ? "tl-dot-hold" : ""}">
+            <i class="fas ${step.icon}"></i>
+            ${state === "active" ? '<span class="tl-pulse"></span>' : ""}
+          </div>
+          ${i < displaySteps.length - 1 ? `<div class="tl-connector"></div>` : ""}
+        </div>
+        <div class="tl-label">
+          <div class="tl-step-name">${step.label}</div>
+          <div class="tl-step-desc">${step.desc}</div>
+        </div>
+      </div>`;
+  }).join("");
+  
+    const itemsHTML = (order.items || [])
+      .map((item) => `
+        <div class="track-item">
+          <div class="track-item-name">${escHtml(item.name || "পণ্য")}</div>
+          <div class="track-item-meta">x${item.quantity} × ৳${(item.price || 0).toLocaleString()}</div>
+          <div class="track-item-total">৳${(item.total || item.price * item.quantity || 0).toLocaleString()}</div>
+        </div>`)
+      .join("");
+  
+    el.innerHTML = `
+      <div class="track-result" style="animation:trackResultIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;">
+  
+        <div class="track-status-header" style="background:${sc.bg};border-color:${sc.border};">
+          <div class="track-status-left">
+            <div class="track-order-num">${escHtml(order.orderNumber || "—")}</div>
+            <div class="track-order-date">অর্ডারের তারিখ: ${displayDate(order.createdAt)}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+            <div class="track-status-badge" style="background:${sc.color};color:#fff;">
+              ${statusBn[order.orderStatus] || "অপেক্ষায়"}
             </div>
-          </div>`
-       : "";
-   
-     const itemsHTML = (order.items || [])
-       .map((item) => `
-          <div class="track-item">
-            <div class="track-item-name">${escHtml(item.name || "পণ্য")}</div>
-            <div class="track-item-meta">x${item.quantity} × ৳${(item.price || 0).toLocaleString()}</div>
-            <div class="track-item-total">৳${(item.total || item.price * item.quantity || 0).toLocaleString()}</div>
-          </div>`)
-       .join("");
-   
-     el.innerHTML = `
-          <div class="track-result" style="animation:trackResultIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;">
-            <div class="track-status-header" style="background:${sc.bg};border-color:${sc.border};">
-              <div class="track-status-left">
-                <div class="track-order-num">${escHtml(order.orderNumber || "—")}</div>
-                <div class="track-order-date">অর্ডারের তারিখ: ${displayDate(order.createdAt)}</div>
-              </div>
-              <div class="track-status-badge" style="background:${sc.color};color:#fff;">
-                ${statusBn[order.orderStatus] || "অপেক্ষায়"}
-              </div>
+            ${verifiedBadgeHTML}
+          </div>
+        </div>
+  
+        ${fraudCancelHTML}
+        ${holdBannerHTML}
+        ${cancelledHTML}
+  
+        <div class="track-section">
+          <div class="track-section-title"><i class="fas fa-route"></i> অর্ডারের অগ্রগতি</div>
+          <div class="track-timeline ${isCancelled ? "tl-cancelled" : ""}">${stepsHTML}</div>
+        </div>
+  
+        <div class="track-info-grid">
+          <div class="track-info-card">
+            <div class="track-card-title"><i class="fas fa-user"></i> গ্রাহক তথ্য</div>
+            <div class="track-info-row"><span class="ti-label">নাম</span><span class="ti-val">${escHtml(order.customer?.name || "—")}</span></div>
+            <div class="track-info-row"><span class="ti-label">মোবাইল</span><span class="ti-val">${escHtml(order.customer?.phone || "—")}</span></div>
+            <div class="track-info-row">
+              <span class="ti-label">ঠিকানা</span>
+              <span class="ti-val">${escHtml([order.customer?.address?.street, order.customer?.address?.city].filter(Boolean).join(", ") || "—")}</span>
             </div>
-            ${cancelledHTML}
-            <div class="track-section">
-              <div class="track-section-title"><i class="fas fa-route"></i> অর্ডারের অগ্রগতি</div>
-              <div class="track-timeline ${isCancelled ? "tl-cancelled" : ""}">${stepsHTML}</div>
+            ${order.trackingNumber ? `<div class="track-info-row highlight-row"><span class="ti-label"><i class="fas fa-barcode"></i> ট্র্যাকিং ID</span><span class="ti-val ti-mono">${escHtml(order.trackingNumber)}</span></div>` : ""}
+            ${order.deliveryPartner ? `<div class="track-info-row"><span class="ti-label">কুরিয়ার</span><span class="ti-val">${escHtml(order.deliveryPartner)}</span></div>` : ""}
+          </div>
+          <div class="track-info-card">
+            <div class="track-card-title"><i class="fas fa-wallet"></i> পেমেন্ট তথ্য</div>
+            <div class="track-info-row"><span class="ti-label">পেমেন্ট পদ্ধতি</span><span class="ti-val">${payMethodLabel[order.paymentMethod] || escHtml(order.paymentMethod || "—")}</span></div>
+            <div class="track-info-row">
+              <span class="ti-label">পেমেন্ট স্ট্যাটাস</span>
+              <span class="ti-val">
+                ${order.paymentStatus === "paid"
+                  ? '<span class="pay-badge pay-paid"><i class="fas fa-check"></i> পরিশোধিত</span>'
+                  : '<span class="pay-badge pay-pending"><i class="fas fa-clock"></i> বাকি</span>'}
+              </span>
             </div>
-            <div class="track-info-grid">
-              <div class="track-info-card">
-                <div class="track-card-title"><i class="fas fa-user"></i> গ্রাহক তথ্য</div>
-                <div class="track-info-row"><span class="ti-label">নাম</span><span class="ti-val">${escHtml(order.customer?.name || "—")}</span></div>
-                <div class="track-info-row"><span class="ti-label">মোবাইল</span><span class="ti-val">${escHtml(order.customer?.phone || "—")}</span></div>
-                <div class="track-info-row">
-                  <span class="ti-label">ঠিকানা</span>
-                  <span class="ti-val">${escHtml([order.customer?.address?.street, order.customer?.address?.city].filter(Boolean).join(", ") || "—")}</span>
-                </div>
-                ${order.trackingNumber ? `<div class="track-info-row highlight-row"><span class="ti-label"><i class="fas fa-barcode"></i> ট্র্যাকিং ID</span><span class="ti-val ti-mono">${escHtml(order.trackingNumber)}</span></div>` : ""}
-                ${order.deliveryPartner ? `<div class="track-info-row"><span class="ti-label">কুরিয়ার</span><span class="ti-val">${escHtml(order.deliveryPartner)}</span></div>` : ""}
-              </div>
-              <div class="track-info-card">
-                <div class="track-card-title"><i class="fas fa-wallet"></i> পেমেন্ট তথ্য</div>
-                <div class="track-info-row"><span class="ti-label">পেমেন্ট পদ্ধতি</span><span class="ti-val">${payMethodLabel[order.paymentMethod] || escHtml(order.paymentMethod || "—")}</span></div>
-                <div class="track-info-row">
-                  <span class="ti-label">পেমেন্ট স্ট্যাটাস</span>
-                  <span class="ti-val">
-                    ${order.paymentStatus === "paid"
-                      ? '<span class="pay-badge pay-paid"><i class="fas fa-check"></i> পরিশোধিত</span>'
-                      : '<span class="pay-badge pay-pending"><i class="fas fa-clock"></i> বাকি</span>'}
-                  </span>
-                </div>
-                <div class="track-info-row"><span class="ti-label">পণ্যের মূল্য</span><span class="ti-val">৳${(order.subtotal || 0).toLocaleString()}</span></div>
-                <div class="track-info-row"><span class="ti-label">ডেলিভারি চার্জ</span><span class="ti-val">৳${(order.deliveryCharge || 0).toLocaleString()}</span></div>
-                ${(order.discount > 0) ? `<div class="track-info-row"><span class="ti-label">কুপন ছাড়</span><span class="ti-val" style="color:#059669">-৳${order.discount.toLocaleString()}</span></div>` : ""}
-                <div class="track-info-row track-total-row"><span class="ti-label">মোট</span><span class="ti-val ti-total">৳${(order.total || 0).toLocaleString()}</span></div>
-              </div>
-            </div>
-            <div class="track-section">
-              <div class="track-section-title"><i class="fas fa-box"></i> অর্ডার আইটেম</div>
-              <div class="track-items-list">
-                <div class="track-items-head"><span>পণ্য</span><span></span><span style="text-align:right;">মোট</span></div>
-                ${itemsHTML}
-              </div>
-            </div>
-            <div class="track-help-bar">
-              <i class="fas fa-headset"></i>
-              <span>সমস্যা হচ্ছে? কল করুন: <strong>01700-000000</strong> অথবা WhatsApp করুন</span>
-              <button class="track-help-btn" onclick="closeModal('trackingModal')"><i class="fas fa-times"></i></button>
-            </div>
-          </div>`;
-   }
+            <div class="track-info-row"><span class="ti-label">পণ্যের মূল্য</span><span class="ti-val">৳${(order.subtotal || 0).toLocaleString()}</span></div>
+            <div class="track-info-row"><span class="ti-label">ডেলিভারি চার্জ</span><span class="ti-val">৳${(order.deliveryCharge || 0).toLocaleString()}</span></div>
+            ${(order.discount > 0) ? `<div class="track-info-row"><span class="ti-label">কুপন ছাড়</span><span class="ti-val" style="color:#059669">-৳${order.discount.toLocaleString()}</span></div>` : ""}
+            <div class="track-info-row track-total-row"><span class="ti-label">মোট</span><span class="ti-val ti-total">৳${(order.total || 0).toLocaleString()}</span></div>
+          </div>
+        </div>
+  
+        <div class="track-section">
+          <div class="track-section-title"><i class="fas fa-box"></i> অর্ডার আইটেম</div>
+          <div class="track-items-list">
+            <div class="track-items-head"><span>পণ্য</span><span></span><span style="text-align:right;">মোট</span></div>
+            ${itemsHTML}
+          </div>
+        </div>
+  
+        <div class="track-help-bar">
+          <i class="fas fa-headset"></i>
+          <span>সমস্যা হচ্ছে? কল করুন: <strong>01700-000000</strong> অথবা WhatsApp করুন</span>
+          <button class="track-help-btn" onclick="closeModal('trackingModal')"><i class="fas fa-times"></i></button>
+        </div>
+      </div>`;
+  }
    
    /* ════════════════════════════════════════════════════════════
          ORDER SLIP GENERATOR
@@ -1652,6 +2135,7 @@ function closeMobileCart() {
    function showPolicy(key) {
      const policy = POLICIES[key];
      if (!policy) return;
+     window.GodTracker?.policyView(key);
      document.getElementById("policyModalTitle").innerHTML = policy.title;
      document.getElementById("policyModalBody").innerHTML = policy.body;
      openModal("policyModal");
@@ -1814,42 +2298,111 @@ function closeMobileCart() {
    }
    
    function renderMobileOrdersList(phoneNumber, orders) {
-     const container = document.getElementById("mobileOrdersList");
-     if (!container) return;
-     if (!orders || orders.length === 0) {
-       container.innerHTML = `<div class="mobile-orders-empty"><i class="fas fa-inbox"></i><p>${phoneNumber} নম্বরে কোনো অর্ডার পাওয়া যায়নি</p></div>`;
-       return;
-     }
-     const statusBnMap = { pending:"pending", confirmed:"confirmed", processing:"processing", shipped:"shipped", delivered:"delivered", cancelled:"cancelled" };
-     container.innerHTML = orders.map((order) => `
-       <div class="order-item-mini" onclick="viewOrderDetails('${order.orderNumber || order._id}')">
-         <div class="order-item-header">
-           <span class="order-num-mini"><i class="fas fa-hashtag"></i> ${order.orderNumber || order._id?.slice(-8) || "N/A"}</span>
-           <span class="order-status-mini ${order.orderStatus || "pending"}">${statusBnMap[order.orderStatus] || order.orderStatus || "অপেক্ষায়"}</span>
-           <span class="order-total-mini">৳${(order.total || 0).toLocaleString()}</span>
-         </div>
-         <div class="order-item-header">
-           <span class="order-date-mini"><i class="fas fa-calendar"></i> ${new Date(order.createdAt).toLocaleDateString("bn-BD")}</span>
-           <span class="order-date-mini"><i class="fas fa-box"></i> ${order.items?.length || 0}টি পণ্য</span>
-         </div>
-       </div>`).join("");
-     const countSpan = document.getElementById("mobileOrdersCount");
-     if (countSpan) countSpan.textContent = orders.length;
-   }
+    const container = document.getElementById("mobileOrdersList");
+    if (!container) return;
+  
+    if (!orders || orders.length === 0) {
+      container.innerHTML = `
+        <div class="mobile-orders-empty">
+          <i class="fas fa-inbox"></i>
+          <p>${phoneNumber} নম্বরে কোনো অর্ডার পাওয়া যায়নি</p>
+        </div>`;
+      return;
+    }
+  
+    const statusBnMap = {
+      pending: "অপেক্ষায়", confirmed: "কনফার্মড",
+      processing: "প্রস্তুত", shipped: "পাঠানো হয়েছে",
+      delivered: "ডেলিভারি সম্পন্ন", cancelled: "বাতিল",
+    };
+  
+    container.innerHTML = orders.map((order) => {
+      // ── Fraud indicator logic ────────────────────────────────
+      const fVerdict = order.fraudVerdict;
+      const fAction  = order.fraudAutoAction;
+  
+      const fraudChipHTML = (() => {
+        // If order is cancelled, show appropriate chip
+        if (order.orderStatus === "cancelled") {
+          // Was it fraud-cancelled or normal cancellation?
+          if (fVerdict === "blocked" || fAction === "cancelled" || fVerdict === "review") {
+            return `<span class="order-fraud-chip chip-blocked">
+                      <i class="fas fa-shield-xmark"></i> যাচাই ব্যর্থ
+                    </span>`;
+          }
+          return ""; // Normal cancellation — no fraud chip
+        }
+      
+        // Order is NOT cancelled — show verdict-based chip
+        if (fVerdict === "safe") {
+          return `<span class="order-fraud-chip chip-safe">
+                    <i class="fas fa-shield-check"></i> যাচাইকৃত
+                  </span>`;
+        }
+      
+        if (fVerdict === "review" || fAction === "held") {
+          return `<span class="order-fraud-chip chip-hold">
+                    <i class="fas fa-shield-halved"></i> যাচাই চলছে
+                  </span>`;
+        }
+      
+        if (fVerdict === "blocked" || fAction === "cancelled") {
+          return `<span class="order-fraud-chip chip-blocked">
+                    <i class="fas fa-shield-xmark"></i> যাচাই ব্যর্থ
+                  </span>`;
+        }
+      
+        return ""; // No fraud data
+      })();
+  
+      return `
+        <div class="order-item-mini"
+             onclick="viewOrderDetails('${order.orderNumber || order._id}')">
+          <div class="order-item-header">
+            <span class="order-num-mini">
+              <i class="fas fa-hashtag"></i>
+              ${order.orderNumber || order._id?.slice(-8) || "N/A"}
+            </span>
+            <span class="order-status-mini ${order.orderStatus || "pending"}">
+              ${statusBnMap[order.orderStatus] || order.orderStatus || "অপেক্ষায়"}
+            </span>
+            <span class="order-total-mini">৳${(order.total || 0).toLocaleString()}</span>
+          </div>
+          <div class="order-item-header" style="margin-top:4px;">
+            <span class="order-date-mini">
+              <i class="fas fa-calendar"></i>
+              ${new Date(order.createdAt).toLocaleDateString("bn-BD")}
+            </span>
+            <span class="order-date-mini">
+              <i class="fas fa-box"></i> ${order.items?.length || 0}টি পণ্য
+            </span>
+            ${fraudChipHTML}
+          </div>
+        </div>`;
+    }).join("");
+  
+    const countSpan = document.getElementById("mobileOrdersCount");
+    if (countSpan) countSpan.textContent = orders.length;
+  }
    
    async function handleMobileNumberSubmit() {
-     const input = document.getElementById("mobileNumberInput");
-     const phoneNumber = input?.value.trim();
-     if (!phoneNumber) { showToast("মোবাইল নম্বর লিখুন", "error"); return; }
-     if (!/^01[3-9]\d{8}$/.test(phoneNumber)) { showToast("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)", "error"); return; }
-     addToStoredNumbers(phoneNumber);
-     localStorage.setItem("last_displayed_mobile", phoneNumber);
-     const orders = await fetchOrdersByMobile(phoneNumber);
-     if (orders) {
-       renderMobileOrdersList(phoneNumber, orders);
-       document.getElementById("currentMobileDisplay").textContent = phoneNumber;
-     }
-   }
+    const input = document.getElementById("mobileNumberInput");
+    const phoneNumber = input?.value.trim();
+    if (!phoneNumber) { showToast("মোবাইল নম্বর লিখুন", "error"); return; }
+    if (!/^01[3-9]\d{8}$/.test(phoneNumber)) {
+      showToast("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)", "error"); return;
+    }
+    window.GodTracker?.mobileOrderSearch(phoneNumber);
+    addToStoredNumbers(phoneNumber);
+    localStorage.setItem("last_displayed_mobile", phoneNumber);
+  
+    const orders = await fetchOrdersByMobile(phoneNumber);
+    if (orders) {
+      renderMobileOrdersList(phoneNumber, orders);
+      document.getElementById("currentMobileDisplay").textContent = phoneNumber;
+      checkCustomerRiskAndWarn(phoneNumber); // ← new
+    }
+  }
    
    function addToStoredNumbers(phoneNumber) {
      let storedNumbers = JSON.parse(localStorage.getItem("beeharvest_stored_numbers") || "[]");
@@ -1903,16 +2456,63 @@ function closeMobileCart() {
      }
    }
    
-   async function fetchAndDisplayOrdersByNumber(phoneNumber) {
-     const input = document.getElementById("mobileNumberInput");
-     if (input) input.value = phoneNumber;
-     localStorage.setItem("last_displayed_mobile", phoneNumber);
-     const orders = await fetchOrdersByMobile(phoneNumber);
-     if (orders) {
-       renderMobileOrdersList(phoneNumber, orders);
-       document.getElementById("currentMobileDisplay").textContent = phoneNumber;
-     }
-   }
+ /* ── Customer risk check — silent, non-blocking ─────────────── */
+async function checkCustomerRiskAndWarn(phone) {
+  try {
+    const res = await fetch(
+      `${API_URL}/fraud/customer-risk?phone=${encodeURIComponent(phone)}`
+    );
+    const data = await res.json();
+    if (!data.success || !data.data) return;
+
+    const risk = data.data;
+
+    // Only warn if genuinely high risk with actual blocks
+    if (risk.riskLevel !== "high" || risk.blockedCount < 1) return;
+
+    const listEl = document.getElementById("mobileOrdersList");
+    if (!listEl) return;
+
+    // Don't duplicate if already shown
+    if (listEl.querySelector(".fraud-account-warn")) return;
+
+    const banner = document.createElement("div");
+    banner.className = "fraud-account-warn";
+    banner.style.cssText = `
+      background:#FEF3CD; border:1px solid #F5C518; border-radius:10px;
+      padding:0.875rem 1rem; margin-bottom:0.75rem;
+      display:flex; gap:10px; align-items:flex-start; font-size:0.78rem;
+    `;
+    banner.innerHTML = `
+      <i class="fas fa-triangle-exclamation" style="color:#B7770D;margin-top:2px;flex-shrink:0;"></i>
+      <div>
+        <strong style="color:#92400E;display:block;margin-bottom:3px;">
+          কিছু অর্ডার যাচাই প্রক্রিয়ায় আটকেছে
+        </strong>
+        <span style="color:#B7770D;line-height:1.5;">
+          আপনার ${risk.blockedCount}টি অর্ডার নিরাপত্তা যাচাইয়ে বাতিল হয়েছে।
+          ভুল হলে সাপোর্টে কল করুন: <strong>01700-000000</strong>
+        </span>
+      </div>`;
+    listEl.insertBefore(banner, listEl.firstChild);
+  } catch (e) {
+    // Non-critical — fail silently
+  }
+}
+
+/* ── Full modified fetchAndDisplayOrdersByNumber ─────────────── */
+async function fetchAndDisplayOrdersByNumber(phoneNumber) {
+  const input = document.getElementById("mobileNumberInput");
+  if (input) input.value = phoneNumber;
+  localStorage.setItem("last_displayed_mobile", phoneNumber);
+
+  const orders = await fetchOrdersByMobile(phoneNumber);
+  if (orders) {
+    renderMobileOrdersList(phoneNumber, orders);
+    document.getElementById("currentMobileDisplay").textContent = phoneNumber;
+    checkCustomerRiskAndWarn(phoneNumber); // ← new
+  }
+}
    
    function clearAllStoredOrdersCache() {
      if (confirm("সব সংরক্ষিত অর্ডার ক্যাশ মুছে ফেলতে চান? এটি শুধু লোকাল স্টোরেজ ক্লিয়ার করবে।")) {
@@ -1978,6 +2578,7 @@ function closeMobileCart() {
        win.classList.toggle('bee-open', this.open);
        fab.classList.toggle('chat-open', this.open);
        if (this.open) {
+        window.GodTracker?.chatbotOpen();
          this._hideBadge();
          if (this.history.length === 0) this._showWelcome();
          setTimeout(() => document.getElementById('beeChatInput')?.focus(), 400);
@@ -2030,6 +2631,7 @@ function closeMobileCart() {
          const data = await res.json();
          this._hideTyping();
          if (data.success) {
+          window.GodTracker?.chatbotMessage(data.intent || "UNKNOWN");
            this._renderBotResponse(data.response, data.intent);
            if (data.response?.suggestions?.length) this._loadSuggestions(data.response.suggestions);
          } else {
@@ -2227,53 +2829,1143 @@ async function removeCouponFromUI() {
   showToast("কুপন সরানো হয়েছে", "info");
 }
 
-/* ── Checkout step navigation ─────────────────────────── */
-function checkoutGoTo(step) {
-  const validateStep1 = () => {
-    const name  = val("checkoutName");
-    const email = val("checkoutEmail");
-    const phone = val("checkoutPhone");
-    const addr  = val("checkoutAddress");
-    const city  = val("checkoutCity");
-    if (!name || !email || !phone || !addr || !city) {
-      showToast("সব প্রয়োজনীয় তথ্য পূরণ করুন (*)", "error");
-      return false;
+/* ════════════════════════════════════════════════════════════
+     BACK BUTTON MODAL HANDLER - Prevents accidental page exit
+     ════════════════════════════════════════════════════════════ */
+
+// Track which modal is currently open
+let activeModalOnBack = null;
+
+// Save reference to original openModal function
+const originalOpenModal = window.openModal;
+
+// Override openModal to track which modal is opened
+window.openModal = function(id) {
+  activeModalOnBack = id;
+  if (originalOpenModal) {
+    originalOpenModal(id);
+  } else {
+    const m = document.getElementById(id);
+    if (m) {
+      m.classList.add("active");
+      document.body.style.overflow = "hidden";
+      document.body.classList.add("modal-open");
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showToast("সঠিক ইমেইল ঠিকানা দিন", "error");
-      return false;
+  }
+};
+
+// Save reference to original closeModal function
+const originalCloseModal = window.closeModal;
+
+// Override closeModal to clear tracking
+window.closeModal = function(id) {
+  activeModalOnBack = null;
+  if (originalCloseModal) {
+    originalCloseModal(id);
+  } else {
+    const m = document.getElementById(id);
+    if (m) {
+      m.classList.remove("active");
+      document.body.style.overflow = "";
+      if (!document.querySelector(".modal.active")) {   
+        document.body.classList.remove("modal-open");  
+      }
     }
-    if (!/^01[3-9]\d{8}$/.test(phone)) {
-      showToast("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)", "error");
-      return false;
+  }
+};
+
+// Handle back button - close modal instead of leaving page
+window.addEventListener('popstate', function(event) {
+  // If a modal is open, close it and stay on page
+  if (activeModalOnBack !== null) {
+    const modalId = activeModalOnBack;
+    window.closeModal(modalId);
+    
+    // Show a subtle hint to user
+    showToast("মোডাল বন্ধ করা হয়েছে", "info");
+    
+    // Prevent the back navigation
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Push a new state to replace the popped one
+    history.pushState(null, '', window.location.href);
+    return false;
+  }
+  return true;
+});
+
+// Initialize history state when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Push initial state to handle back button properly
+  history.pushState(null, '', window.location.hf);
+});
+
+// Also handle checkout modal specially (since it's most important)
+const originalOpenCheckoutSave = window.openCheckout;
+window.openCheckout = async function() {
+  if (cart.length === 0) {
+    showToast("কার্ট খালি! আগে পণ্য যোগ করুন", "error");
+    return;
+  }
+  
+  activeModalOnBack = 'checkoutModal';
+  
+  if (originalOpenCheckoutSave) {
+    await originalOpenCheckoutSave();
+  } else {
+    // Original openCheckout code here if needed
+    const list = document.getElementById("checkoutItems");
+    if (list) {
+      list.innerHTML = cart
+        .map(
+          (item) => `
+          <div class="checkout-item">
+            <img src="${escHtml(item.image || "https://via.placeholder.com/60")}" alt="${escHtml(item.name)}"
+                 onerror="this.src='https://via.placeholder.com/60'">
+            <div class="checkout-item-details">
+              <div class="checkout-item-name">${escHtml(item.name)}</div>
+              <div class="checkout-item-meta">৳${item.price.toLocaleString()} × ${item.quantity}</div>
+            </div>
+            <div class="checkout-item-total">৳${(item.price * item.quantity).toLocaleString()}</div>
+          </div>`,
+        )
+        .join("");
     }
-    return true;
+   
+    const citySelect = document.getElementById("checkoutCity");
+    const selectedCity = citySelect ? citySelect.value : null;
+    const { subtotal, shipping, discount, total } = await cartTotalsAsync(selectedCity, true);
+    
+    setText("summarySubtotal", `৳${subtotal.toLocaleString()}`);
+    setText("summaryShipping", `৳${shipping.toLocaleString()}`);
+    setText("summaryTotal", `৳${total.toLocaleString()}`);
+
+    const discountRow = document.getElementById("summaryDiscountRow");
+    if (discountRow) discountRow.style.display = "none";
+   
+    window.openModal("checkoutModal");
+  }
+};
+
+// Handle tracking modal
+const originalOpenTrackingModalSave = window.openTrackingModal;
+window.openTrackingModal = function(prefillOrderNumber = "") {
+  activeModalOnBack = 'trackingModal';
+  
+  if (originalOpenTrackingModalSave) {
+    originalOpenTrackingModalSave(prefillOrderNumber);
+  } else {
+    const input = document.getElementById("trackOrderInput");
+    const result = document.getElementById("trackResult");
+    if (input) {
+      input.value = prefillOrderNumber || "";
+      if (window._toggleClearBtn) window._toggleClearBtn();
+    }
+    if (result) result.innerHTML = "";
+    window.openModal("trackingModal");
+    if (prefillOrderNumber) {
+      setTimeout(() => { if (window.trackOrder) window.trackOrder(); }, 350);
+    } else {
+      setTimeout(() => input?.focus(), 350);
+    }
+  }
+};
+
+// Handle policy modal
+const originalShowPolicySave = window.showPolicy;
+window.showPolicy = function(key) {
+  activeModalOnBack = 'policyModal';
+  if (originalShowPolicySave) {
+    originalShowPolicySave(key);
+  } else {
+    const policy = POLICIES?.[key];
+    if (!policy) return;
+    const titleEl = document.getElementById("policyModalTitle");
+    const bodyEl = document.getElementById("policyModalBody");
+    if (titleEl) titleEl.innerHTML = policy.title;
+    if (bodyEl) bodyEl.innerHTML = policy.body;
+    window.openModal("policyModal");
+  }
+};
+
+// Handle success modal
+const originalOpenSuccessModal = window.openModal?.bind(null, 'successModal');
+if (originalOpenSuccessModal) {
+  window.openSuccessModal = function() {
+    activeModalOnBack = 'successModal';
+    window.openModal('successModal');
   };
-
-  if (step === 2 && !validateStep1()) return;
-
-  [1, 2, 3].forEach(i => {
-    document.getElementById("coPanel" + i)?.classList.toggle("active", i === step);
-    const dot  = document.getElementById("coStep" + i);
-    const line = document.getElementById("coLine"  + i);
-    if (!dot) return;
-    dot.classList.remove("active", "done");
-    if (i <  step) { dot.classList.add("done"); dot.querySelector(".co-dot").innerHTML = '<i class="fas fa-check" style="font-size:0.6rem"></i>'; }
-    if (i === step) { dot.classList.add("active"); dot.querySelector(".co-dot").textContent = i; }
-    if (i >  step)  { dot.querySelector(".co-dot").textContent = i; }
-    if (line) line.classList.toggle("done", i < step);
-  });
-
-  // refresh summary when entering step 2
-  if (step === 2) _refreshCheckoutSummary();
-  document.querySelector(".co-body")?.scrollTo(0, 0);
 }
 
-window.checkoutGoTo = checkoutGoTo;
+// Make sure close buttons work with tracking
+document.addEventListener('click', function(e) {
+  // Close button with data-dismiss
+  if (e.target.closest('[data-dismiss="modal"]')) {
+    activeModalOnBack = null;
+  }
+  // Modal backdrop click
+  if (e.target.classList && e.target.classList.contains('modal')) {
+    activeModalOnBack = null;
+  }
+});
+
+
+/* ═══════════════════════════════════════════════════════════
+   DELIVERY CHARGES INFO MODAL - Shows all options & highlights best
+   Shows on EVERY page reload (no session tracking)
+   ═══════════════════════════════════════════════════════════ */
+
+// Track if modal is currently being shown to prevent duplicates
+let deliveryModalLoading = false;
+
+async function showDeliveryChargesInfo(forceShow = false) {
+  // Prevent multiple simultaneous modal attempts
+  if (deliveryModalLoading) return;
+  
+  try {
+    deliveryModalLoading = true;
+    
+    // Fetch all delivery charges from API
+    const response = await fetch(`${API_URL}/delivery-charges`);
+    const result = await response.json();
+    
+    if (!result.success || !result.data) {
+      console.error("Failed to fetch delivery charges");
+      deliveryModalLoading = false;
+      return;
+    }
+    
+    const charges = result.data;
+    
+    // Get current cart subtotal and selected city (if any)
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const citySelect = document.getElementById("checkoutCity");
+    const selectedCity = citySelect ? citySelect.value : null;
+    
+    // Calculate which charge would apply currently
+    let activeCharge = null;
+    let activeAmount = 0;
+    
+    // Sort charges to find the applicable one
+    const insideDhaka = charges.find(c => c.name === "inside_dhaka");
+    const outsideDhaka = charges.find(c => c.name === "outside_dhaka");
+    const defaultCharge = charges.find(c => c.name === "default");
+    
+    // Determine current applicable charge
+    if (selectedCity && selectedCity.toLowerCase() === "dhaka") {
+      activeCharge = insideDhaka;
+    } else if (selectedCity) {
+      activeCharge = outsideDhaka;
+    }
+    
+    // Check if special default charge applies (based on min order)
+    if (defaultCharge && defaultCharge.isActive && subtotal >= (defaultCharge.minOrderAmount || 0)) {
+      activeCharge = defaultCharge;
+    }
+    
+    activeAmount = activeCharge?.amount || 60;
+    
+    // Find the lowest charge among all active charges
+    const activeCharges = charges.filter(c => c.isActive);
+    const lowestCharge = activeCharges.reduce((min, c) => c.amount < min.amount ? c : min, activeCharges[0]);
+    
+    // Get zone names mapping
+    const zoneNames = {
+      inside_dhaka: { label: "ঢাকার ভিতরে", icon: "fa-city", desc: "ঢাকা শহরের মধ্যে ডেলিভারি", bg: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" },
+      outside_dhaka: { label: "ঢাকার বাইরে", icon: "fa-tree", desc: "ঢাকার বাইরের জেলাসমূহ", bg: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" },
+      default: { label: "স্পেশাল অফার", icon: "fa-gift", desc: "মিনিমাম অর্ডারে স্পেশাল চার্জ", bg: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)" }
+    };
+    
+    // Build modal HTML
+    const modalHtml = `
+      <div class="modal" id="deliveryInfoModal" style="z-index: 10000;">
+        <div class="modal-content" style="max-width: 520px; animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);">
+          <div class="modal-header" style="background: linear-gradient(135deg, #0D1B3E, #1A2E5A);">
+            <h3 style="display: flex; align-items: center; gap: 10px;">
+              <i class="fas fa-truck-fast" style="color: #F5A623;"></i> 
+              ডেলিভারি চার্জের তথ্য
+            </h3>
+            <button class="close-modal" onclick="closeModal('deliveryInfoModal')" style="background: rgba(255,255,255,0.1);">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body" style="padding: 1.5rem;">
+            
+            <!-- Current Cart Info -->
+            <div style="background: linear-gradient(135deg, #FFF9F0, #FFF5E6); border-radius: 16px; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid rgba(245,166,35,0.3);">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                <div>
+                  <div style="font-size: 0.75rem; color: #6B7A99;">আপনার কার্টের মূল্য</div>
+                  <div style="font-size: 1.5rem; font-weight: 800; color: #0D1B3E;">${formatCurrency(subtotal)}</div>
+                </div>
+                <div style="width: 1px; height: 40px; background: rgba(0,0,0,0.1);"></div>
+                <div>
+                  <div style="font-size: 0.75rem; color: #6B7A99;">বর্তমান ডেলিভারি চার্জ</div>
+                  <div style="font-size: 1.5rem; font-weight: 800; color: #F5A623;">${formatCurrency(activeAmount)}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Delivery Zones -->
+            <div style="margin-bottom: 1.5rem;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 1rem;">
+                <i class="fas fa-location-dot" style="color: #F5A623;"></i>
+                <span style="font-weight: 700; font-size: 0.9rem;">ডেলিভারি জোন অনুযায়ী চার্জ</span>
+              </div>
+              
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                ${charges.filter(c => c.isActive).map(charge => {
+                  const zone = zoneNames[charge.name] || { 
+                    label: charge.name === "inside_dhaka" ? "ঢাকার ভিতরে" : charge.name === "outside_dhaka" ? "ঢাকার বাইরে" : "স্পেশাল অফার",
+                    icon: "fa-truck",
+                    desc: charge.name === "inside_dhaka" ? "ঢাকা শহরের মধ্যে" : charge.name === "outside_dhaka" ? "ঢাকার বাইরের জেলা" : "মিনিমাম অর্ডারে প্রযোজ্য",
+                    bg: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                  };
+                  
+                  const isLowest = lowestCharge && charge._id === lowestCharge._id;
+                  const isApplicable = activeCharge && charge._id === activeCharge._id;
+                  const meetsMinOrder = subtotal >= (charge.minOrderAmount || 0);
+                  
+                  return `
+                    <div style="
+                      background: ${isApplicable ? 'linear-gradient(135deg, #E8F5EE, #D4EDDA)' : 'white'};
+                      border: 2px solid ${isLowest ? '#F5A623' : isApplicable ? '#1E8A4A' : 'var(--border)'};
+                      border-radius: 14px;
+                      padding: 1rem;
+                      position: relative;
+                      transition: all 0.2s ease;
+                      ${isLowest ? 'box-shadow: 0 4px 12px rgba(245,166,35,0.25);' : ''}
+                    ">
+                      ${isLowest ? `
+                        <div style="position: absolute; top: -10px; right: 12px; background: linear-gradient(135deg, #F5A623, #C47F11); color: white; padding: 4px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 700;">
+                          <i class="fas fa-crown"></i> সেরা অফার
+                        </div>
+                      ` : ''}
+                      
+                      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                          <div style="width: 48px; height: 48px; background: ${zone.bg}; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas ${zone.icon}" style="color: white; font-size: 1.2rem;"></i>
+                          </div>
+                          <div>
+                            <div style="font-weight: 700; font-size: 1rem; color: #0D1B3E;">${zone.label}</div>
+                            <div style="font-size: 0.7rem; color: #6B7A99;">${zone.desc}</div>
+                            ${charge.minOrderAmount > 0 ? `
+                              <div style="font-size: 0.65rem; color: #F5A623; margin-top: 2px;">
+                                <i class="fas fa-chart-line"></i> মিনিমাম অর্ডার: ৳${charge.minOrderAmount}
+                              </div>
+                            ` : ''}
+                          </div>
+                        </div>
+                        <div style="text-align: right;">
+                          <div style="font-size: 1.4rem; font-weight: 800; color: ${isLowest ? '#F5A623' : isApplicable ? '#1E8A4A' : '#0D1B3E'};">
+                            ৳${charge.amount}
+                          </div>
+                          ${charge.minOrderAmount > 0 && !meetsMinOrder ? `
+                            <div style="font-size: 0.65rem; color: #C0392B;">
+                              <i class="fas fa-exclamation-circle"></i> আরও ৳${charge.minOrderAmount - subtotal} প্রয়োজন
+                            </div>
+                          ` : isApplicable ? `
+                            <div style="font-size: 0.65rem; color: #1E8A4A;">
+                              <i class="fas fa-check-circle"></i> আপনার জোনে প্রযোজ্য
+                            </div>
+                          ` : ''}
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+            
+            <!-- Info Note -->
+            <div style="background: #F0F4F8; border-radius: 12px; padding: 1rem; margin-top: 0.5rem;">
+              <div style="display: flex; gap: 10px;">
+                <i class="fas fa-info-circle" style="color: #F5A623; font-size: 1rem;"></i>
+                <div style="font-size: 0.75rem; color: #6B7A99; line-height: 1.6;">
+                  <strong style="color: #0D1B3E;">ডেলিভারি চার্জ নির্ধারণের নিয়ম:</strong><br>
+                  • আপনার লোকেশন অনুযায়ী প্রযোজ্য চার্জ স্বয়ংক্রিয়ভাবে নির্বাচিত হবে<br>
+                  • মিনিমাম অর্ডার পূরণ করলে স্পেশাল অফার চার্জ প্রযোজ্য হবে<br>
+                  • চেকআউটের সময় জেলা নির্বাচন করলে সঠিক চার্জ দেখাবে
+                </div>
+              </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+              <button onclick="closeModal('deliveryInfoModal')" class="btn-ghost" style="flex: 1; padding: 0.75rem;">
+                <i class="fas fa-times"></i> বন্ধ করুন
+              </button>
+              <button onclick="closeModal('deliveryInfoModal'); navigateTo('products');" class="btn-primary" style="flex: 1; padding: 0.75rem;">
+                <i class="fas fa-shopping-cart"></i> কেনাকাটা শুরু করুন
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Remove existing modal if present
+    const existingModal = document.getElementById('deliveryInfoModal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+    
+    // Add modal to body
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHtml;
+    document.body.appendChild(modalContainer);
+    
+    // Open modal
+    setTimeout(() => {
+      const modal = document.getElementById('deliveryInfoModal');
+      if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        document.body.classList.add('modal-open');
+      }
+    }, 100);
+    
+  } catch (error) {
+    console.error("Error showing delivery charges modal:", error);
+  } finally {
+    deliveryModalLoading = false;
+  }
+}
+
+// Function to show modal on EVERY page load (no session check)
+function checkAndShowDeliveryModal() {
+  // Show modal on every page load/reload
+  // Delay to ensure page is fully loaded
+  setTimeout(() => {
+    showDeliveryChargesInfo();
+  }, 2000);
+}
+
+// Manual trigger function
+function showDeliveryChargesInfoManual() {
+  // Close existing modal if open
+  const existingModal = document.getElementById('deliveryInfoModal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+  showDeliveryChargesInfo();
+}
+
+// Format currency helper (if not already defined)
+function formatCurrency(amount) {
+  return "৳ " + (amount || 0).toLocaleString("bn-BD");
+}
+
+// Auto-open tracking modal from details page redirect
+(function initAutoTracking() {
+  const trackAfterRedirect = localStorage.getItem("trackAfterRedirect");
+  if (trackAfterRedirect) {
+    console.log("Found trackAfterRedirect:", trackAfterRedirect);
+    localStorage.removeItem("trackAfterRedirect");
+    
+    // Wait for page to fully load
+    const tryOpenTracking = function(attempts) {
+      attempts = attempts || 0;
+      if (typeof openTrackingModal === 'function') {
+        console.log("Opening tracking modal for:", trackAfterRedirect);
+        setTimeout(function() {
+          openTrackingModal(trackAfterRedirect);
+        }, 500);
+      } else if (attempts < 10) {
+        console.log("Waiting for openTrackingModal, attempt:", attempts + 1);
+        setTimeout(function() {
+          tryOpenTracking(attempts + 1);
+        }, 300);
+      }
+    };
+    
+    tryOpenTracking();
+  }
+})();
+
+/* ── Premium Nav — active indicator ───────────────────── */
+function pnavPosition(el) {
+  const pill = document.querySelector('.pnav-pill');
+  const ind  = document.getElementById('pnavIndicator');
+  if (!pill || !ind || !el) return;
+  const pr = pill.getBoundingClientRect();
+  const ir = el.getBoundingClientRect();
+  ind.style.left  = (ir.left  - pr.left)  + 'px';
+  ind.style.width = ir.width + 'px';
+}
+
+function setPnavActive(el) {
+  document.querySelectorAll('.pnav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  pnavPosition(el);
+}
+
+function setPnavCartActive() {
+  document.querySelectorAll('.pnav-item').forEach(i => i.classList.remove('active'));
+  /* cart sheet opens — no page nav, so no indicator shift */
+}
+
+/* Init on load */
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const active = document.querySelector('.pnav-item.active');
+    if (active) pnavPosition(active);
+  }, 100);
+  window.addEventListener('resize', () => {
+    const active = document.querySelector('.pnav-item.active');
+    if (active) pnavPosition(active);
+  });
+});
+
+/* Sync with navigateTo */
+const _origNavigateTo = window.navigateTo;
+window.navigateTo = function(page) {
+  _origNavigateTo(page);
+  const match = document.querySelector(`.pnav-item[data-page="${page}"]`);
+  if (match) setPnavActive(match);
+};
 
 // Export the functions
 window.applyCouponFromUI = applyCouponFromUI;
 window.removeCouponFromUI = removeCouponFromUI;
+
+// ==============================================
+// SLIDER PLACE ORDER BUTTON - COMPLETE FIX
+// Resets properly after success, reject, and validation errors
+// ==============================================
+
+(function initSliderOrderButton() {
+  let startX = 0;
+  let startY = 0;
+  let trackWidth = 0;
+  let maxLeft = 0;
+  let isDragging = false;
+  let orderTriggered = false;
+  let currentPercent = 0;
+  let resetTimeout = null;
+  let touchMoved = false;
+  let isProcessing = false;
+  
+  const wrapper = document.getElementById('sliderOrderWrapper');
+  const track = document.getElementById('sliderTrack');
+  const thumb = document.getElementById('sliderThumb');
+  const progressFill = document.getElementById('sliderProgressFill');
+  const label = document.getElementById('sliderLabel');
+  const successLabel = document.getElementById('sliderSuccessLabel');
+  const hint = document.getElementById('sliderHint');
+  
+  // Check if elements exist
+  if (!track || !thumb) {
+    console.warn('Slider elements not found');
+    return;
+  }
+  
+  // Store original placeOrder reference
+  const originalPlaceOrder = window.placeOrder;
+  
+  // Helper to update slider UI
+  function updateSliderUI(percent) {
+    currentPercent = Math.min(100, Math.max(0, percent));
+    const newLeft = 4 + (maxLeft * (currentPercent / 100));
+    thumb.style.left = newLeft + 'px';
+    progressFill.style.width = currentPercent + '%';
+    
+    // Change label style based on progress
+    if (currentPercent >= 95) {
+      label.style.opacity = '0';
+      successLabel.style.display = 'block';
+      successLabel.innerHTML = '<i class="fas fa-arrow-right"></i> ছেড়ে দিন অর্ডার করতে';
+    } else {
+      label.style.opacity = '1';
+      successLabel.style.display = 'none';
+    }
+  }
+  
+  // Complete reset function - called after order success or rejection
+  function completeReset() {
+    console.log('Complete reset triggered');
+    
+    // Reset all flags
+    orderTriggered = false;
+    isDragging = false;
+    touchMoved = false;
+    isProcessing = false;
+    currentPercent = 0;
+    
+    // Clear timeout
+    if (resetTimeout) {
+      clearTimeout(resetTimeout);
+      resetTimeout = null;
+    }
+    
+    // Reset DOM elements
+    thumb.style.left = '4px';
+    progressFill.style.width = '0%';
+    label.style.opacity = '1';
+    successLabel.style.display = 'none';
+    
+    // Remove classes
+    if (track) track.classList.remove('processing');
+    if (wrapper) wrapper.classList.remove('flash-success');
+    
+    // Reset hint
+    if (hint) {
+      hint.style.opacity = '1';
+      hint.innerHTML = '<i class="fas fa-hand-pointer"></i> ডান দিকে স্লাইড করুন অর্ডার কনফার্ম করতে';
+      hint.style.color = '#6B7A99';
+    }
+    
+    // Remove any leftover event listeners
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend', onTouchEnd);
+  }
+  
+  // Reset on validation error
+  function resetOnError() {
+    if (orderTriggered) return;
+    
+    console.log('Reset on error triggered');
+    
+    // Cancel any pending order
+    orderTriggered = false;
+    isProcessing = false;
+    
+    // Remove processing class
+    if (track) track.classList.remove('processing');
+    if (wrapper) wrapper.classList.remove('flash-success');
+    
+    // Force reset positions
+    thumb.style.left = '4px';
+    progressFill.style.width = '0%';
+    label.style.opacity = '1';
+    successLabel.style.display = 'none';
+    currentPercent = 0;
+    
+    // Reset hint with error message temporarily
+    if (hint) {
+      hint.style.opacity = '1';
+      const originalHtml = hint.innerHTML;
+      const originalColor = hint.style.color;
+      hint.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ফর্মটি পূরণ করুন, তারপর স্লাইড করুন';
+      hint.style.color = '#C0392B';
+      setTimeout(() => {
+        if (hint && !orderTriggered) {
+          hint.innerHTML = originalHtml;
+          hint.style.color = originalColor;
+        }
+      }, 3000);
+    }
+    
+    // Clear any ongoing drag
+    isDragging = false;
+    touchMoved = false;
+    
+    // Remove any leftover event listeners
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend', onTouchEnd);
+    
+    // Clear timeout
+    if (resetTimeout) {
+      clearTimeout(resetTimeout);
+      resetTimeout = null;
+    }
+  }
+  
+  // Override the placeOrder function to listen for completion
+  const enhancedPlaceOrder = async function(e) {
+    if (e) e.preventDefault();
+    if (cart.length === 0) {
+      showToast("কার্ট খালি!", "error");
+      resetOnError();
+      return;
+    }
+    
+    const fullName = val("checkoutName");
+    const email = val("checkoutEmail");
+    const phone = val("checkoutPhone");
+    const address = val("checkoutAddress");
+    const city = val("checkoutCity");
+    const zipCode = val("checkoutZipCode");
+    const notes = val("checkoutNotes");
+    
+    const payMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || "COD";
+    const accepted = document.getElementById("acceptTerms")?.checked;
+    
+    // Validation checks...
+    if (!fullName || !email || !phone || !address || !city) {
+      showToast("সব প্রয়োজনীয় তথ্য পূরণ করুন (*)", "error");
+      resetOnError();
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showToast("সঠিক ইমেইল ঠিকানা দিন", "error");
+      resetOnError();
+      return;
+    }
+    if (!/^01[3-9]\d{8}$/.test(phone)) {
+      showToast("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)", "error");
+      resetOnError();
+      return;
+    }
+    if (!accepted) {
+      showToast("শর্তাবলী মেনে নিন", "error");
+      resetOnError();
+      return;
+    }
+    
+    // Close modal immediately for instant feedback
+    closeModal("checkoutModal");
+    
+    // Show loading
+    showLoadingOverlay();
+    const btn = document.getElementById("confirmOrderBtn");
+    setButtonLoading(btn, true);
+    
+    // Get cached totals
+    const { subtotal, shipping, discount, total } = await cartTotalsAsync(city, true);
+    
+    window.GodTracker?.orderAttempt(subtotal, cart.length, city, payMethod);
+
+    const pmMap = {
+      COD: "cash_on_delivery",
+      bkash: "bkash",
+      nagad: "nagad",
+      card: "card",
+    };
+    
+    const orderData = {
+      items: cart.map((i) => ({
+        product: i.productId,
+        name: i.name,
+        price: i.price,
+        quantity: i.quantity,
+      })),
+      customer: {
+        name: fullName,
+        email,
+        phone,
+        address: {
+          street: address,
+          city,
+          area: city,
+          district: city,
+          division: city,
+          postalCode: zipCode || "",
+        },
+      },
+      paymentMethod: pmMap[payMethod] || "cash_on_delivery",
+      deliveryCharge: shipping,
+      discount: discount || 0,
+      couponCode: checkoutAppliedCoupon?.code || undefined,
+      notes: notes || "",
+    };
+  
+    try {
+      const res = await fetch(`${API_URL}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "অর্ডার দেওয়া যায়নি");
+      if (!data.success) throw new Error(data.message || "অর্ডার ব্যর্থ");
+  
+      // Fire coupon usage increment (fire-and-forget)
+      if (checkoutAppliedCoupon?.code) {
+        fetch(`${API_URL}/coupons/apply`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: checkoutAppliedCoupon.code, subtotal }),
+        }).catch((err) => console.warn("Coupon apply error:", err.message));
+        checkoutAppliedCoupon = null;
+      }
+  
+      const orderNum = data.data?.orderNumber || data.data?._id?.slice(-8) || "SUCCESS";
+      const fraudVerdict    = data.data?.fraudVerdict    || null;
+      const fraudAutoAction = data.data?.fraudAutoAction || null;
+  
+      window.lastOrderData = {
+        orderNumber: orderNum,
+        customer: orderData.customer,
+        items: orderData.items,
+        subtotal,
+        shipping,
+        total,
+        paymentMethod: orderData.paymentMethod,
+      };
+  
+      cart = [];
+      saveCart();
+      await updateCartUI();
+      hideLoadingOverlay();
+      
+      window.GodTracker?.orderSuccess(orderNum, total, orderData.paymentMethod);
+
+      setText("orderNumber", `#${orderNum}`);
+
+      // Fraud-aware success modal update
+      const successIcon       = document.getElementById("successIcon");
+      const successIconInner  = document.getElementById("successIconInner");
+      const successTitle      = document.getElementById("successModalTitle");
+      const successSubtitle   = document.getElementById("successModalSubtitle");
+      const successFraudBanner = document.getElementById("successFraudBanner");
+
+      if (fraudVerdict === "review" || fraudAutoAction === "held") {
+        if (successIcon) successIcon.style.background = "linear-gradient(135deg, #6366F1, #4338CA)";
+        if (successIconInner) successIconInner.className = "fas fa-shield-halved";
+        if (successTitle) successTitle.textContent = "অর্ডার গৃহীত হয়েছে";
+        if (successSubtitle) successSubtitle.innerHTML = "আপনার অর্ডারটি সফলভাবে জমা হয়েছে।<br>আমরা শীঘ্রই যোগাযোগ করব।";
+        if (successFraudBanner) successFraudBanner.style.display = "flex";
+        window.GodTracker?.orderFraudHeld(orderNum);
+      } else {
+        if (successIcon) successIcon.style.background = "linear-gradient(135deg, var(--honey) 0%, var(--honey-dark) 100%)";
+        if (successIconInner) successIconInner.className = "fas fa-check";
+        if (successTitle) successTitle.textContent = "অর্ডার সফল হয়েছে!";
+        if (successSubtitle) successSubtitle.innerHTML = "আপনার অর্ডারটি গ্রহণ করা হয়েছে।<br>শীঘ্রই আপনার সাথে যোগাযোগ করা হবে।";
+        if (successFraudBanner) successFraudBanner.style.display = "none";
+      }
+      
+      const downloadBtn = document.getElementById("downloadSlipBtn");
+      if (downloadBtn) {
+        downloadBtn.onclick = () => generateOrderSlipPNG(window.lastOrderData);
+      }
+  
+      const trackBtn = document.getElementById("trackSuccessOrderBtn");
+      if (trackBtn) {
+        trackBtn.onclick = () => {
+          closeModal("successModal");
+          openTrackingModal(orderNum);
+        };
+      }
+  
+      // Show success modal
+      setTimeout(() => {
+        openModal("successModal");
+        startConfetti();
+        setTimeout(stopConfetti, 4000);
+      }, 200);
+  
+      showToast("অর্ডার সফল হয়েছে! 🎉", "success");
+      document.getElementById("checkoutForm")?.reset();
+      
+      // COMPLETE RESET AFTER SUCCESS - important!
+      setTimeout(() => {
+        completeReset();
+      }, 1000);
+      
+    } catch (err) {
+      hideLoadingOverlay();
+      window.GodTracker?.orderFail(err.message);
+      const rejectMsg = document.getElementById("rejectModalMsg");
+      if (rejectMsg) rejectMsg.textContent = err.message || "আপনার অর্ডারটি প্রক্রিয়া করা যায়নি। সহায়তার জন্য যোগাযোগ করুন।";
+      setTimeout(() => openModal("orderRejectModal"), 200);
+      console.error("Order error:", err);
+      
+      // COMPLETE RESET AFTER REJECT - important!
+      setTimeout(() => {
+        completeReset();
+      }, 500);
+      
+    } finally {
+      setButtonLoading(btn, false);
+    }
+  };
+  
+  // Replace the original placeOrder with enhanced version
+  window.placeOrder = enhancedPlaceOrder;
+  
+  // Trigger order with validation
+  async function triggerOrder() {
+    if (orderTriggered || isProcessing) return;
+    
+    // First validate the form
+    const fullName = document.getElementById("checkoutName")?.value.trim();
+    const email = document.getElementById("checkoutEmail")?.value.trim();
+    const phone = document.getElementById("checkoutPhone")?.value.trim();
+    const address = document.getElementById("checkoutAddress")?.value.trim();
+    const city = document.getElementById("checkoutCity")?.value;
+    const accepted = document.getElementById("acceptTerms")?.checked;
+    
+    // Validation checks
+    if (!fullName || !email || !phone || !address || !city) {
+      showToast("সব প্রয়োজনীয় তথ্য পূরণ করুন (*)", "error");
+      resetOnError();
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showToast("সঠিক ইমেইল ঠিকানা দিন", "error");
+      resetOnError();
+      return;
+    }
+    if (!/^01[3-9]\d{8}$/.test(phone)) {
+      showToast("সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)", "error");
+      resetOnError();
+      return;
+    }
+    if (!accepted) {
+      showToast("শর্তাবলী মেনে নিন", "error");
+      resetOnError();
+      return;
+    }
+    
+    // If cart is empty
+    if (typeof cart !== 'undefined' && cart.length === 0) {
+      showToast("কার্ট খালি!", "error");
+      resetOnError();
+      return;
+    }
+    
+    orderTriggered = true;
+    isProcessing = true;
+    
+    // Disable slider visually
+    if (track) track.classList.add('processing');
+    if (wrapper) wrapper.classList.add('flash-success');
+    if (hint) hint.style.opacity = '0.3';
+    
+    // Show processing state
+    successLabel.style.display = 'block';
+    successLabel.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> অর্ডার প্রক্রিয়াকরণ...';
+    
+    try {
+      if (typeof window.placeOrder === 'function') {
+        await window.placeOrder(new Event('submit'));
+      } else {
+        throw new Error('Order function missing');
+      }
+    } catch (err) {
+      console.error('Order failed:', err);
+      // Reset on failure so user can try again
+      orderTriggered = false;
+      isProcessing = false;
+      if (track) track.classList.remove('processing');
+      resetSlider(false);
+      if (hint) {
+        hint.style.opacity = '1';
+        hint.innerHTML = '<i class="fas fa-exclamation-triangle"></i> অর্ডার ব্যর্থ হয়েছে, আবার চেষ্টা করুন';
+        hint.style.color = '#C0392B';
+        setTimeout(() => {
+          if (hint && !orderTriggered) {
+            hint.innerHTML = '<i class="fas fa-hand-pointer"></i> ডান দিকে স্লাইড করুন অর্ডার কনফার্ম করতে';
+            hint.style.color = '#6B7A99';
+          }
+        }, 3000);
+      }
+    }
+  }
+  
+  // Reset slider to initial position
+  function resetSlider(instant = false) {
+    if (orderTriggered && !isProcessing) return;
+    
+    if (instant) {
+      thumb.style.transition = 'none';
+      progressFill.style.transition = 'none';
+    }
+    
+    currentPercent = 0;
+    thumb.style.left = '4px';
+    progressFill.style.width = '0%';
+    label.style.opacity = '1';
+    successLabel.style.display = 'none';
+    
+    if (instant) {
+      void thumb.offsetHeight;
+      thumb.style.transition = '';
+      progressFill.style.transition = '';
+    }
+    
+    if (track && !orderTriggered) track.classList.remove('processing');
+    if (wrapper) wrapper.classList.remove('flash-success');
+  }
+  
+  // Mouse/Touch move handler
+  function onMove(clientX) {
+    if (!isDragging || orderTriggered || isProcessing) return;
+    touchMoved = true;
+    
+    let delta = clientX - startX;
+    let newPercent = (delta / trackWidth) * 100;
+    newPercent = Math.min(100, Math.max(0, newPercent));
+    
+    updateSliderUI(newPercent);
+    
+    // If reached 98%, trigger order
+    if (newPercent >= 98 && !orderTriggered && !isProcessing) {
+      triggerOrder();
+      isDragging = false;
+    }
+  }
+  
+  function onEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    
+    if (resetTimeout) clearTimeout(resetTimeout);
+    
+    if (!orderTriggered && !isProcessing && currentPercent > 0) {
+      if (currentPercent > 30 && currentPercent < 98) {
+        if (hint) {
+          const originalHtml = hint.innerHTML;
+          hint.innerHTML = '<i class="fas fa-arrow-right"></i> পুরো পথ স্লাইড করুন অর্ডার করতে';
+          hint.style.color = '#F5A623';
+          setTimeout(() => {
+            if (hint && !orderTriggered && !isProcessing) {
+              hint.innerHTML = originalHtml;
+              hint.style.color = '#6B7A99';
+            }
+          }, 1500);
+        }
+      }
+      resetTimeout = setTimeout(() => {
+        if (!orderTriggered && !isProcessing) {
+          resetSlider(false);
+        }
+      }, 200);
+    } else if (!orderTriggered && !isProcessing) {
+      resetSlider(false);
+    }
+    
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend', onTouchEnd);
+  }
+  
+  function onMouseMove(e) {
+    onMove(e.clientX);
+  }
+  
+  function onMouseUp() {
+    onEnd();
+  }
+  
+  function onTouchMove(e) {
+    e.preventDefault();
+    if (e.touches.length) {
+      onMove(e.touches[0].clientX);
+    }
+  }
+  
+  function onTouchEnd(e) {
+    e.preventDefault();
+    onEnd();
+  }
+  
+  function startDrag(clientX, clientY) {
+    if (orderTriggered || isProcessing) return;
+    
+    if (resetTimeout) {
+      clearTimeout(resetTimeout);
+      resetTimeout = null;
+    }
+    
+    const trackRect = track.getBoundingClientRect();
+    trackWidth = trackRect.width - 56;
+    maxLeft = Math.max(trackWidth, 10);
+    
+    startX = clientX;
+    startY = clientY;
+    touchMoved = false;
+    isDragging = true;
+    
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchend', onTouchEnd);
+  }
+  
+  // Mouse events on thumb
+  thumb.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startDrag(e.clientX, e.clientY);
+  });
+  
+  // Touch events on thumb
+  thumb.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (e.touches.length) {
+      startDrag(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  });
+  
+  // Click on track resets the slider
+  track.addEventListener('click', (e) => {
+    if (orderTriggered || isProcessing) return;
+    if (!isDragging && currentPercent > 0) {
+      resetSlider(false);
+    }
+  });
+  
+  // Prevent accidental page scroll when dragging on mobile
+  document.addEventListener('touchmove', function(e) {
+    if (isDragging) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+  
+  // Reset when modal closes
+  const originalCloseModal = window.closeModal;
+  window.closeModal = function(modalId) {
+    if (modalId === 'checkoutModal') {
+      setTimeout(() => {
+        completeReset();
+      }, 100);
+    }
+    if (modalId === 'successModal' || modalId === 'orderRejectModal') {
+      // Reset after success or reject modal closes
+      setTimeout(() => {
+        completeReset();
+      }, 100);
+    }
+    if (originalCloseModal) originalCloseModal(modalId);
+  };
+  
+  // Reset when checkout opens fresh
+  const originalOpenCheckout = window.openCheckout;
+  window.openCheckout = async function() {
+    completeReset();
+    if (originalOpenCheckout) {
+      return originalOpenCheckout();
+    }
+  };
+  
+  // Listen for form validation events
+  const formInputs = ['checkoutName', 'checkoutEmail', 'checkoutPhone', 'checkoutAddress', 'checkoutCity'];
+  formInputs.forEach(inputId => {
+    const input = document.getElementById(inputId);
+    if (input) {
+      input.addEventListener('change', function() {
+        if (!orderTriggered && !isProcessing && currentPercent > 0 && currentPercent < 95) {
+          resetSlider(false);
+        }
+      });
+      input.addEventListener('input', function() {
+        if (!orderTriggered && !isProcessing && currentPercent > 0 && currentPercent < 95) {
+          resetSlider(false);
+        }
+      });
+    }
+  });
+  
+  const termsCheckbox = document.getElementById('acceptTerms');
+  if (termsCheckbox) {
+    termsCheckbox.addEventListener('change', function() {
+      if (!orderTriggered && !isProcessing && currentPercent > 0 && currentPercent < 95) {
+        resetSlider(false);
+      }
+    });
+  }
+  
+  // Initialize
+  completeReset();
+})();
 
    /* ════════════════════════════════════════════════════════════
          GLOBAL EXPORTS
@@ -2309,8 +4001,14 @@ window.removeCouponFromUI = removeCouponFromUI;
          DOM READY
       ════════════════════════════════════════════════════════════ */
    document.addEventListener("DOMContentLoaded", () => {
+    const _origOpen = window.openModal;
+    window.openModal = function(id) {
+      window.GodTracker?.modalOpen(id);
+      _origOpen(id);
+    };
      loadStoredMobileOrders();
      renderStoredNumberBadges();
+     checkAndShowDeliveryModal();
    });
 
    document.addEventListener("DOMContentLoaded", () => {
@@ -2345,8 +4043,19 @@ window.removeCouponFromUI = removeCouponFromUI;
        document.getElementById("cartBackdrop").classList.remove("show");
        openCheckout();
      });
+
+    
      document.getElementById("checkoutForm")?.addEventListener("submit", placeOrder);
      document.getElementById("confirmOrderBtn")?.addEventListener("click", placeOrder);
+
+     restoreCheckoutInfo();
+     CHECKOUT_FIELDS.forEach((id) => {
+       const el = document.getElementById(id);
+       if (el) {
+         el.addEventListener("input", saveCheckoutInfo);
+         el.addEventListener("change", saveCheckoutInfo);
+       }
+     });
    
      /* Mobile nav */
      document.querySelectorAll(".mobile-nav-item[data-page]").forEach((item) => {
