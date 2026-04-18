@@ -3542,78 +3542,21 @@
    }
    
    @media (max-width: 768px) {
-     body { padding-bottom: 72px; }
-   
-     .nav-links, .nav-actions { display: none; }
-     .mobile-bottom-nav { display: block; }
-   
-     .main-content {
-       padding: 1rem;
-       margin-top: 68px;
-     }
-   
-     .hero-section {
-       padding: 2.5rem 1.5rem;
-       border-radius: var(--radius-lg);
-       margin-bottom: 1.5rem;
-     }
-   
-     .hero-content h1 { font-size: 1.8rem; }
-     .hero-content p { font-size: 0.95rem; }
-     .hero-section::after { display: none; }
-   
-     .products-grid {
-       grid-template-columns: repeat(2, 1fr);
-       gap: 0.875rem;
-     }
-   
-     .product-image { height: 160px; }
-     .product-info { padding: 0.875rem; }
-     .product-name { font-size: 0.875rem; }
-     .price-final { font-size: 1.1rem; }
-   
-     .product-quick-add { display: none; }
-   
-     .categories-grid {
-       grid-template-columns: repeat(3, 1fr);
-       gap: 0.75rem;
-     }
-   
-     .category-card { padding: 1rem 0.5rem; }
-     .cat-icon { width: 42px; height: 42px; font-size: 1.1rem; margin-bottom: 0.5rem; }
-     .category-card h3 { font-size: 0.75rem; }
-   
-     .filters-bar { flex-direction: column; }
-     .filter-select, .search-box { width: 100%; }
-   
-     .cart-sidebar {
-       width: 100%;
-       right: -100%;
-     }
-   
-     .checkout-grid { grid-template-columns: 1fr; }
-     .profile-container { grid-template-columns: 1fr; }
-     .form-row { grid-template-columns: 1fr; }
-   
-     .modal-large { max-width: 100%; border-radius: 0; max-height: 100vh; }
-     .modal-content { border-radius: var(--radius-xl); }
-   
-     .toast {
-       bottom: 80px;
-       right: 0.75rem;
-       left: 0.75rem;
-       max-width: 100%;
-     }
-   
-     .page-header { padding: 1.25rem; }
-     .page-header h2 { font-size: 1.4rem; margin-bottom: 1rem; }
-   
-     .section-title h2 { font-size: 1.35rem; }
-   
-     .hero-actions { flex-direction: column; }
-     .hero-actions .btn-primary,
-     .hero-actions .btn-nav { width: 100%; justify-content: center; }
-   }
+    body { padding-bottom: 72px; }
+  
+    .nav-links { display: none; }
+    .mobile-bottom-nav { display: block; }
+  
+    /* Hide cart button and avatar on mobile — they're in the bottom tab bar */
+    .nav-actions .cart-btn { display: none !important; }
+    .nav-actions .user-avatar-btn { display: none !important; }
+  
+    /* Keep nav-actions visible so blog btn shows */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
    
    @media (max-width: 480px) {
      .products-grid { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
@@ -5045,15 +4988,12 @@ body.cart-open .bee-chat-window {
   /* Move FAB to navbar area on mobile */
   .bee-fab {
     position: fixed;
-    top: auto;
-    bottom: auto;
-    right: 16px;
-    top: 12px;
+    top: 14px;
+    right: 80px;   
     width: 42px;
     height: 42px;
     z-index: 1001;
     box-shadow: 0 4px 16px rgba(245,166,35,0.4);
-  }
   
   .bee-fab .bee-fab-icon {
     font-size: 1.2rem;
@@ -6919,4 +6859,4 @@ body { padding-bottom: 0; }
 
 @media (max-width: 768px) {
   body { padding-bottom: 72px; }
-}
+}}}
