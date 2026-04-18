@@ -18,7 +18,6 @@
     />
     <link rel="stylesheet" href="css/layer.css" />
     <link rel="stylesheet" href="css/customer.css" />
-    <link rel="stylesheet" href="css/blog.css" />
   </head>
   <body style="padding-bottom: 0 !important; margin-bottom: 0 !important;">
     <!-- ═══ LOADING OVERLAY ═══════════════════════════════════ -->
@@ -58,9 +57,6 @@
           <a href="#" class="nav-link" data-page="products"
             ><i class="fas fa-box"></i> পণ্য</a
           >
-          <a href="#" class="nav-link" data-page="blogs"
-            ><i class="fas fa-pen-nib"></i> ব্লগ</a
-          >
           <a href="#" class="nav-link" data-page="orders"
             ><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক</a
           >
@@ -70,22 +66,14 @@
         </div>
 
         <div class="nav-actions">
-          <!-- Blog button (mobile only) -->
-          <button class="mobile-blog-btn" onclick="navigateTo('blogs')" aria-label="ব্লগ">
-            <i class="fas fa-pen-nib"></i>
-            <span class="mobile-blog-badge">নতুন</span>
-          </button>
-          
-          <!-- Cart button -->
           <button class="cart-btn" id="cartBtn" aria-label="কার্ট খুলুন">
             <i class="fas fa-shopping-cart"></i>
             <span>কার্ট</span>
             <span class="cart-count" id="cartCount">0</span>
           </button>
-          
-          <!-- User avatar -->
           <div class="user-avatar-btn">
-            <img loading="lazy" 
+            <img
+            loading="lazy" 
               src="https://icons.veryicon.com/png/o/miscellaneous/user-avatar/user-avatar-male-5.png"
               alt="ব্যবহারকারী"
               id="userAvatar"
@@ -448,10 +436,6 @@
           </h2>
         </div>
         <div id="userOrders" class="orders-list"></div>
-      </div>
-
-      <div class="page-content" id="blogsPage">
-        <!-- Dynamically rendered by blog.js initBlogPage() -->
       </div>
 
       <!-- ── PROFILE PAGE ───────────────────────────────────── -->
@@ -1586,6 +1570,5 @@
 </script>
 <script src="js/god-tracker.js"></script>
     <script src="js/customer.min.js"></script>
-    <script src="js/blog.js"></script>
   </body>
 </html>
