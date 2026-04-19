@@ -18,7 +18,6 @@
     />
     <link rel="stylesheet" href="css/layer.css" />
     <link rel="stylesheet" href="css/customer.css" />
-    <link rel="stylesheet" href="css/blog.css" />
   </head>
   <body style="padding-bottom: 0 !important; margin-bottom: 0 !important;">
     <!-- ═══ LOADING OVERLAY ═══════════════════════════════════ -->
@@ -58,10 +57,6 @@
           <a href="#" class="nav-link" data-page="products"
             ><i class="fas fa-box"></i> পণ্য</a
           >
-          <a href="#" class="nav-link" data-page="blogs">
-            <i class="fas fa-newspaper"></i> ব্লগ
-         
-          </a>
           <a href="#" class="nav-link" data-page="orders"
             ><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক</a
           >
@@ -441,10 +436,6 @@
           </h2>
         </div>
         <div id="userOrders" class="orders-list"></div>
-      </div>
-
-      <div class="page-content" id="blogsPage">
-        <!-- JS renders everything here via initBlogPage() -->
       </div>
 
       <!-- ── PROFILE PAGE ───────────────────────────────────── -->
@@ -1111,8 +1102,6 @@
       <span class="pnav-label">পণ্য</span>
     </div>
 
-    
-
     <div class="pnav-item" id="pnavCartBtn" onclick="openMobileCart(); setPnavCartActive()">
       <div class="pnav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
@@ -1123,15 +1112,6 @@
         <span class="pnav-cart-badge" id="mobileCartCount">0</span>
       </div>
       <span class="pnav-label">কার্ট</span>
-    </div>
-
-    <div class="pnav-item" data-page="blogs" onclick="navigateTo('blogs'); setPnavActive(this)">
-      <div class="pnav-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
-          <path d="M4 6h16M4 10h16M4 14h10M4 18h8"/>
-        </svg>
-      </div>
-      <span class="pnav-label">ব্লগ</span>
     </div>
 
     <div class="pnav-item" data-page="orders" onclick="navigateTo('orders'); setPnavActive(this)">
@@ -1145,7 +1125,7 @@
       <span class="pnav-label">ট্র্যাক</span>
     </div>
 
-    <!-- <div class="pnav-item" data-page="profile" onclick="navigateTo('profile'); setPnavActive(this)">
+    <div class="pnav-item" data-page="profile" onclick="navigateTo('profile'); setPnavActive(this)">
       <div class="pnav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
           <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
@@ -1153,7 +1133,7 @@
         </svg>
       </div>
       <span class="pnav-label">প্রোফাইল</span>
-    </div> -->
+    </div>
   </div>
   <div class="pnav-home-indicator"></div>
 </div>
@@ -1590,23 +1570,5 @@
 </script>
 <script src="js/god-tracker.js"></script>
     <script src="js/customer.js"></script>
-    <script src="js/blog.js"></script>
-    <script>
-      /* ── Wire up blog nav badge (shows "নতুন" if recent posts exist) ── */
-      (function initBlogNavBadge() {
-        fetch("https://beeyond-harvest-admin.onrender.com/api/blogs?sort=newest&limit=1")
-          .then(r => r.json())
-          .then(data => {
-            const post = data.data?.[0];
-            if (!post) return;
-            const isNew = Date.now() - new Date(post.publishedAt || post.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000;
-            if (isNew) {
-              const badge = document.getElementById("navBlogBadge");
-              if (badge) badge.style.display = "inline-flex";
-            }
-          })
-          .catch(() => {});
-      })();
-    </script>
   </body>
 </html>
