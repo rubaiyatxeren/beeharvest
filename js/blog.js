@@ -1,1033 +1,1118 @@
 /* ═══════════════════════════════════════════════════════════
-   BeeHarvest — Blog Feature JS  v3.0
-   Full-page detail view · Powerful search · Real-time polling
-   API: https://beeyond-harvest-admin.onrender.com/api/blogs
-═══════════════════════════════════════════════════════════ */
-
-const BLOG_API      = "https://beeyond-harvest-admin.onrender.com/api/blogs";
-const BLOG_SITE_URL = "https://beeharvest.vercel.app";
-
-/* ── State ─────────────────────────────────────────────── */
-const BlogState = {
-  posts: [], categories: [], tags: [],
-  activeCategory: "", activeTag: "",
-  search: "", sort: "newest",
-  page: 1, totalPages: 1,
-  loading: false, detailLoading: false,
-  currentPost: null, view: "list", /* "list" | "detail" */
-  likedPosts: JSON.parse(localStorage.getItem("bh_liked_blogs") || "[]"),
-  realtimeInterval: null,
-  searchHistory: JSON.parse(localStorage.getItem("bh_blog_history") || "[]"),
-};
-
-/* ── Helpers ────────────────────────────────────────────── */
-function $b(id) { return document.getElementById(id); }
-
-function blogEsc(str) {
-  if (!str) return "";
-  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-
-function blogDate(d) {
-  if (!d) return "";
-  return new Date(d).toLocaleDateString("bn-BD", { year:"numeric", month:"long", day:"numeric" });
-}
-
-function blogDateShort(d) {
-  if (!d) return "";
-  return new Date(d).toLocaleDateString("bn-BD", { year:"numeric", month:"short", day:"numeric" });
-}
-
-function authorInitials(name) {
-  if (!name) return "?";
-  return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
-}
-
-function stripHtml(html) { return html ? html.replace(/<[^>]+>/g,"").trim() : ""; }
-
-function bengaliNum(n) { return String(n).replace(/[0-9]/g, d => "০১২৩৪৫৬৭৮৯"[d]); }
-
-function debounce(fn, delay) {
-  let t;
-  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
-}
-
-async function blogFetch(url, options = {}) {
-  const res = await fetch(url, { headers: { "Content-Type": "application/json" }, ...options });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Blog API error");
-  return data;
-}
-
-/* ── Save search history ────────────────────────────────── */
-function saveSearchHistory(q) {
-  if (!q || q.length < 2) return;
-  BlogState.searchHistory = [q, ...BlogState.searchHistory.filter(h => h !== q)].slice(0, 8);
-  localStorage.setItem("bh_blog_history", JSON.stringify(BlogState.searchHistory));
-}
-
-/* ═══════════════════════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════════════════════ */
-async function initBlogPage() {
-  BlogState.view = "list";
-  renderBlogPageShell();
-  await Promise.all([loadBlogCategories(), loadBlogPosts()]);
-  startBlogRealtime();
-}
-
-/* ── Real-time polling ──────────────────────────────────── */
-function startBlogRealtime() {
-  stopBlogRealtime();
-  BlogState.realtimeInterval = setInterval(() => {
-    const blogsPage = $b("blogsPage");
-    if (!blogsPage?.classList.contains("active")) return;
-    if (BlogState.view === "list") silentRefreshPosts();
-    else if (BlogState.view === "detail" && BlogState.currentPost) {
-      silentRefreshDetail(BlogState.currentPost._id);
-    }
-  }, 40000);
-}
-
-function stopBlogRealtime() {
-  if (BlogState.realtimeInterval) { clearInterval(BlogState.realtimeInterval); BlogState.realtimeInterval = null; }
-}
-
-async function silentRefreshPosts() {
-  try {
-    const params = new URLSearchParams({ page: BlogState.page, limit: 9, sort: BlogState.sort });
-    if (BlogState.activeCategory) params.set("category", BlogState.activeCategory);
-    if (BlogState.search) params.set("search", BlogState.search);
-    const data = await blogFetch(`${BLOG_API}?${params}`);
-    (data.data || []).forEach(post => {
-      const id = String(post._id);
-      document.querySelectorAll(`[data-post-id="${id}"]`).forEach(card => {
-        const v = card.querySelector(".blog-stat-chip.views");
-        const l = card.querySelector(".blog-stat-chip.likes");
-        if (v) v.innerHTML = `<i class="fas fa-eye"></i> ${bengaliNum(post.views || 0)}`;
-        if (l) l.innerHTML = `<i class="fas fa-heart"></i> ${bengaliNum(post.likes || 0)}`;
-      });
-    });
-  } catch(e) {}
-}
-
-async function silentRefreshDetail(id) {
-  try {
-    const data = await blogFetch(`${BLOG_API}/${id}`);
-    const post = data.data;
-    const vEl = document.querySelector(".blog-article-views");
-    const lEl = $b("blogLikeCount");
-    if (vEl) vEl.textContent = bengaliNum(post.views || 0);
-    if (lEl && !BlogState.likedPosts.includes(String(id))) lEl.textContent = bengaliNum(post.likes || 0);
-  } catch(e) {}
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PAGE SHELL — List view
-═══════════════════════════════════════════════════════════ */
-function renderBlogPageShell() {
-  const page = $b("blogsPage");
-  if (!page) return;
-
-  page.innerHTML = `
-    <!-- Reading progress bar -->
-    <div class="blog-reading-progress" id="blogReadingProgress">
-      <div class="blog-reading-progress-fill" id="blogReadingFill"></div>
-    </div>
-
-    <!-- List view -->
-    <div id="blogListView">
-      <div class="blog-hero-banner">
-        <div class="blog-hero-eyebrow"><i class="fas fa-pen-nib"></i> জ্ঞান ও অনুপ্রেরণা</div>
-        <h1 class="blog-hero-title">আমাদের <em>ব্লগ</em></h1>
-        <p class="blog-hero-desc">স্বাস্থ্য, পুষ্টি ও প্রকৃতির সেরা পণ্য নিয়ে বিশেষজ্ঞদের লেখা পড়ুন।</p>
-      </div>
-
-      <!-- Powerful Search -->
-      <div class="blog-search-section" id="blogSearchSection">
-        <div class="blog-search-outer">
-          <div class="blog-search-icon"><i class="fas fa-search"></i></div>
-          <input type="text" id="blogSearchInput" class="blog-search-input"
-            placeholder="শিরোনাম, ট্যাগ, লেখক দিয়ে খুঁজুন..." autocomplete="off" />
-          <div class="blog-search-controls">
-            <button class="blog-search-clear" id="blogSearchClear" onclick="clearBlogSearch()">
-              <i class="fas fa-times"></i>
-            </button>
-            <span class="blog-search-kbd"><i class="fas fa-keyboard"></i> Enter</span>
-          </div>
-          <button class="blog-search-btn" onclick="triggerBlogSearch()">
-            <i class="fas fa-search"></i>
-            <span>খুঁজুন</span>
-          </button>
-        </div>
-
-        <!-- Suggestions dropdown -->
-        <div class="blog-suggestions-drop" id="blogSuggestions"></div>
-
-        <!-- Filters row -->
-        <div class="blog-search-filters" id="blogFilterRow">
-          <button class="blog-filter-chip active" data-filter="all" onclick="setBlogFilter('all', this)">
-            <i class="fas fa-border-all"></i> সব পোস্ট
-          </button>
-          <button class="blog-filter-chip" data-filter="popular" onclick="setBlogFilter('popular', this)">
-            <i class="fas fa-fire"></i> জনপ্রিয়
-          </button>
-          <button class="blog-filter-chip" data-filter="trending" onclick="setBlogFilter('trending', this)">
-            <i class="fas fa-chart-line"></i> ট্রেন্ডিং
-          </button>
-          <button class="blog-filter-chip" data-filter="recent" onclick="setBlogFilter('recent', this)">
-            <i class="fas fa-clock"></i> সাম্প্রতিক
-          </button>
-          <select id="blogSortSelect" class="blog-sort-select">
-            <option value="newest">সর্বশেষ</option>
-            <option value="popular">পঠিত</option>
-            <option value="trending">ট্রেন্ডিং</option>
-            <option value="oldest">পুরনো</option>
-          </select>
-        </div>
-
-        <!-- Search result info -->
-        <div class="blog-search-info" id="blogSearchInfo">
-          <i class="fas fa-search"></i>
-          <span id="blogSearchInfoText"></span>
-          <button class="blog-search-info-clear" onclick="clearBlogSearch()">মুছুন</button>
-        </div>
-      </div>
-
-      <!-- Category pills -->
-      <div class="blog-category-pills" id="blogCatPills">
-        <button class="blog-cat-pill active" data-cat="" onclick="filterBlogByCategory('')">
-          <i class="fas fa-border-all"></i> সব
-        </button>
-      </div>
-
-      <div id="blogFeaturedWrap"></div>
-      <div class="blog-grid" id="blogGrid">${blogSkeletons(6)}</div>
-      <div class="blog-pagination" id="blogPagination"></div>
-    </div>
-
-    <!-- Detail view (full page, no modal) -->
-    <div class="blog-detail-page" id="blogDetailView"></div>
-  `;
-
-  wireSearchEvents();
-  wireSortEvent();
-}
-
-function blogSkeletons(n) {
-  return Array(n).fill(0).map(() => `
-    <div class="blog-skeleton">
-      <div class="blog-skel-img"></div>
-      <div class="blog-skel-body">
-        <div class="blog-skel-line" style="height:11px;width:38%;"></div>
-        <div class="blog-skel-line" style="height:17px;width:88%;"></div>
-        <div class="blog-skel-line" style="height:17px;width:68%;"></div>
-        <div class="blog-skel-line" style="height:11px;width:80%;"></div>
-        <div class="blog-skel-line" style="height:11px;width:50%;"></div>
-      </div>
-    </div>`).join("");
-}
-
-/* ── Wire search events ─────────────────────────────────── */
-function wireSearchEvents() {
-  const input = $b("blogSearchInput");
-  if (!input) return;
-
-  input.addEventListener("input", debounce((e) => {
-    const q = e.target.value.trim();
-    const clearBtn = $b("blogSearchClear");
-    if (clearBtn) clearBtn.classList.toggle("show", q.length > 0);
-    showBlogSuggestions(q);
-  }, 200));
-
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); triggerBlogSearch(); }
-    if (e.key === "Escape") { closeBlogSuggestions(); input.blur(); }
-  });
-
-  input.addEventListener("focus", () => {
-    showBlogSuggestions(input.value.trim());
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!$b("blogSearchSection")?.contains(e.target)) closeBlogSuggestions();
-  });
-}
-
-function wireSortEvent() {
-  const sel = $b("blogSortSelect");
-  if (sel) sel.addEventListener("change", () => {
-    BlogState.sort = sel.value;
-    BlogState.page = 1;
-    loadBlogPosts();
-  });
-}
-
-/* ── Suggestions ────────────────────────────────────────── */
-async function showBlogSuggestions(q) {
-  const drop = $b("blogSuggestions");
-  if (!drop) return;
-
-  const items = [];
-
-  if (!q) {
-    // Show recent searches
-    if (BlogState.searchHistory.length > 0) {
-      items.push(`<div class="blog-sug-label">সাম্প্রতিক অনুসন্ধান</div>`);
-      BlogState.searchHistory.slice(0, 5).forEach(h => {
-        items.push(`<div class="blog-sug-item" onclick="selectSuggestion('${blogEsc(h)}')">
-          <i class="fas fa-history"></i> ${blogEsc(h)}
-        </div>`);
-      });
-    }
-
-    // Show categories as suggestions
-    if (BlogState.categories.length > 0) {
-      items.push(`<div class="blog-sug-label">ক্যাটাগরি</div>`);
-      BlogState.categories.slice(0, 4).forEach(c => {
-        items.push(`<div class="blog-sug-item" onclick="filterBlogByCategory('${blogEsc(c.name)}'); closeBlogSuggestions();">
-          <i class="fas fa-tag"></i> ${blogEsc(c.name)} <span style="margin-left:auto;font-size:0.68rem;color:var(--text-light);">${bengaliNum(c.count)}</span>
-        </div>`);
-      });
-    }
-  } else {
-    // Live search in loaded posts
-    const lq = q.toLowerCase();
-    const matched = BlogState.posts.filter(p =>
-      (p.title || "").toLowerCase().includes(lq) ||
-      (p.category || "").toLowerCase().includes(lq) ||
-      (p.excerpt || "").toLowerCase().includes(lq) ||
-      (p.tags || []).some(t => t.toLowerCase().includes(lq))
-    ).slice(0, 6);
-
-    if (matched.length > 0) {
-      items.push(`<div class="blog-sug-label">পোস্ট</div>`);
-      matched.forEach(p => {
-        const hi = (p.title || "").replace(new RegExp(`(${q})`, "gi"), "<mark>$1</mark>");
-        items.push(`<div class="blog-sug-item" onclick="openBlogDetail('${String(p._id)}')">
-          <i class="fas fa-file-alt"></i> <span>${hi}</span>
-        </div>`);
-      });
-    }
-
-    // Match categories
-    const matchedCats = BlogState.categories.filter(c => c.name.toLowerCase().includes(lq)).slice(0, 3);
-    if (matchedCats.length > 0) {
-      items.push(`<div class="blog-sug-label">ক্যাটাগরি</div>`);
-      matchedCats.forEach(c => {
-        items.push(`<div class="blog-sug-item" onclick="filterBlogByCategory('${blogEsc(c.name)}'); closeBlogSuggestions();">
-          <i class="fas fa-tag"></i> ${blogEsc(c.name)}
-        </div>`);
-      });
-    }
-
-    if (items.length === 0) {
-      items.push(`<div class="blog-sug-item" style="color:var(--text-muted);cursor:default;">
-        <i class="fas fa-search"></i> "<strong>${blogEsc(q)}</strong>" খুঁজুন
-      </div>`);
-    }
-  }
-
-  if (items.length > 0) {
-    drop.innerHTML = items.join("");
-    drop.classList.add("open");
-  } else {
-    closeBlogSuggestions();
-  }
-}
-
-function closeBlogSuggestions() {
-  const drop = $b("blogSuggestions");
-  if (drop) drop.classList.remove("open");
-}
-
-function selectSuggestion(q) {
-  const input = $b("blogSearchInput");
-  if (input) input.value = q;
-  closeBlogSuggestions();
-  BlogState.search = q;
-  BlogState.page = 1;
-  loadBlogPosts();
-}
-
-function triggerBlogSearch() {
-  const input = $b("blogSearchInput");
-  const q = input?.value.trim() || "";
-  closeBlogSuggestions();
-  saveSearchHistory(q);
-  BlogState.search = q;
-  BlogState.page = 1;
-  loadBlogPosts();
-  updateSearchInfo(q);
-}
-
-function clearBlogSearch() {
-  const input = $b("blogSearchInput");
-  if (input) input.value = "";
-  const clearBtn = $b("blogSearchClear");
-  if (clearBtn) clearBtn.classList.remove("show");
-  closeBlogSuggestions();
-  BlogState.search = "";
-  BlogState.activeTag = "";
-  BlogState.page = 1;
-  updateSearchInfo("");
-  loadBlogPosts();
-}
-
-function updateSearchInfo(q) {
-  const info = $b("blogSearchInfo");
-  const text = $b("blogSearchInfoText");
-  if (!info || !text) return;
-  if (q) {
-    text.textContent = `"${q}" খোঁজার ফলাফল দেখাচ্ছে`;
-    info.classList.add("show");
-  } else {
-    info.classList.remove("show");
-  }
-}
-
-function setBlogFilter(filter, btn) {
-  document.querySelectorAll(".blog-filter-chip").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  const sortMap = { all: "newest", popular: "popular", trending: "trending", recent: "newest" };
-  BlogState.sort = sortMap[filter] || "newest";
-  const sel = $b("blogSortSelect");
-  if (sel) sel.value = BlogState.sort;
-  BlogState.page = 1;
-  loadBlogPosts();
-}
-
-/* ── Categories ─────────────────────────────────────────── */
-async function loadBlogCategories() {
-  try {
-    const data = await blogFetch(`${BLOG_API}/meta/categories`);
-    BlogState.categories = data.data || [];
-    renderCategoryPills();
-  } catch(e) { console.warn("Blog categories:", e.message); }
-}
-
-function renderCategoryPills() {
-  const container = $b("blogCatPills");
-  if (!container) return;
-
-  const pills = BlogState.categories.slice(0, 12).map(cat => `
-    <button class="blog-cat-pill" data-cat="${blogEsc(cat.name)}" onclick="filterBlogByCategory('${blogEsc(cat.name)}')">
-      <i class="fas fa-tag"></i> ${blogEsc(cat.name)}
-      <span class="pill-count">${bengaliNum(cat.count)}</span>
-    </button>`).join("");
-
-  container.innerHTML = `
-    <button class="blog-cat-pill ${!BlogState.activeCategory ? "active" : ""}" data-cat="" onclick="filterBlogByCategory('')">
-      <i class="fas fa-border-all"></i> সব
-    </button>${pills}`;
-}
-
-function filterBlogByCategory(cat) {
-  BlogState.activeCategory = cat;
-  BlogState.page = 1;
-  document.querySelectorAll(".blog-cat-pill").forEach(p => p.classList.toggle("active", p.dataset.cat === cat));
-  loadBlogPosts();
-}
-
-/* ── Load posts ─────────────────────────────────────────── */
-async function loadBlogPosts() {
-  if (BlogState.loading) return;
-  BlogState.loading = true;
-  const grid = $b("blogGrid");
-  if (grid) grid.innerHTML = blogSkeletons(6);
-  const featuredWrap = $b("blogFeaturedWrap");
-
-  try {
-    const params = new URLSearchParams({ page: BlogState.page, limit: 9, sort: BlogState.sort });
-    if (BlogState.activeCategory) params.set("category", BlogState.activeCategory);
-    if (BlogState.activeTag) params.set("tag", BlogState.activeTag);
-    if (BlogState.search) params.set("search", BlogState.search);
-
-    const data = await blogFetch(`${BLOG_API}?${params}`);
-    const posts = data.data || [];
-    BlogState.posts = posts;
-    BlogState.totalPages = data.pagination?.pages || 1;
-
-    if (featuredWrap) {
-      const showFeatured = !BlogState.search && !BlogState.activeCategory && !BlogState.activeTag && BlogState.page === 1;
-      const featured = showFeatured ? (posts.find(p => p.isFeatured) || posts[0]) : null;
-      featuredWrap.innerHTML = featured ? renderFeaturedCard(featured) : "";
-    }
-
-    const featuredId = featuredWrap?.querySelector("[data-post-id]")?.dataset.postId;
-    const gridPosts = posts.filter(p => String(p._id) !== String(featuredId));
-
-    if (grid) {
-      grid.innerHTML = gridPosts.length === 0 && !featuredId
-        ? `<div class="blog-empty"><div class="blog-empty-icon">📝</div><h3>কোনো পোস্ট নেই</h3><p>এখনো কোনো পোস্ট প্রকাশিত হয়নি।</p></div>`
-        : gridPosts.length === 0
-        ? `<div class="blog-empty" style="grid-column:1/-1"><div class="blog-empty-icon">🔍</div><h3>ফলাফল পাওয়া যায়নি</h3><p>অনুসন্ধান পরিবর্তন করে আবার চেষ্টা করুন।</p></div>`
-        : gridPosts.map(renderBlogCard).join("");
-    }
-
-    renderBlogPagination();
-  } catch(e) {
-    console.error("Blog load:", e);
-    if (grid) grid.innerHTML = `<div class="blog-empty" style="grid-column:1/-1"><div class="blog-empty-icon">⚠️</div><h3>লোড করতে সমস্যা</h3><p>সংযোগ পরীক্ষা করে পুনরায় চেষ্টা করুন।</p></div>`;
-  } finally {
-    BlogState.loading = false;
-  }
-}
-
-/* ── Featured card ──────────────────────────────────────── */
-function renderFeaturedCard(post) {
-  const id = String(post._id);
-  const imgUrl = post.coverImage?.url || "";
-  const title = post.title || "";
-  const excerpt = post.excerpt || stripHtml(post.body || "").slice(0, 200);
-  const cat = post.category || "সাধারণ";
-  const views = post.views || 0, likes = post.likes || 0;
-  const readTime = post.readingTime || "৫";
-
-  return `
-    <div class="blog-featured-card" data-post-id="${id}" onclick="openBlogDetail('${id}')">
-      <div class="blog-featured-img">
-        ${imgUrl ? `<img src="${blogEsc(imgUrl)}" alt="${blogEsc(title)}" loading="lazy">` : `<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;background:linear-gradient(135deg,rgba(245,166,35,0.12),rgba(13,27,62,0.07));">🍯</div>`}
-        <div class="blog-featured-img-overlay"></div>
-        <div class="blog-featured-badge"><i class="fas fa-star"></i> ফিচার্ড</div>
-      </div>
-      <div class="blog-featured-body">
-        <div class="blog-featured-cat"><i class="fas fa-tag"></i> ${blogEsc(cat)}</div>
-        <h2 class="blog-featured-title">${blogEsc(title)}</h2>
-        <p class="blog-featured-excerpt">${blogEsc(excerpt)}</p>
-        <div class="blog-featured-meta">
-          <span><i class="fas fa-user"></i> ${blogEsc(post.author?.name || "BeeHarvest")}</span>
-          <span><i class="fas fa-clock"></i> ${bengaliNum(readTime)} মিনিট</span>
-          <span><i class="fas fa-eye"></i> ${bengaliNum(views)}</span>
-          <span><i class="fas fa-heart"></i> ${bengaliNum(likes)}</span>
-        </div>
-        <button class="blog-read-btn" onclick="event.stopPropagation(); openBlogDetail('${id}')">
-          <i class="fas fa-book-open"></i> পড়তে থাকুন <i class="fas fa-arrow-right"></i>
-        </button>
-      </div>
-    </div>`;
-}
-
-/* ── Blog card ──────────────────────────────────────────── */
-function renderBlogCard(post) {
-  const id = String(post._id);
-  const imgUrl = post.coverImage?.url || "";
-  const title = post.title || "";
-  const excerpt = post.excerpt || stripHtml(post.body || "").slice(0, 140);
-  const cat = post.category || "সাধারণ";
-  const authorName = post.author?.name || "BeeHarvest";
-  const authorAvatar = post.author?.avatar || "";
-  const views = post.views || 0, likes = post.likes || 0;
-  const readTime = post.readingTime || 5;
-  const commentCount = post.commentCount || 0;
-  const publishedAt = post.publishedAt || post.createdAt;
-
-  return `
-    <div class="blog-card" data-post-id="${id}" onclick="openBlogDetail('${id}')">
-      <div class="blog-card-img-wrap">
-        ${imgUrl
-          ? `<img class="blog-card-img" src="${blogEsc(imgUrl)}" alt="${blogEsc(title)}" loading="lazy"
-               onerror="this.style.display='none';this.parentNode.querySelector('.blog-card-no-img').style.display='flex';">
-             <div class="blog-card-no-img" style="display:none;">🍯</div>`
-          : `<div class="blog-card-no-img">🍯</div>`}
-        <div class="blog-card-cat-badge"><i class="fas fa-tag"></i> ${blogEsc(cat)}</div>
-        <div class="blog-card-read-time"><i class="fas fa-clock"></i> ${bengaliNum(readTime)}মি</div>
-      </div>
-      <div class="blog-card-body">
-        <h3 class="blog-card-title">${blogEsc(title)}</h3>
-        <p class="blog-card-excerpt">${blogEsc(excerpt)}</p>
-        <div class="blog-card-footer">
-          <div class="blog-card-author">
-            <div class="blog-card-avatar">
-              ${authorAvatar ? `<img src="${blogEsc(authorAvatar)}" alt="${blogEsc(authorName)}" onerror="this.style.display='none'">` : authorInitials(authorName)}
-            </div>
-            <div>
-              <div class="blog-card-author-name">${blogEsc(authorName)}</div>
-              <div class="blog-card-date">${blogDateShort(publishedAt)}</div>
-            </div>
-          </div>
-          <div class="blog-card-stats">
-            <span class="blog-stat-chip views"><i class="fas fa-eye"></i> ${bengaliNum(views)}</span>
-            <span class="blog-stat-chip likes"><i class="fas fa-heart"></i> ${bengaliNum(likes)}</span>
-            ${commentCount > 0 ? `<span class="blog-stat-chip"><i class="fas fa-comment"></i> ${bengaliNum(commentCount)}</span>` : ""}
-          </div>
-        </div>
-      </div>
-    </div>`;
-}
-
-/* ── Pagination ─────────────────────────────────────────── */
-function renderBlogPagination() {
-  const el = $b("blogPagination");
-  if (!el) return;
-  const { page, totalPages } = BlogState;
-  if (totalPages <= 1) { el.innerHTML = ""; return; }
-
-  const btns = [];
-  btns.push(`<button onclick="goBlogPage(${page-1})" ${page===1?"disabled":""}><i class="fas fa-chevron-left"></i></button>`);
-
-  const start = Math.max(1, page - 2), end = Math.min(totalPages, page + 2);
-  if (start > 1) btns.push(`<button onclick="goBlogPage(1)">১</button>`);
-  if (start > 2) btns.push(`<button disabled>…</button>`);
-  for (let i = start; i <= end; i++) btns.push(`<button onclick="goBlogPage(${i})" class="${i===page?"active":""}">${bengaliNum(i)}</button>`);
-  if (end < totalPages - 1) btns.push(`<button disabled>…</button>`);
-  if (end < totalPages) btns.push(`<button onclick="goBlogPage(${totalPages})">${bengaliNum(totalPages)}</button>`);
-  btns.push(`<button onclick="goBlogPage(${page+1})" ${page===totalPages?"disabled":""}><i class="fas fa-chevron-right"></i></button>`);
-
-  el.innerHTML = btns.join("");
-}
-
-function goBlogPage(n) {
-  if (n < 1 || n > BlogState.totalPages) return;
-  BlogState.page = n;
-  loadBlogPosts();
-  $b("blogsPage")?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-/* ═══════════════════════════════════════════════════════════
-   BLOG DETAIL — Full page (no modal)
-═══════════════════════════════════════════════════════════ */
-async function openBlogDetail(id) {
-  const listView = $b("blogListView");
-  const detailView = $b("blogDetailView");
-  if (!listView || !detailView) return;
-
-  // Switch to detail view
-  BlogState.view = "detail";
-  listView.style.display = "none";
-  detailView.classList.add("active");
-
-  // Show loading
-  detailView.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:center;padding:5rem 2rem;flex-direction:column;gap:1rem;">
-      <div style="width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--honey);border-radius:50%;animation:spin 0.7s linear infinite;"></div>
-      <p style="color:var(--text-muted);font-size:0.875rem;">লোড হচ্ছে...</p>
-    </div>`;
-
-  window.scrollTo({ top: 0, behavior: "smooth" });
-
-  try {
-    const data = await blogFetch(`${BLOG_API}/${id}`);
-    const post = data.data;
-    BlogState.currentPost = post;
-    renderBlogDetailPage(post, detailView);
-    startReadingProgress();
-  } catch(e) {
-    detailView.innerHTML = `
-      <div style="text-align:center;padding:4rem 2rem;">
-        <div style="font-size:3rem;margin-bottom:1rem;">⚠️</div>
-        <h3 style="font-family:'DM Serif Display',serif;color:var(--navy);margin-bottom:0.5rem;">লোড করা যায়নি</h3>
-        <p style="color:var(--text-muted);margin-bottom:1.5rem;">${e.message}</p>
-        <button onclick="closeBlogDetail()" style="background:var(--navy);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;">ফিরে যান</button>
-      </div>`;
-  }
-}
-
-function closeBlogDetail() {
-  const listView = $b("blogListView");
-  const detailView = $b("blogDetailView");
-  if (!listView || !detailView) return;
-
-  BlogState.view = "list";
-  BlogState.currentPost = null;
-
-  detailView.classList.remove("active");
-  detailView.innerHTML = "";
-  listView.style.display = "";
-
-  stopReadingProgress();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-/* ── Render detail page ─────────────────────────────────── */
-function renderBlogDetailPage(post, container) {
-  const id = String(post._id);
-  const imgUrl = post.coverImage?.url || "";
-  const title = post.title || "";
-  const body = post.body || "";
-  const cat = post.category || "সাধারণ";
-  const authorName = post.author?.name || "BeeHarvest";
-  const authorBio = post.author?.bio || "";
-  const authorAvatar = post.author?.avatar || "";
-  const views = post.views || 0, likes = post.likes || 0;
-  const readTime = post.readingTime || 5;
-  const tags = post.tags || [];
-  const comments = (post.comments || []).filter(c => c.isApproved);
-  const relatedProducts = post.relatedProducts || [];
-  const publishedAt = post.publishedAt || post.createdAt;
-  const isLiked = BlogState.likedPosts.includes(id);
-
-  // Build TOC from body headings
-  const tocItems = [];
-  const headingMatches = [...body.matchAll(/<h([23])[^>]*>(.*?)<\/h[23]>/gi)];
-  headingMatches.forEach((m, i) => {
-    tocItems.push({ level: m[1], text: stripHtml(m[2]), id: `bh-h-${i}` });
-  });
-
-  // Inject IDs into headings for TOC scrolling
-  let processedBody = body;
-  headingMatches.forEach((m, i) => {
-    processedBody = processedBody.replace(m[0], m[0].replace(/<h([23])/, `<h$1 id="bh-h-${i}"`));
-  });
-
-  container.innerHTML = `
-    <!-- Back bar -->
-    <div class="blog-back-bar">
-      <button class="blog-back-btn" onclick="closeBlogDetail()">
-        <i class="fas fa-arrow-left"></i> ব্লগে ফিরুন
-      </button>
-      <div class="blog-back-breadcrumb">
-        <span onclick="closeBlogDetail()">ব্লগ</span>
-        <i class="fas fa-chevron-right"></i>
-        <span style="color:var(--text-primary);font-weight:500;">${blogEsc(title.slice(0, 38))}${title.length > 38 ? "…" : ""}</span>
-      </div>
-    </div>
-
-    <!-- Hero -->
-    ${imgUrl
-      ? `<div class="blog-article-hero">
-           <img src="${blogEsc(imgUrl)}" alt="${blogEsc(title)}" onerror="this.style.display='none'">
-           <div class="blog-article-hero-overlay"></div>
-           <div class="blog-article-hero-content">
-             <div class="blog-article-cat-badge"><i class="fas fa-tag"></i> ${blogEsc(cat)}</div>
-             <h1 class="blog-article-title">${blogEsc(title)}</h1>
+   BeeHarvest — blog.js
+   Real-time Blog System for Customer Panel
+   ═══════════════════════════════════════════════════════════ */
+
+   const BLOG_API = "https://beeyond-harvest-admin.onrender.com/api/blogs";
+
+   /* ── State ─────────────────────────────────────────────────── */
+   const BlogState = {
+     posts: [],
+     currentPost: null,
+     categories: [],
+     tags: [],
+     page: 1,
+     totalPages: 1,
+     activeCategory: "",
+     activeTag: "",
+     searchQuery: "",
+     sortBy: "newest",
+     loading: false,
+     viewMode: "grid", // grid | list
+     likedPosts: JSON.parse(localStorage.getItem("bh_liked_posts") || "[]"),
+     readPosts: JSON.parse(localStorage.getItem("bh_read_posts") || "[]"),
+   };
+   
+   /* ════════════════════════════════════════════════════════════
+      INIT
+   ════════════════════════════════════════════════════════════ */
+   window.initBlogPage = async function () {
+     renderBlogShell();
+     await Promise.all([fetchBlogMeta(), fetchBlogs(1)]);
+     initBlogSearch();
+     initBlogIntersectionObserver();
+   };
+   
+   /* ════════════════════════════════════════════════════════════
+      SHELL RENDER
+   ════════════════════════════════════════════════════════════ */
+   function renderBlogShell() {
+     const page = document.getElementById("blogsPage");
+     if (!page) return;
+   
+     page.innerHTML = `
+       <!-- ── BLOG HERO ──────────────────────────────────────── -->
+       <div class="blog-hero">
+         <div class="blog-hero-bg"></div>
+         <div class="blog-hero-orbs">
+           <span class="bh-orb bh-orb-1"></span>
+           <span class="bh-orb bh-orb-2"></span>
+           <span class="bh-orb bh-orb-3"></span>
+         </div>
+         <div class="blog-hero-content">
+           <div class="blog-hero-eyebrow">
+             <span class="blog-eyebrow-dot"></span>
+             জ্ঞান · স্বাস্থ্য · জীবনধারা
            </div>
-         </div>`
-      : `<div class="blog-article-no-hero">🍯</div>
-         <div style="margin-top:1rem;">
-           <div class="blog-article-cat-badge" style="background:var(--honey);color:var(--navy);display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:50px;font-size:0.7rem;font-weight:800;text-transform:uppercase;"><i class="fas fa-tag"></i> ${blogEsc(cat)}</div>
-           <h1 style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--navy);margin-top:0.75rem;line-height:1.25;">${blogEsc(title)}</h1>
-         </div>`}
-
-    <!-- Two-column layout -->
-    <div class="blog-article-layout" style="margin-top:${imgUrl ? "0" : "1.5rem"};">
-
-      <!-- Main content -->
-      <div>
-        <div class="blog-article-main" style="${imgUrl ? "" : "border-radius:16px;border-top:1.5px solid var(--border);"}">
-          <!-- Meta strip -->
-          <div class="blog-article-meta">
-            <div class="blog-article-author">
-              <div class="blog-article-avatar">
-                ${authorAvatar
-                  ? `<img src="${blogEsc(authorAvatar)}" alt="${blogEsc(authorName)}" onerror="this.style.display='none';this.parentNode.textContent='${authorInitials(authorName)}';">`
-                  : authorInitials(authorName)}
-              </div>
-              <div>
-                <div class="blog-article-author-name">${blogEsc(authorName)}</div>
-                <div class="blog-article-author-bio">${authorBio ? blogEsc(authorBio.slice(0,60)) + (authorBio.length > 60 ? "…" : "") : blogDate(publishedAt)}</div>
-              </div>
-            </div>
-            <div class="blog-article-stats">
-              <span><i class="fas fa-clock"></i> ${bengaliNum(readTime)} মিনিট</span>
-              <span><i class="fas fa-eye"></i> <span class="blog-article-views">${bengaliNum(views)}</span></span>
-              <span><i class="fas fa-heart"></i> ${bengaliNum(likes)}</span>
-              <span><i class="fas fa-comment"></i> ${bengaliNum(comments.length)}</span>
-            </div>
-          </div>
-
-          ${tags.length > 0 ? `<div class="blog-article-tags">${tags.map(t => `<span class="blog-tag" onclick="filterBlogByTag('${blogEsc(t)}');">#${blogEsc(t)}</span>`).join("")}</div>` : ""}
-
-          <!-- Article body -->
-          <div class="blog-article-body" id="blogArticleBody">
-            ${processedBody || "<p>কোনো বিষয়বস্তু নেই।</p>"}
-          </div>
-
-          <!-- Actions -->
-          <div class="blog-article-actions">
-            <button class="blog-like-btn ${isLiked ? "liked" : ""}" id="blogLikeBtn" onclick="likeBlogPost('${id}')">
-              <i class="${isLiked ? "fas" : "far"} fa-heart"></i>
-              <span id="blogLikeCount">${bengaliNum(likes)}</span> পছন্দ
-            </button>
-            <div class="blog-share-row">
-              <span>শেয়ার:</span>
-              <button class="blog-share-btn" onclick="shareBlogPost('${id}','facebook')" title="Facebook"><i class="fab fa-facebook-f"></i></button>
-              <button class="blog-share-btn" onclick="shareBlogPost('${id}','whatsapp')" title="WhatsApp"><i class="fab fa-whatsapp"></i></button>
-              <button class="blog-share-btn" onclick="copyBlogLink('${id}')" title="লিংক কপি"><i class="fas fa-link"></i></button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Comments -->
-        <div class="blog-comments-section">
-          <div class="blog-comments-header">
-            <div class="blog-comments-title">
-              <i class="fas fa-comments"></i> মন্তব্য
-              <span class="blog-comments-count-badge" id="blogCommentCount">${bengaliNum(comments.length)}</span>
-            </div>
-          </div>
-          <div class="blog-comment-form">
-            <div class="blog-comment-form-grid">
-              <input type="text" id="commentName" placeholder="আপনার নাম *" maxlength="80">
-              <input type="email" id="commentEmail" placeholder="ইমেইল *" maxlength="100">
-            </div>
-            <textarea id="commentBody" placeholder="আপনার মতামত লিখুন..." maxlength="1000" oninput="updateCommentChar(this)"></textarea>
-            <div class="blog-comment-form-footer">
-              <span class="blog-comment-char" id="commentChar">০/১০০০</span>
-              <button class="blog-comment-submit" id="commentSubmitBtn" onclick="submitBlogComment('${id}')">
-                <i class="fas fa-paper-plane"></i> মন্তব্য পাঠান
-              </button>
-            </div>
-          </div>
-          <div class="blog-comments-list" id="blogCommentsList">
-            ${comments.length === 0
-              ? `<div class="blog-no-comments"><i class="fas fa-comment-slash"></i> প্রথম মন্তব্য করুন!</div>`
-              : comments.map(renderComment).join("")}
-          </div>
-        </div>
-      </div>
-
-      <!-- Sidebar -->
-      <div class="blog-article-sidebar">
-
-        ${tocItems.length > 0 ? `
-          <div class="blog-sidebar-card">
-            <div class="blog-sidebar-title"><i class="fas fa-list-ul"></i> বিষয়সূচি</div>
-            <div class="blog-toc-list" id="blogTocList">
-              ${tocItems.map(t => `<a class="blog-toc-item ${t.level === "3" ? "h3" : ""}" onclick="scrollToHeading('${t.id}')">${blogEsc(t.text)}</a>`).join("")}
-            </div>
-          </div>` : ""}
-
-        ${relatedProducts.length > 0 ? `
-          <div class="blog-sidebar-card">
-            <div class="blog-sidebar-title"><i class="fas fa-shopping-bag"></i> সম্পর্কিত পণ্য</div>
-            <div class="blog-sidebar-products">
-              ${relatedProducts.map(p => `
-                <div class="blog-rel-product" onclick="closeBlogDetail(); viewProduct('${String(p._id)}')">
-                  <img class="blog-rel-product-img" src="${blogEsc(p.images?.[0]?.url || "https://via.placeholder.com/52")}" alt="${blogEsc(p.name||"পণ্য")}" onerror="this.src='https://via.placeholder.com/52'">
-                  <div class="blog-rel-product-info">
-                    <div class="blog-rel-product-name">${blogEsc(p.name||"")}</div>
-                    <div class="blog-rel-product-price">৳${(p.price||0).toLocaleString()}</div>
-                  </div>
-                </div>`).join("")}
-            </div>
-          </div>` : ""}
-
-        <!-- Author card -->
-        <div class="blog-sidebar-card">
-          <div class="blog-sidebar-title"><i class="fas fa-user-pen"></i> লেখক</div>
-          <div style="padding:1rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:0.625rem;">
-            <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--honey),var(--honey-dark));display:flex;align-items:center;justify-content:center;color:white;font-size:1.1rem;font-weight:700;overflow:hidden;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.12);">
-              ${authorAvatar ? `<img src="${blogEsc(authorAvatar)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : authorInitials(authorName)}
-            </div>
-            <div>
-              <div style="font-weight:700;color:var(--navy);font-size:0.88rem;">${blogEsc(authorName)}</div>
-              ${authorBio ? `<div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px;line-height:1.5;">${blogEsc(authorBio.slice(0,100))}${authorBio.length>100?"…":""}</div>` : ""}
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>`;
-
-  // Wire TOC active state
-  setTimeout(() => { setupTOCObserver(); }, 400);
-}
-
-function scrollToHeading(id) {
-  const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function setupTOCObserver() {
-  const headings = document.querySelectorAll(".blog-article-body h2, .blog-article-body h3");
-  if (!headings.length) return;
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        document.querySelectorAll(".blog-toc-item").forEach(a => a.classList.remove("active"));
-        const tocItem = document.querySelector(`.blog-toc-item[onclick="scrollToHeading('${entry.target.id}')"]`);
-        if (tocItem) tocItem.classList.add("active");
+           <h1 class="blog-hero-title">
+             BeeHarvest <em>ব্লগ</em>
+           </h1>
+           <p class="blog-hero-sub">
+             প্রকৃতির সেরা উপহার থেকে শুরু করে সুস্বাস্থ্যের রহস্য — সব কিছু জানুন একসাথে।
+           </p>
+           <!-- Search bar -->
+           <div class="blog-search-bar" id="blogSearchBar">
+             <i class="fas fa-search"></i>
+             <input
+               type="text"
+               id="blogSearchInput"
+               placeholder="ব্লগ খুঁজুন..."
+               autocomplete="off"
+               spellcheck="false"
+             />
+             <button class="blog-search-clear" id="blogSearchClear" style="display:none">
+               <i class="fas fa-times"></i>
+             </button>
+             <div class="blog-search-shortcut">⌘K</div>
+           </div>
+           <!-- Stats -->
+           <div class="blog-hero-stats">
+             <div class="bhs-item">
+               <span class="bhs-num" id="blogStatPosts">—</span>
+               <span class="bhs-label">পোস্ট</span>
+             </div>
+             <div class="bhs-sep"></div>
+             <div class="bhs-item">
+               <span class="bhs-num" id="blogStatCats">—</span>
+               <span class="bhs-label">ক্যাটাগরি</span>
+             </div>
+             <div class="bhs-sep"></div>
+             <div class="bhs-item">
+               <span class="bhs-num" id="blogStatTags">—</span>
+               <span class="bhs-label">ট্যাগ</span>
+             </div>
+           </div>
+         </div>
+       </div>
+   
+       <!-- ── FILTERS BAR ─────────────────────────────────────── -->
+       <div class="blog-filters-bar" id="blogFiltersBar">
+         <div class="blog-filter-cats" id="blogFilterCats">
+           <button class="blog-cat-chip active" onclick="filterBlogByCategory('')">সব</button>
+         </div>
+         <div class="blog-filter-controls">
+           <div class="blog-sort-select">
+             <select id="blogSortSelect" onchange="onBlogSortChange(this.value)">
+               <option value="newest">সর্বশেষ</option>
+               <option value="oldest">পুরনো</option>
+               <option value="popular">জনপ্রিয়</option>
+               <option value="trending">ট্রেন্ডিং</option>
+             </select>
+             <i class="fas fa-chevron-down"></i>
+           </div>
+           <div class="blog-view-toggle">
+             <button class="bvt-btn active" id="bvt-grid" onclick="setBlogView('grid')" title="গ্রিড">
+               <i class="fas fa-grid-2"></i>
+             </button>
+             <button class="bvt-btn" id="bvt-list" onclick="setBlogView('list')" title="লিস্ট">
+               <i class="fas fa-list"></i>
+             </button>
+           </div>
+         </div>
+       </div>
+   
+       <!-- ── TAG CLOUD ──────────────────────────────────────── -->
+       <div class="blog-tag-cloud" id="blogTagCloud"></div>
+   
+       <!-- ── MAIN CONTENT AREA ──────────────────────────────── -->
+       <div class="blog-layout">
+         <!-- Posts grid -->
+         <div class="blog-posts-area">
+           <div class="blog-posts-header" id="blogPostsHeader">
+             <span class="bph-count" id="blogPostsCount"></span>
+             <div class="bph-active-filters" id="blogActiveFilters"></div>
+           </div>
+           <div class="blog-grid" id="blogGrid"></div>
+           <!-- Load more -->
+           <div class="blog-load-more-area" id="blogLoadMore" style="display:none">
+             <button class="blog-load-more-btn" onclick="loadMoreBlogs()">
+               <i class="fas fa-arrow-down"></i>
+               আরও পোস্ট দেখুন
+             </button>
+           </div>
+         </div>
+         <!-- Sidebar -->
+         <aside class="blog-sidebar" id="blogSidebar">
+           <div class="blog-sidebar-section">
+             <div class="bss-title"><i class="fas fa-fire"></i> ট্রেন্ডিং পোস্ট</div>
+             <div id="blogTrending" class="blog-trending-list">
+               ${skeletonTrending(3)}
+             </div>
+           </div>
+           <div class="blog-sidebar-section">
+             <div class="bss-title"><i class="fas fa-tags"></i> জনপ্রিয় ট্যাগ</div>
+             <div class="blog-sidebar-tags" id="blogSidebarTags"></div>
+           </div>
+           <div class="blog-sidebar-cta">
+             <div class="bsc-icon">🐝</div>
+             <div class="bsc-title">নিউজলেটার</div>
+             <div class="bsc-sub">সেরা আর্টিকেল সরাসরি আপনার ইনবক্সে পান।</div>
+             <div class="bsc-input-row">
+               <input type="email" id="blogNewsletterEmail" placeholder="আপনার ইমেইল..."/>
+               <button onclick="subscribeNewsletter()">সাবস্ক্রাইব</button>
+             </div>
+           </div>
+         </aside>
+       </div>
+   
+       <!-- ── SINGLE POST VIEW (overlay) ─────────────────────── -->
+       <div class="blog-post-overlay" id="blogPostOverlay">
+         <div class="bpo-inner">
+           <div class="bpo-top-bar">
+             <button class="bpo-back" onclick="closeBlogPost()">
+               <i class="fas fa-arrow-left"></i>
+               <span>ব্লগে ফিরুন</span>
+             </button>
+             <div class="bpo-top-actions">
+               <button class="bpo-action-btn" id="bpoLikeBtn" onclick="togglePostLike()">
+                 <i class="far fa-heart"></i>
+                 <span id="bpoLikeCount">0</span>
+               </button>
+               <button class="bpo-action-btn" onclick="sharePost()">
+                 <i class="fas fa-share-alt"></i>
+               </button>
+             </div>
+           </div>
+           <div class="bpo-content" id="bpoContent">
+             <!-- Rendered post goes here -->
+           </div>
+         </div>
+       </div>
+     `;
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      FETCH BLOGS
+   ════════════════════════════════════════════════════════════ */
+   async function fetchBlogs(page = 1, append = false) {
+     if (BlogState.loading) return;
+     BlogState.loading = true;
+   
+     const grid = document.getElementById("blogGrid");
+     if (!grid) return;
+   
+     if (!append) {
+       grid.innerHTML = skeletonBlogCards(6);
+       grid.classList.add("loading");
+     } else {
+       showBlogLoadingMore();
+     }
+   
+     try {
+       const params = new URLSearchParams({
+         page,
+         limit: 9,
+         sort: BlogState.sortBy,
+       });
+       if (BlogState.activeCategory) params.set("category", BlogState.activeCategory);
+       if (BlogState.activeTag) params.set("tag", BlogState.activeTag);
+       if (BlogState.searchQuery) params.set("search", BlogState.searchQuery);
+   
+       const res = await fetch(`${BLOG_API}?${params}`);
+       if (!res.ok) throw new Error("Failed");
+       const data = await res.json();
+   
+       BlogState.posts = append
+         ? [...BlogState.posts, ...(data.data || [])]
+         : data.data || [];
+       BlogState.page = page;
+       BlogState.totalPages = data.pagination?.pages || 1;
+   
+       renderBlogGrid(BlogState.posts, append);
+       updateBlogUI(data.pagination);
+       fetchTrending();
+     } catch (e) {
+       grid.innerHTML = `
+         <div class="blog-error-state">
+           <div class="bes-icon"><i class="fas fa-satellite-dish"></i></div>
+           <h3>সংযোগ সমস্যা</h3>
+           <p>ব্লগ লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।</p>
+           <button class="btn-primary" onclick="fetchBlogs(1)">
+             <i class="fas fa-redo"></i> রিট্রাই
+           </button>
+         </div>`;
+     } finally {
+       BlogState.loading = false;
+       const g = document.getElementById("blogGrid");
+       if (g) g.classList.remove("loading");
+       hideBlogLoadingMore();
+     }
+   }
+   
+   async function fetchBlogMeta() {
+     try {
+       const [catRes, tagRes] = await Promise.all([
+         fetch(`${BLOG_API}/meta/categories`),
+         fetch(`${BLOG_API}/meta/tags`),
+       ]);
+       const [catData, tagData] = await Promise.all([catRes.json(), tagRes.json()]);
+   
+       BlogState.categories = catData.data || [];
+       BlogState.tags = tagData.data || [];
+   
+       renderCategoryChips();
+       renderTagCloud();
+       renderSidebarTags();
+   
+       // Update hero stats
+       setText("blogStatCats", BlogState.categories.length);
+       setText("blogStatTags", BlogState.tags.length);
+     } catch (e) {
+       console.warn("Blog meta fetch failed", e);
+     }
+   }
+   
+   async function fetchTrending() {
+     try {
+       const res = await fetch(`${BLOG_API}?sort=popular&limit=5`);
+       const data = await res.json();
+       renderTrending(data.data || []);
+       setText("blogStatPosts", data.pagination?.total || BlogState.posts.length);
+     } catch (e) {}
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      RENDER — GRID
+   ════════════════════════════════════════════════════════════ */
+   function renderBlogGrid(posts, append = false) {
+     const grid = document.getElementById("blogGrid");
+     if (!grid) return;
+   
+     if (!posts || posts.length === 0) {
+       grid.innerHTML = `
+         <div class="blog-empty-state">
+           <div class="bes-icon"><i class="fas fa-newspaper"></i></div>
+           <h3>কোনো পোস্ট পাওয়া যায়নি</h3>
+           <p>অন্য কিওয়ার্ড বা ক্যাটাগরি দিয়ে চেষ্টা করুন।</p>
+           <button class="btn-ghost" onclick="resetBlogFilters()">
+             <i class="fas fa-refresh"></i> ফিল্টার রিসেট করুন
+           </button>
+         </div>`;
+       return;
+     }
+   
+     const isGrid = BlogState.viewMode === "grid";
+     const isList = BlogState.viewMode === "list";
+   
+     const cardsHtml = posts.map((post, idx) => renderBlogCard(post, idx, isList)).join("");
+   
+     if (append) {
+       grid.insertAdjacentHTML("beforeend", cardsHtml);
+     } else {
+       grid.className = `blog-grid ${isList ? "blog-grid-list" : ""}`;
+       grid.innerHTML = cardsHtml;
+     }
+   
+     // Add entrance animations
+     requestAnimationFrame(() => {
+       grid.querySelectorAll(".blog-card:not(.animated)").forEach((card, i) => {
+         card.style.animationDelay = `${i * 0.06}s`;
+         card.classList.add("animated");
+       });
+     });
+   }
+   
+   function renderBlogCard(post, idx = 0, isList = false) {
+     const img = post.coverImage?.url || "";
+     const cat = post.category || "";
+     const readTime = post.readingTime || Math.ceil((post.body?.length || 600) / 1000);
+     const isNew = isPostNew(post.publishedAt);
+     const isFeatured = post.isFeatured;
+     const isRead = BlogState.readPosts.includes(post._id);
+     const likeCount = post.likes || 0;
+     const views = formatBlogNum(post.views || 0);
+     const date = formatBlogDate(post.publishedAt || post.createdAt);
+     const excerpt = post.excerpt || "";
+   
+     const badge = isFeatured
+       ? `<span class="blog-card-badge bcb-featured"><i class="fas fa-crown"></i> ফিচার্ড</span>`
+       : isNew
+       ? `<span class="blog-card-badge bcb-new"><i class="fas fa-sparkles"></i> নতুন</span>`
+       : "";
+   
+     const readBadge = isRead
+       ? `<span class="blog-card-read-badge"><i class="fas fa-check"></i> পড়েছেন</span>`
+       : "";
+   
+     if (isList) {
+       return `
+         <div class="blog-card blog-card-list" onclick="openBlogPost('${post._id}')">
+           <div class="bcl-img-wrap">
+             ${img ? `<img src="${escBlog(img)}" alt="${escBlog(post.title)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'bcl-img-fallback\\'>🍯</div>'">` : `<div class="bcl-img-fallback">🍯</div>`}
+             ${badge}
+           </div>
+           <div class="bcl-body">
+             <div class="bcl-meta">
+               ${cat ? `<span class="blog-cat-tag">${escBlog(cat)}</span>` : ""}
+               <span class="blog-meta-dot"></span>
+               <span>${date}</span>
+               <span class="blog-meta-dot"></span>
+               <span><i class="fas fa-clock"></i> ${readTime} মিনিট</span>
+               ${readBadge}
+             </div>
+             <h3 class="bcl-title">${escBlog(post.title)}</h3>
+             <p class="bcl-excerpt">${escBlog(excerpt)}</p>
+             <div class="bcl-footer">
+               <div class="blog-author-mini">
+                 <div class="bam-avatar">${(post.author?.name || "B")[0]}</div>
+                 <span>${escBlog(post.author?.name || "BeeHarvest")}</span>
+               </div>
+               <div class="blog-stats-mini">
+                 <span><i class="fas fa-eye"></i> ${views}</span>
+                 <span><i class="fas fa-heart"></i> ${likeCount}</span>
+               </div>
+             </div>
+           </div>
+         </div>`;
+     }
+   
+     return `
+       <div class="blog-card" onclick="openBlogPost('${post._id}')">
+         <div class="blog-card-img">
+           ${img ? `<img src="${escBlog(img)}" alt="${escBlog(post.title)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'blog-card-img-fallback\\'>🍯</div>'">` : `<div class="blog-card-img-fallback">🍯</div>`}
+           <div class="blog-card-img-overlay"></div>
+           ${badge}
+           ${readBadge}
+           <div class="blog-card-cat-tag">${escBlog(cat)}</div>
+         </div>
+         <div class="blog-card-body">
+           <div class="blog-card-meta">
+             <span class="bcm-date"><i class="far fa-calendar"></i> ${date}</span>
+             <span class="bcm-dot"></span>
+             <span class="bcm-read"><i class="fas fa-clock"></i> ${readTime} মিনিট</span>
+           </div>
+           <h3 class="blog-card-title">${escBlog(post.title)}</h3>
+           <p class="blog-card-excerpt">${escBlog(excerpt)}</p>
+           <div class="blog-card-footer">
+             <div class="blog-author-mini">
+               <div class="bam-avatar">${(post.author?.name || "B")[0]}</div>
+               <span>${escBlog(post.author?.name || "BeeHarvest")}</span>
+             </div>
+             <div class="blog-stats-mini">
+               <span><i class="fas fa-eye"></i> ${views}</span>
+               <span><i class="far fa-heart"></i> ${likeCount}</span>
+             </div>
+           </div>
+         </div>
+       </div>`;
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      SINGLE POST VIEW
+   ════════════════════════════════════════════════════════════ */
+   window.openBlogPost = async function (postId) {
+    const overlay = document.getElementById("blogPostOverlay");
+    const content = document.getElementById("bpoContent");
+    if (!overlay || !content) return;
+  
+    if (!BlogState.readPosts.includes(postId)) {
+      BlogState.readPosts.push(postId);
+      localStorage.setItem("bh_read_posts", JSON.stringify(BlogState.readPosts));
+    }
+  
+    overlay.classList.add("active");
+    document.body.style.overflow = "hidden";
+    content.innerHTML = skeletonPostDetail();
+  
+    // Only push state if we aren't already in a post
+    if (!history.state?.blogPost) {
+      history.pushState({ blogPost: postId }, "", `?post=${postId}`);
+    } else {
+      history.replaceState({ blogPost: postId }, "", `?post=${postId}`);
+    }
+  
+    try {
+      const res = await fetch(`${BLOG_API}/${postId}`);
+      const data = await res.json();
+      if (!data.success || !data.data) throw new Error("Not found");
+      BlogState.currentPost = data.data;
+      renderPostDetail(data.data);
+    } catch (e) {
+      content.innerHTML = `
+        <div class="blog-error-state" style="margin:4rem auto;max-width:400px;text-align:center">
+          <div class="bes-icon"><i class="fas fa-file-slash"></i></div>
+          <h3>পোস্ট পাওয়া যায়নি</h3>
+          <button class="btn-primary" onclick="closeBlogPost()">ফিরে যান</button>
+        </div>`;
+    }
+  };
+   
+   function renderPostDetail(post) {
+     const content = document.getElementById("bpoContent");
+     if (!content) return;
+   
+     const isLiked = BlogState.likedPosts.includes(post._id);
+     const readTime = post.readingTime || 5;
+     const date = formatBlogDate(post.publishedAt || post.createdAt);
+     const tags = (post.tags || []).slice(0, 8);
+     const approvedComments = (post.comments || []).filter((c) => c.isApproved);
+   
+     // Update like button
+     const likeBtn = document.getElementById("bpoLikeBtn");
+     if (likeBtn) {
+       likeBtn.classList.toggle("liked", isLiked);
+       likeBtn.innerHTML = `<i class="${isLiked ? "fas" : "far"} fa-heart"></i><span>${post.likes || 0}</span>`;
+     }
+   
+     content.innerHTML = `
+       <article class="bpo-article">
+         <!-- Cover -->
+         ${post.coverImage?.url ? `
+           <div class="bpo-cover">
+             <img src="${escBlog(post.coverImage.url)}" alt="${escBlog(post.coverImage.alt || post.title)}" loading="eager">
+             <div class="bpo-cover-overlay"></div>
+           </div>` : ""}
+   
+         <!-- Header -->
+         <header class="bpo-header">
+           ${post.category ? `<div class="bpo-category">${escBlog(post.category)}</div>` : ""}
+           <h1 class="bpo-title">${escBlog(post.title)}</h1>
+           ${post.excerpt ? `<p class="bpo-lead">${escBlog(post.excerpt)}</p>` : ""}
+           <div class="bpo-meta-row">
+             <div class="bpo-author">
+               <div class="bpo-author-avatar">${(post.author?.name || "B")[0]}</div>
+               <div>
+                 <div class="bpo-author-name">${escBlog(post.author?.name || "BeeHarvest")}</div>
+                 ${post.author?.bio ? `<div class="bpo-author-bio">${escBlog(post.author.bio)}</div>` : ""}
+               </div>
+             </div>
+             <div class="bpo-stats">
+               <span><i class="far fa-calendar"></i> ${date}</span>
+               <span><i class="fas fa-clock"></i> ${readTime} মিনিট পড়া</span>
+               <span><i class="fas fa-eye"></i> ${formatBlogNum(post.views || 0)}</span>
+               <span><i class="fas fa-comments"></i> ${approvedComments.length}</span>
+             </div>
+           </div>
+           <!-- Tags -->
+           ${tags.length ? `
+             <div class="bpo-tags">
+               ${tags.map(t => `<span class="bpo-tag" onclick="filterBlogByTag('${t}');closeBlogPost()">#${escBlog(t)}</span>`).join("")}
+             </div>` : ""}
+           <!-- Reading progress -->
+           <div class="bpo-progress-bar"><div class="bpo-progress-fill" id="bpoProgress"></div></div>
+         </header>
+   
+         <!-- Body -->
+         <div class="bpo-body" id="bpoBody">
+           ${renderBlogBody(post.body)}
+         </div>
+   
+         <!-- Gallery -->
+         ${post.gallery?.length ? `
+           <div class="bpo-gallery">
+             <h3><i class="fas fa-images"></i> ফটো গ্যালারি</h3>
+             <div class="bpo-gallery-grid">
+               ${post.gallery.map(g => `<div class="bpo-gallery-item"><img src="${escBlog(g.url)}" alt="${escBlog(g.alt || "")}" loading="lazy" onclick="openGalleryImage('${escBlog(g.url)}')"></div>`).join("")}
+             </div>
+           </div>` : ""}
+   
+         <!-- Related products -->
+         ${post.relatedProducts?.length ? `
+           <div class="bpo-related-products">
+             <h3><i class="fas fa-box"></i> সম্পর্কিত পণ্য</h3>
+             <div class="bpo-rp-grid">
+               ${post.relatedProducts.map(p => `
+                 <div class="bpo-rp-card" onclick="viewProduct('${p._id}')">
+                   ${p.images?.[0]?.url ? `<img src="${escBlog(p.images[0].url)}" alt="${escBlog(p.name)}">` : `<div class="bpo-rp-placeholder">🍯</div>`}
+                   <div class="bpo-rp-name">${escBlog(p.name)}</div>
+                   <div class="bpo-rp-price">৳${(p.price || 0).toLocaleString()}</div>
+                 </div>`).join("")}
+             </div>
+           </div>` : ""}
+   
+         <!-- Engagement -->
+         <div class="bpo-engagement">
+           <button class="bpo-like-big ${isLiked ? "liked" : ""}" onclick="togglePostLike()">
+             <i class="${isLiked ? "fas" : "far"} fa-heart"></i>
+             <span>${isLiked ? "লাইক করেছেন" : "পোস্টটি পছন্দ হলে লাইক করুন"}</span>
+             <span class="bpo-like-count">${post.likes || 0}</span>
+           </button>
+           <div class="bpo-share-row">
+             <span>শেয়ার করুন:</span>
+             <button onclick="shareFacebook()" class="bpo-share-btn bpo-fb"><i class="fab fa-facebook-f"></i></button>
+             <button onclick="shareWhatsapp()" class="bpo-share-btn bpo-wa"><i class="fab fa-whatsapp"></i></button>
+             <button onclick="copyPostLink()" class="bpo-share-btn bpo-cp"><i class="fas fa-link"></i></button>
+           </div>
+         </div>
+   
+         <!-- Comments -->
+         ${post.allowComments !== false ? `
+           <div class="bpo-comments-section">
+             <h3 class="bpo-comments-title">
+               <i class="fas fa-comments"></i>
+               মন্তব্য
+               <span class="bpo-comment-count">${approvedComments.length}</span>
+             </h3>
+             <div class="bpo-comments-list" id="bpoCommentsList">
+               ${approvedComments.length === 0
+                 ? `<div class="bpo-no-comments"><i class="far fa-comment-dots"></i><p>এখনো কোনো মন্তব্য নেই। প্রথম মন্তব্য করুন!</p></div>`
+                 : approvedComments.map(c => renderComment(c)).join("")}
+             </div>
+             <!-- Comment form -->
+             <div class="bpo-comment-form">
+               <h4><i class="fas fa-pen"></i> মন্তব্য করুন</h4>
+               <div class="bcf-fields">
+                 <div class="bcf-row">
+                   <input type="text" id="bcfName" placeholder="আপনার নাম *" maxlength="80">
+                   <input type="email" id="bcfEmail" placeholder="ইমেইল * (প্রকাশ হবে না)" maxlength="100">
+                 </div>
+                 <textarea id="bcfBody" placeholder="আপনার মন্তব্য লিখুন..." rows="4" maxlength="1000"></textarea>
+                 <div class="bcf-footer">
+                   <span class="bcf-char-count" id="bcfCharCount">0/1000</span>
+                   <button class="btn-primary" onclick="submitBlogComment('${post._id}')">
+                     <i class="fas fa-paper-plane"></i> পাঠান
+                   </button>
+                 </div>
+               </div>
+               <div class="bcf-note"><i class="fas fa-info-circle"></i> মন্তব্য অনুমোদনের পর প্রকাশিত হবে।</div>
+             </div>
+           </div>` : `<div class="bpo-comments-disabled"><i class="fas fa-lock"></i> এই পোস্টে মন্তব্য বন্ধ আছে।</div>`}
+   
+         <!-- Related posts -->
+         ${post.relatedPosts?.length ? `
+           <div class="bpo-related-posts">
+             <h3><i class="fas fa-newspaper"></i> আরও পড়ুন</h3>
+             <div class="bpo-related-grid">
+               ${post.relatedPosts.map(rp => `
+                 <div class="bpo-related-card" onclick="openBlogPost('${rp._id || rp}')">
+                   ${rp.coverImage?.url ? `<img src="${escBlog(rp.coverImage.url)}" alt="${escBlog(rp.title || "")}">` : ""}
+                   <div class="bpo-rc-body">
+                     <div class="bpo-rc-date">${formatBlogDate(rp.publishedAt)}</div>
+                     <div class="bpo-rc-title">${escBlog(rp.title || "")}</div>
+                   </div>
+                 </div>`).join("")}
+             </div>
+           </div>` : ""}
+       </article>
+     `;
+   
+     // Init reading progress
+     initReadingProgress();
+   
+     // Init char counter
+     const bodyTA = document.getElementById("bcfBody");
+     const charCount = document.getElementById("bcfCharCount");
+     if (bodyTA && charCount) {
+       bodyTA.addEventListener("input", () => {
+         charCount.textContent = `${bodyTA.value.length}/1000`;
+       });
+     }
+   
+     // Scroll to top of overlay
+     const overlay = document.getElementById("blogPostOverlay");
+     if (overlay) overlay.scrollTop = 0;
+   }
+   
+   function renderComment(c) {
+     const date = formatBlogDate(c.approvedAt || c.createdAt);
+     return `
+       <div class="bpo-comment">
+         <div class="bpo-comment-avatar">${(c.author || "?")[0].toUpperCase()}</div>
+         <div class="bpo-comment-body">
+           <div class="bpo-comment-header">
+             <span class="bpc-author">${escBlog(c.author)}</span>
+             <span class="bpc-date">${date}</span>
+           </div>
+           <p class="bpc-text">${escBlog(c.body)}</p>
+         </div>
+       </div>`;
+   }
+   
+   function renderBlogBody(body) {
+     if (!body) return "<p>কোনো কন্টেন্ট নেই।</p>";
+     // If it's HTML already, render it; otherwise wrap in p tags
+     const isHtml = /<[a-z][\s\S]*>/i.test(body);
+     if (isHtml) return body;
+     // Simple text — convert newlines to paragraphs
+     return body.split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+   }
+   
+   window.closeBlogPost = function () {
+    const overlay = document.getElementById("blogPostOverlay");
+    if (overlay) overlay.classList.remove("active");
+    document.body.style.overflow = "";
+    BlogState.currentPost = null;
+    // Go back in history if we pushed a state for this post
+    if (history.state?.blogPost) {
+      history.back();
+    } else {
+      history.replaceState({}, "", window.location.pathname);
+    }
+  };
+   
+   /* ════════════════════════════════════════════════════════════
+      LIKE
+   ════════════════════════════════════════════════════════════ */
+   window.togglePostLike = async function () {
+     const post = BlogState.currentPost;
+     if (!post) return;
+   
+     const isLiked = BlogState.likedPosts.includes(post._id);
+     if (isLiked) {
+       showToast("আপনি ইতোমধ্যে এই পোস্টটি লাইক করেছেন", "info");
+       return;
+     }
+   
+     try {
+       const res = await fetch(`${BLOG_API}/${post._id}/like`, { method: "POST" });
+       const data = await res.json();
+       if (!data.success) throw new Error();
+   
+       BlogState.likedPosts.push(post._id);
+       localStorage.setItem("bh_liked_posts", JSON.stringify(BlogState.likedPosts));
+       BlogState.currentPost.likes = data.data.likes;
+   
+       // Update like button
+       const likeBtn = document.getElementById("bpoLikeBtn");
+       if (likeBtn) {
+         likeBtn.classList.add("liked");
+         likeBtn.innerHTML = `<i class="fas fa-heart"></i><span>${data.data.likes}</span>`;
+       }
+       // Update big like button
+       const bigLike = document.querySelector(".bpo-like-big");
+       if (bigLike) {
+         bigLike.classList.add("liked");
+         bigLike.innerHTML = `<i class="fas fa-heart"></i><span>লাইক করেছেন</span><span class="bpo-like-count">${data.data.likes}</span>`;
+       }
+       showToast("পোস্টটি লাইক করা হয়েছে ❤️", "success");
+     } catch (e) {
+       showToast("লাইক করতে সমস্যা হয়েছে", "error");
+     }
+   };
+   
+   /* ════════════════════════════════════════════════════════════
+      COMMENTS
+   ════════════════════════════════════════════════════════════ */
+   window.submitBlogComment = async function (postId) {
+     const author = document.getElementById("bcfName")?.value.trim();
+     const email = document.getElementById("bcfEmail")?.value.trim();
+     const body = document.getElementById("bcfBody")?.value.trim();
+   
+     if (!author || !email || !body) {
+       showToast("নাম, ইমেইল এবং মন্তব্য সব পূরণ করুন", "error");
+       return;
+     }
+     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+       showToast("সঠিক ইমেইল ঠিকানা দিন", "error");
+       return;
+     }
+   
+     const btn = document.querySelector(".bpo-comment-form .btn-primary");
+     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> পাঠানো হচ্ছে...'; }
+   
+     try {
+       const res = await fetch(`${BLOG_API}/${postId}/comments`, {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ author, email, body }),
+       });
+       const data = await res.json();
+       if (!data.success) throw new Error(data.message);
+   
+       document.getElementById("bcfName").value = "";
+       document.getElementById("bcfEmail").value = "";
+       document.getElementById("bcfBody").value = "";
+       document.getElementById("bcfCharCount").textContent = "0/1000";
+   
+       showToast("মন্তব্য পাঠানো হয়েছে! অনুমোদনের পর দেখা যাবে। ✅", "success");
+     } catch (e) {
+       showToast(e.message || "মন্তব্য পাঠাতে সমস্যা হয়েছে", "error");
+     } finally {
+       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> পাঠান'; }
+     }
+   };
+   
+   /* ════════════════════════════════════════════════════════════
+      FILTERS & SEARCH
+   ════════════════════════════════════════════════════════════ */
+   window.filterBlogByCategory = function (cat) {
+     BlogState.activeCategory = cat;
+     BlogState.activeTag = "";
+     BlogState.page = 1;
+     fetchBlogs(1);
+     // Update active chip
+     document.querySelectorAll(".blog-cat-chip").forEach((c) => {
+       c.classList.toggle("active", c.dataset.cat === cat || (cat === "" && !c.dataset.cat));
+     });
+     updateActiveFilters();
+   };
+   
+   window.filterBlogByTag = function (tag) {
+     BlogState.activeTag = tag === BlogState.activeTag ? "" : tag;
+     BlogState.page = 1;
+     fetchBlogs(1);
+     updateActiveFilters();
+     // Update tag cloud
+     document.querySelectorAll(".blog-tag-item, .bst-tag").forEach((t) => {
+       t.classList.toggle("active", t.dataset.tag === BlogState.activeTag);
+     });
+   };
+   
+   window.onBlogSortChange = function (val) {
+     BlogState.sortBy = val;
+     fetchBlogs(1);
+   };
+   
+   window.setBlogView = function (mode) {
+     BlogState.viewMode = mode;
+     document.getElementById("bvt-grid")?.classList.toggle("active", mode === "grid");
+     document.getElementById("bvt-list")?.classList.toggle("active", mode === "list");
+     renderBlogGrid(BlogState.posts);
+   };
+   
+   window.resetBlogFilters = function () {
+     BlogState.activeCategory = "";
+     BlogState.activeTag = "";
+     BlogState.searchQuery = "";
+     BlogState.sortBy = "newest";
+     const searchInput = document.getElementById("blogSearchInput");
+     if (searchInput) searchInput.value = "";
+     const sortSel = document.getElementById("blogSortSelect");
+     if (sortSel) sortSel.value = "newest";
+     document.querySelectorAll(".blog-cat-chip").forEach((c) => c.classList.remove("active"));
+     document.querySelector(".blog-cat-chip")?.classList.add("active");
+     fetchBlogs(1);
+     updateActiveFilters();
+   };
+   
+   window.loadMoreBlogs = function () {
+     if (BlogState.page < BlogState.totalPages) {
+       fetchBlogs(BlogState.page + 1, true);
+     }
+   };
+   
+   function initBlogSearch() {
+    const input = document.getElementById("blogSearchInput");
+    const clear = document.getElementById("blogSearchClear");
+    if (!input) return;
+  
+    let debounceTimer;
+    input.addEventListener("input", () => {
+      BlogState.searchQuery = input.value.trim();
+      clear.style.display = BlogState.searchQuery ? "flex" : "none";
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        fetchBlogs(1);
+        updateActiveFilters();
+        // Scroll to blog grid after search
+        scrollToBlogGrid();
+      }, 450);
+    });
+  
+    clear.addEventListener("click", () => {
+      input.value = "";
+      BlogState.searchQuery = "";
+      clear.style.display = "none";
+      fetchBlogs(1);
+      updateActiveFilters();
+    });
+  
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        if (document.getElementById("blogsPage")?.classList.contains("active")) {
+          input.focus();
+          input.select();
+        }
       }
     });
-  }, { rootMargin: "-80px 0px -70% 0px" });
-  headings.forEach(h => observer.observe(h));
-}
-
-function renderComment(c) {
-  return `
-    <div class="blog-comment-item">
-      <div class="blog-comment-author-row">
-        <div class="blog-comment-avatar">${authorInitials(c.author || "?")}</div>
-        <div>
-          <div class="blog-comment-author-name">${blogEsc(c.author || "বেনামী")}</div>
-          <div class="blog-comment-date">${blogDate(c.approvedAt || c.createdAt)}</div>
-        </div>
-      </div>
-      <div class="blog-comment-body">${blogEsc(c.body || "")}</div>
-    </div>`;
-}
-
-function updateCommentChar(el) {
-  const charEl = $b("commentChar");
-  if (charEl) charEl.textContent = `${bengaliNum(el.value.length)}/১০০০`;
-}
-
-/* ── Reading progress bar ───────────────────────────────── */
-let _scrollHandler = null;
-
-function startReadingProgress() {
-  const bar = $b("blogReadingProgress");
-  const fill = $b("blogReadingFill");
-  if (!bar || !fill) return;
-
-  bar.classList.add("active");
-
-  _scrollHandler = () => {
-    const body = $b("blogArticleBody");
-    if (!body) return;
-    const rect = body.getBoundingClientRect();
-    const total = body.offsetHeight;
-    const scrolled = Math.max(0, -rect.top);
-    const pct = Math.min(100, (scrolled / total) * 100);
-    fill.style.width = pct + "%";
-  };
-
-  window.addEventListener("scroll", _scrollHandler, { passive: true });
-}
-
-function stopReadingProgress() {
-  const bar = $b("blogReadingProgress");
-  if (bar) bar.classList.remove("active");
-  if (_scrollHandler) { window.removeEventListener("scroll", _scrollHandler); _scrollHandler = null; }
-}
-
-/* ── Like ───────────────────────────────────────────────── */
-async function likeBlogPost(id) {
-  const btn = $b("blogLikeBtn");
-  const countEl = $b("blogLikeCount");
-  if (!btn || !countEl) return;
-
-  const wasLiked = BlogState.likedPosts.includes(id);
-  if (wasLiked) {
-    BlogState.likedPosts = BlogState.likedPosts.filter(i => i !== id);
-    localStorage.setItem("bh_liked_blogs", JSON.stringify(BlogState.likedPosts));
-    btn.classList.remove("liked");
-    const icon = btn.querySelector("i");
-    if (icon) icon.className = "far fa-heart";
-    return;
   }
-
-  btn.disabled = true;
-  try {
-    const data = await blogFetch(`${BLOG_API}/${id}/like`, { method: "POST" });
-    countEl.textContent = bengaliNum(data.data?.likes || 0);
-    btn.classList.add("liked");
-    const icon = btn.querySelector("i");
-    if (icon) { icon.className = "fas fa-heart"; icon.style.transform = "scale(1.45)"; setTimeout(() => icon.style.transform = "", 300); }
-    BlogState.likedPosts.push(id);
-    localStorage.setItem("bh_liked_blogs", JSON.stringify(BlogState.likedPosts));
-    if (typeof showToast === "function") showToast("পোস্টটি পছন্দ করা হয়েছে! ❤️", "success");
-  } catch(e) {
-    if (typeof showToast === "function") showToast("পছন্দ করতে সমস্যা হয়েছে", "error");
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-/* ── Comment submit ─────────────────────────────────────── */
-async function submitBlogComment(postId) {
-  const nameEl = $b("commentName");
-  const emailEl = $b("commentEmail");
-  const bodyEl = $b("commentBody");
-  const btn = $b("commentSubmitBtn");
-
-  const author = nameEl?.value.trim();
-  const email = emailEl?.value.trim();
-  const body = bodyEl?.value.trim();
-
-  if (!author || !email || !body) {
-    if (typeof showToast === "function") showToast("সব তথ্য পূরণ করুন", "error");
-    return;
-  }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    if (typeof showToast === "function") showToast("সঠিক ইমেইল দিন", "error");
-    return;
-  }
-
-  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>'; }
-
-  try {
-    await blogFetch(`${BLOG_API}/${postId}/comments`, {
-      method: "POST",
-      body: JSON.stringify({ author, email, body }),
-    });
-    if (typeof showToast === "function") showToast("মন্তব্য পাঠানো হয়েছে! অনুমোদনের পরে দেখাবে।", "success");
-    if (nameEl) nameEl.value = "";
-    if (emailEl) emailEl.value = "";
-    if (bodyEl) bodyEl.value = "";
-    const charEl = $b("commentChar");
-    if (charEl) charEl.textContent = "০/১০০০";
-  } catch(e) {
-    if (typeof showToast === "function") showToast("সমস্যা: " + e.message, "error");
-  } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> মন্তব্য পাঠান'; }
-  }
-}
-
-/* ── Share — real production URL ────────────────────────── */
-function shareBlogPost(id, platform) {
-  const url = `${BLOG_SITE_URL}?blog=${id}`;
-  const text = "BeeHarvest ব্লগে এই দুর্দান্ত লেখাটি পড়ুন!";
-  let shareUrl = "";
-  if (platform === "facebook") shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-  else if (platform === "whatsapp") shareUrl = `https://wa.me/?text=${encodeURIComponent(text + " " + url)}`;
-  if (shareUrl) window.open(shareUrl, "_blank", "width=600,height=400");
-}
-
-async function copyBlogLink(id) {
-  const url = `${BLOG_SITE_URL}?blog=${id}`;
-  try {
-    await navigator.clipboard.writeText(url);
-    if (typeof showToast === "function") showToast("লিংক কপি হয়েছে! 📋", "success");
-  } catch {
-    const ta = document.createElement("textarea");
-    ta.value = url; ta.style.position = "fixed"; ta.style.opacity = "0";
-    document.body.appendChild(ta); ta.select(); document.execCommand("copy");
-    document.body.removeChild(ta);
-    if (typeof showToast === "function") showToast("লিংক কপি হয়েছে! 📋", "success");
-  }
-}
-
-/* ── Filter by tag ──────────────────────────────────────── */
-function filterBlogByTag(tag) {
-  BlogState.activeTag = tag;
-  BlogState.activeCategory = "";
-  BlogState.page = 1;
-  closeBlogDetail();
-  if (typeof navigateTo === "function") navigateTo("blogs");
-  loadBlogPosts();
-}
-
-/* ── URL param auto-open ────────────────────────────────── */
-(function checkBlogUrlParam() {
-  const params = new URLSearchParams(window.location.search);
-  const blogId = params.get("blog");
-  if (blogId) {
-    window.history.replaceState({}, "", window.location.pathname);
+  
+  function scrollToBlogGrid() {
+    const grid = document.getElementById("blogGrid");
+    if (!grid) return;
     setTimeout(() => {
-      if (typeof navigateTo === "function") navigateTo("blogs");
-      setTimeout(() => openBlogDetail(blogId), 500);
-    }, 700);
+      grid.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
   }
-})();
-
-/* ── Expose globals ─────────────────────────────────────── */
-window.initBlogPage        = initBlogPage;
-window.openBlogDetail      = openBlogDetail;
-window.closeBlogDetail     = closeBlogDetail;
-window.likeBlogPost        = likeBlogPost;
-window.submitBlogComment   = submitBlogComment;
-window.filterBlogByCategory = filterBlogByCategory;
-window.filterBlogByTag     = filterBlogByTag;
-window.goBlogPage          = goBlogPage;
-window.shareBlogPost       = shareBlogPost;
-window.copyBlogLink        = copyBlogLink;
-window.updateCommentChar   = updateCommentChar;
-window.clearBlogSearch     = clearBlogSearch;
-window.triggerBlogSearch   = triggerBlogSearch;
-window.setBlogFilter       = setBlogFilter;
-window.selectSuggestion    = selectSuggestion;
-window.scrollToHeading     = scrollToHeading;
-window.stopBlogRealtime    = stopBlogRealtime;
+   
+   function updateActiveFilters() {
+     const el = document.getElementById("blogActiveFilters");
+     if (!el) return;
+     const filters = [];
+     if (BlogState.activeCategory) filters.push(`<span class="baf-chip" onclick="filterBlogByCategory('')"><i class="fas fa-times"></i> ${escBlog(BlogState.activeCategory)}</span>`);
+     if (BlogState.activeTag) filters.push(`<span class="baf-chip" onclick="filterBlogByTag('${BlogState.activeTag}')"><i class="fas fa-times"></i> #${escBlog(BlogState.activeTag)}</span>`);
+     if (BlogState.searchQuery) filters.push(`<span class="baf-chip" onclick="resetBlogFilters()"><i class="fas fa-times"></i> "${escBlog(BlogState.searchQuery)}"</span>`);
+     el.innerHTML = filters.join("");
+   }
+   
+   function updateBlogUI(pagination) {
+     // Post count
+     if (pagination) {
+       setText("blogPostsCount", `${pagination.total || 0} টি পোস্ট পাওয়া গেছে`);
+       setText("blogStatPosts", pagination.total || 0);
+       const lm = document.getElementById("blogLoadMore");
+       if (lm) lm.style.display = pagination.hasNext ? "flex" : "none";
+     }
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      SIDEBAR RENDERS
+   ════════════════════════════════════════════════════════════ */
+   function renderCategoryChips() {
+     const cont = document.getElementById("blogFilterCats");
+     if (!cont) return;
+     const cats = BlogState.categories.slice(0, 8);
+     const allBtn = `<button class="blog-cat-chip active" data-cat="" onclick="filterBlogByCategory('')">সব</button>`;
+     cont.innerHTML = allBtn + cats.map(c =>
+       `<button class="blog-cat-chip" data-cat="${escBlog(c.name)}" onclick="filterBlogByCategory('${escBlog(c.name)}')">${escBlog(c.name)} <span class="bcc-count">${c.count}</span></button>`
+     ).join("");
+   }
+   
+   function renderTagCloud() {
+     const cont = document.getElementById("blogTagCloud");
+     if (!cont) return;
+     const tags = BlogState.tags.slice(0, 20);
+     if (!tags.length) { cont.style.display = "none"; return; }
+     cont.innerHTML = tags.map(t =>
+       `<button class="blog-tag-item" data-tag="${escBlog(t.tag)}" onclick="filterBlogByTag('${escBlog(t.tag)}')">#${escBlog(t.tag)} <span>${t.count}</span></button>`
+     ).join("");
+   }
+   
+   function renderSidebarTags() {
+     const cont = document.getElementById("blogSidebarTags");
+     if (!cont) return;
+     const tags = BlogState.tags.slice(0, 15);
+     cont.innerHTML = tags.map(t =>
+       `<button class="bst-tag" data-tag="${escBlog(t.tag)}" onclick="filterBlogByTag('${escBlog(t.tag)}')">#${escBlog(t.tag)}</button>`
+     ).join("");
+   }
+   
+   function renderTrending(posts) {
+     const cont = document.getElementById("blogTrending");
+     if (!cont) return;
+     if (!posts.length) { cont.innerHTML = "<p style='color:var(--text-muted);font-size:.8rem'>কোনো ট্রেন্ডিং পোস্ট নেই</p>"; return; }
+     cont.innerHTML = posts.slice(0, 5).map((p, i) => `
+       <div class="blog-trending-item" onclick="openBlogPost('${p._id}')">
+         <span class="bti-num">${String(i + 1).padStart(2, "0")}</span>
+         <div class="bti-body">
+           <div class="bti-title">${escBlog(p.title)}</div>
+           <div class="bti-meta"><i class="fas fa-eye"></i> ${formatBlogNum(p.views || 0)} · <i class="fas fa-heart"></i> ${p.likes || 0}</div>
+         </div>
+       </div>`).join("");
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      READING PROGRESS
+   ════════════════════════════════════════════════════════════ */
+   function initReadingProgress() {
+     const overlay = document.getElementById("blogPostOverlay");
+     const bar = document.getElementById("bpoProgress");
+     if (!overlay || !bar) return;
+   
+     overlay.addEventListener("scroll", () => {
+       const scrollTop = overlay.scrollTop;
+       const scrollHeight = overlay.scrollHeight - overlay.clientHeight;
+       const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+       bar.style.width = `${Math.min(100, progress)}%`;
+     }, { passive: true });
+   }
+   
+   function initBlogIntersectionObserver() {
+     // Lazy animate cards when they appear
+     const observer = new IntersectionObserver((entries) => {
+       entries.forEach(e => {
+         if (e.isIntersecting) {
+           e.target.classList.add("in-view");
+           observer.unobserve(e.target);
+         }
+       });
+     }, { threshold: 0.12 });
+   
+     const observe = () => {
+       document.querySelectorAll(".blog-card:not(.in-view)").forEach(c => observer.observe(c));
+     };
+   
+     // Re-observe after grid updates
+     const grid = document.getElementById("blogGrid");
+     if (grid) {
+       new MutationObserver(observe).observe(grid, { childList: true });
+     }
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      SHARE
+   ════════════════════════════════════════════════════════════ */
+   window.sharePost = function () {
+     const post = BlogState.currentPost;
+     if (!post) return;
+     if (navigator.share) {
+       navigator.share({ title: post.title, url: window.location.href });
+     } else {
+       copyPostLink();
+     }
+   };
+   
+   window.shareFacebook = function () {
+     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, "_blank");
+   };
+   
+   window.shareWhatsapp = function () {
+     const post = BlogState.currentPost;
+     window.open(`https://wa.me/?text=${encodeURIComponent((post?.title || "") + " " + window.location.href)}`, "_blank");
+   };
+   
+   window.copyPostLink = function () {
+     navigator.clipboard?.writeText(window.location.href).then(() => {
+       showToast("লিংক কপি হয়েছে! 🔗", "success");
+     });
+   };
+   
+   /* ════════════════════════════════════════════════════════════
+      GALLERY LIGHTBOX
+   ════════════════════════════════════════════════════════════ */
+   window.openGalleryImage = function (url) {
+     const lb = document.createElement("div");
+     lb.className = "blog-lightbox";
+     lb.innerHTML = `
+       <div class="blog-lb-backdrop" onclick="this.parentElement.remove()"></div>
+       <div class="blog-lb-img-wrap">
+         <img src="${escBlog(url)}" alt="Gallery image">
+         <button class="blog-lb-close" onclick="this.closest('.blog-lightbox').remove()">
+           <i class="fas fa-times"></i>
+         </button>
+       </div>`;
+     document.body.appendChild(lb);
+     requestAnimationFrame(() => lb.classList.add("active"));
+   };
+   
+   /* ════════════════════════════════════════════════════════════
+      NEWSLETTER
+   ════════════════════════════════════════════════════════════ */
+   window.subscribeNewsletter = function () {
+     const email = document.getElementById("blogNewsletterEmail")?.value.trim();
+     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+       showToast("সঠিক ইমেইল ঠিকানা দিন", "error");
+       return;
+     }
+     showToast("নিউজলেটার সাবস্ক্রিপশন সফল! 🐝", "success");
+     document.getElementById("blogNewsletterEmail").value = "";
+   };
+   
+   /* ════════════════════════════════════════════════════════════
+      LOADING HELPERS
+   ════════════════════════════════════════════════════════════ */
+   function showBlogLoadingMore() {
+     const btn = document.querySelector(".blog-load-more-btn");
+     if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে...';
+   }
+   
+   function hideBlogLoadingMore() {
+     const btn = document.querySelector(".blog-load-more-btn");
+     if (btn) btn.innerHTML = '<i class="fas fa-arrow-down"></i> আরও পোস্ট দেখুন';
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      SKELETONS
+   ════════════════════════════════════════════════════════════ */
+   function skeletonBlogCards(n) {
+     return Array(n).fill(0).map(() => `
+       <div class="blog-card blog-card-skeleton">
+         <div class="bcs-img"></div>
+         <div class="bcs-body">
+           <div class="bcs-line bcs-line-sm"></div>
+           <div class="bcs-line bcs-line-lg"></div>
+           <div class="bcs-line bcs-line-lg"></div>
+           <div class="bcs-line bcs-line-md"></div>
+           <div class="bcs-footer">
+             <div class="bcs-circle"></div>
+             <div class="bcs-line bcs-line-sm" style="width:80px"></div>
+           </div>
+         </div>
+       </div>`).join("");
+   }
+   
+   function skeletonTrending(n) {
+     return Array(n).fill(0).map(() => `
+       <div class="blog-trending-item blog-trending-skeleton">
+         <div class="bts-num"></div>
+         <div class="bts-body">
+           <div class="bts-line bts-lg"></div>
+           <div class="bts-line bts-sm"></div>
+         </div>
+       </div>`).join("");
+   }
+   
+   function skeletonPostDetail() {
+     return `
+       <div class="bpo-skeleton">
+         <div class="bpos-cover"></div>
+         <div class="bpos-content">
+           <div class="bpos-line bpos-cat"></div>
+           <div class="bpos-line bpos-title-1"></div>
+           <div class="bpos-line bpos-title-2"></div>
+           <div class="bpos-meta"></div>
+           ${Array(8).fill('<div class="bpos-line bpos-body"></div>').join("")}
+         </div>
+       </div>`;
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      HELPERS
+   ════════════════════════════════════════════════════════════ */
+   function escBlog(str) {
+     if (!str) return "";
+     return String(str)
+       .replace(/&/g, "&amp;")
+       .replace(/</g, "&lt;")
+       .replace(/>/g, "&gt;")
+       .replace(/"/g, "&quot;")
+       .replace(/'/g, "&#39;");
+   }
+   
+   function formatBlogDate(dateStr) {
+     if (!dateStr) return "";
+     const d = new Date(dateStr);
+     return d.toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
+   }
+   
+   function formatBlogNum(n) {
+     if (n >= 1000) return (n / 1000).toFixed(1) + "হা";
+     return String(n);
+   }
+   
+   function isPostNew(dateStr) {
+     if (!dateStr) return false;
+     const diff = Date.now() - new Date(dateStr).getTime();
+     return diff < 7 * 24 * 60 * 60 * 1000; // 7 days
+   }
+   
+   /* ════════════════════════════════════════════════════════════
+      HANDLE BACK BUTTON ON POST OVERLAY
+   ════════════════════════════════════════════════════════════ */
+   window.addEventListener("popstate", (e) => {
+    const overlay = document.getElementById("blogPostOverlay");
+    if (overlay?.classList.contains("active")) {
+      // User pressed browser back while post is open — close without pushing history again
+      overlay.classList.remove("active");
+      document.body.style.overflow = "";
+      BlogState.currentPost = null;
+    } else if (e.state?.blogPost) {
+      // Forward navigation to a post
+      openBlogPost(e.state.blogPost);
+    }
+  });
+   
+   /* ════════════════════════════════════════════════════════════
+      AUTO-OPEN FROM URL
+   ════════════════════════════════════════════════════════════ */
+   (function checkBlogAutoOpen() {
+     const params = new URLSearchParams(window.location.search);
+     const postId = params.get("post");
+     if (postId) {
+       setTimeout(() => {
+         navigateTo("blogs");
+         openBlogPost(postId);
+       }, 800);
+     }
+   })();
