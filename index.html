@@ -18,6 +18,7 @@
     />
     <link rel="stylesheet" href="css/layer.css" />
     <link rel="stylesheet" href="css/customer.css" />
+    <link rel="stylesheet" href="css/blog-premium.css" />
   </head>
   <body style="padding-bottom: 0 !important; margin-bottom: 0 !important;">
     <!-- ═══ LOADING OVERLAY ═══════════════════════════════════ -->
@@ -57,6 +58,9 @@
           <a href="#" class="nav-link" data-page="products"
             ><i class="fas fa-box"></i> পণ্য</a
           >
+          <a href="#" class="nav-link" data-page="blogs">
+            <i class="fas fa-newspaper"></i> ব্লগ
+          </a>
           <a href="#" class="nav-link" data-page="orders"
             ><i class="fas fa-satellite-dish"></i> অর্ডার ট্র্যাক</a
           >
@@ -66,6 +70,12 @@
         </div>
 
         <div class="nav-actions">
+          <button class="nav-link-blog-mobile" id="navBlogIconMobile" 
+  onclick="navigateTo('blogs')" 
+  title="ব্লগ পড়ুন"
+  aria-label="ব্লগ">
+  <i class="fas fa-newspaper"></i>
+</button>
           <button class="cart-btn" id="cartBtn" aria-label="কার্ট খুলুন">
             <i class="fas fa-shopping-cart"></i>
             <span>কার্ট</span>
@@ -436,6 +446,62 @@
           </h2>
         </div>
         <div id="userOrders" class="orders-list"></div>
+      </div>
+
+      <div class="page-content" id="blogsPage">
+ 
+        <!-- Hero -->
+        <div class="blog-hero">
+          <div class="blog-hero-badge">
+            <i class="fas fa-newspaper"></i> BeeHarvest ব্লগ
+          </div>
+          <h1>জ্ঞান, রেসিপি ও <span>স্বাস্থ্যের টিপস</span></h1>
+          <p>খাঁটি মধু, প্রাকৃতিক পণ্য, স্বাস্থ্যকর জীবনযাপন — আমাদের বিশেষজ্ঞদের লেখা পড়ুন।</p>
+        </div>
+       
+        <!-- Filters -->
+        <div class="blog-filters">
+          <div class="blog-search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="blogSearchInput" placeholder="ব্লগ খুঁজুন...">
+          </div>
+          <div class="blog-cat-pills" id="blogCategoryPills">
+            <!-- Populated by JS -->
+          </div>
+          <select class="blog-sort" id="blogSortSelect">
+            <option value="newest">সর্বশেষ</option>
+            <option value="oldest">সবচেয়ে পুরনো</option>
+            <option value="popular">সবচেয়ে জনপ্রিয়</option>
+            <option value="trending">ট্রেন্ডিং</option>
+          </select>
+        </div>
+       
+        <!-- Active Filters (JS populated) -->
+        <div class="bc-active-filters" id="blogActiveFilters" style="display:none"></div>
+       
+        <!-- Featured Hero (JS populated) -->
+        <div id="blogFeaturedZone"></div>
+       
+        <!-- Tags Cloud (JS populated) -->
+        <div id="blogTagsCloud"></div>
+       
+
+       
+       
+       
+        <!-- Pagination -->
+        <div class="pagination" id="blogPagination"></div>
+       
+        <!-- Empty State -->
+        <div class="bc-empty" id="blogEmpty" style="display:none">
+          <div class="bc-empty-icon">📝</div>
+          <h3>কোনো পোস্ট পাওয়া যায়নি</h3>
+          <p>ভিন্ন কীওয়ার্ড বা ফিল্টার দিয়ে চেষ্টা করুন</p>
+          <button class="btn-primary" onclick="BlogModule.resetFilters()">
+            <i class="fas fa-redo"></i> ফিল্টার রিসেট করুন
+          </button>
+        </div>
+       
       </div>
 
       <!-- ── PROFILE PAGE ───────────────────────────────────── -->
@@ -1077,6 +1143,7 @@
       </div>
     </div>
 
+
 <!-- ═══ PREMIUM GLASS BOTTOM NAV ════════════════════════════ -->
 <div class="premium-mobile-nav" id="premiumNav">
   <div class="pnav-pill">
@@ -1113,6 +1180,19 @@
       </div>
       <span class="pnav-label">কার্ট</span>
     </div>
+
+    <!-- <div class="pnav-item" data-page="blogs" onclick="navigateTo('blogs'); setPnavActive(this)">
+      <div class="pnav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </div>
+      <span class="pnav-label">ব্লগ</span>
+    </div> -->
 
     <div class="pnav-item" data-page="orders" onclick="navigateTo('orders'); setPnavActive(this)">
       <div class="pnav-icon">
@@ -1238,6 +1318,9 @@
         </button>
       </div>
     </div>
+    <button id="blogFabBtn" class="blog-fab-btn" onclick="navigateTo('blogs')" aria-label="ব্লগ পড়ুন">
+      <i class="fas fa-newspaper"></i>
+    </button>
     <!-- ═══ BEEHARVEST CHATBOT WIDGET ════════════════════════ -->
 <div id="beeChatFab" class="bee-fab" onclick="toggleBeeChat()" aria-label="চ্যাটবট খুলুন">
   <div class="bee-fab-ring"></div>
@@ -1569,6 +1652,7 @@
   })();
 </script>
 <script src="js/god-tracker.js"></script>
-    <script src="js/customer.js"></script>
+    <script src="js/customer.min.js"></script>
+    <script src="js/blog.min.js"></script>
   </body>
 </html>
