@@ -625,12 +625,12 @@ function resetOtp() {
           </div>`;
       }
   
-    async function downloadFile(transferId, fileId, url, name) {
+      async function downloadFile(transferId, fileId, url, name) {
         console.log("📥 Download requested:", { transferId, fileId, url, name });
         
         try {
-          // Track download first (don't await, let it happen in background)
-          fetch(`${API}/transfers/${transferId}/files/${fileId}/download`, {
+          // Track download
+          await fetch(`${API}/transfers/${transferId}/files/${fileId}/download`, {
             method: "POST",
           }).catch(err => console.warn("Track error:", err));
         } catch (_) {}
@@ -638,42 +638,21 @@ function resetOtp() {
         // Handle download
         if (url) {
           try {
-            // For Cloudinary URLs, force download
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = name || 'file';
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
+            // For Cloudinary, force download by adding ?download=1 or using fetch
+            let downloadUrl = url;
             
-            // Add download attribute and click
-            document.body.appendChild(link);
-            link.click();
-            
-            // Clean up
-            setTimeout(() => {
-              document.body.removeChild(link);
-            }, 100);
-            
-            showToastBT("ডাউনলোড শুরু হয়েছে", "success");
-          } catch (err) {
-            console.error("Download error:", err);
-            showToastBT("ডাউনলোড ব্যর্থ হয়েছে", "error");
-          }
-        } else {
-          // If no direct URL, fetch from API
-          try {
-            showToastBT("ফাইল লোড হচ্ছে...", "info");
-            
-            const response = await fetch(`${API}/transfers/${transferId}/files/${fileId}/download`, {
-              method: "GET",
-              headers: {
-                'Accept': 'application/octet-stream'
-              }
-            });
-            
-            if (!response.ok) {
-              throw new Error(`HTTP ${response.status}`);
+            // If it's a Cloudinary URL, add flags to force download
+            if (url.includes('cloudinary.com')) {
+              // Add fl_attachment flag to force download
+              const separator = url.includes('?') ? '&' : '?';
+              downloadUrl = url + separator + 'fl_attachment';
             }
+            
+            // Method 1: Use fetch to get blob then download
+            showToastBT("ফাইল ডাউনলোড হচ্ছে...", "info");
+            
+            const response = await fetch(downloadUrl);
+            if (!response.ok) throw new Error('Download failed');
             
             const blob = await response.blob();
             const blobUrl = URL.createObjectURL(blob);
@@ -685,11 +664,15 @@ function resetOtp() {
             document.body.removeChild(link);
             URL.revokeObjectURL(blobUrl);
             
-            showToastBT("ডাউনলোড শুরু হয়েছে", "success");
+            showToastBT("ডাউনলোড শুরু হয়েছে!", "success");
           } catch (err) {
-            console.error("Download via API failed:", err);
-            showToastBT("ডাউনলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।", "error");
+            console.error("Download error:", err);
+            // Fallback: open in new tab
+            window.open(url, '_blank');
+            showToastBT("ডাউনলোডের জন্য নতুন ট্যাব খোলা হয়েছে", "info");
           }
+        } else {
+          showToastBT("ডাউনলোড URL পাওয়া যায়নি", "error");
         }
       }
   
