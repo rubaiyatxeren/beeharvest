@@ -6670,15 +6670,15 @@ body.modal-open {
     }
   
     /* ── Rating: hide on mobile to save space ──────────────── */
-    .pc-rating-row {
+    /* .pc-rating-row {
       display: none !important;
-    }
+    } */
   
     /* ── Price block ───────────────────────────────────────── */
     .pc-price-main {
       align-items: baseline !important;
       flex-wrap: wrap !important;
-      gap: 2px !important;
+      gap: 1.2px !important;
     }
   
     .pc-price-currency {
