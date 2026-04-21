@@ -18,6 +18,7 @@
     />
     <link rel="stylesheet" href="css/layer.css" />
     <link rel="stylesheet" href="css/customer.css" />
+    <link rel="stylesheet" href="css/beetransfer.css" />
     <link rel="stylesheet" href="css/blog-premium.css" />
   </head>
   <body style="padding-bottom: 0 !important; margin-bottom: 0 !important;">
@@ -71,11 +72,18 @@
 
         <div class="nav-actions">
           <button class="nav-link-blog-mobile" id="navBlogIconMobile" 
-  onclick="navigateTo('blogs')" 
-  title="ব্লগ পড়ুন"
-  aria-label="ব্লগ">
-  <i class="fas fa-newspaper"></i>
-</button>
+            onclick="navigateTo('blogs')" 
+            title="ব্লগ পড়ুন"
+            aria-label="ব্লগ">
+            <i class="fas fa-newspaper"></i>
+          </button>
+          
+          <!-- Send button - visible on desktop, hidden on mobile (will be shown in mobile nav) -->
+          <button class="bt-nav-btn desktop-only" onclick="navigateTo('transfer')" title="ফাইল ট্রান্সফার করুন">
+            <i class="fas fa-paper-plane"></i>
+            <span>ফাইল পাঠান</span>
+          </button>
+        
           <button class="cart-btn" id="cartBtn" aria-label="কার্ট খুলুন">
             <i class="fas fa-shopping-cart"></i>
             <span>কার্ট</span>
@@ -83,7 +91,7 @@
           </button>
           <div class="user-avatar-btn">
             <img
-            loading="lazy" 
+              loading="lazy" 
               src="https://icons.veryicon.com/png/o/miscellaneous/user-avatar/user-avatar-male-5.png"
               alt="ব্যবহারকারী"
               id="userAvatar"
@@ -504,6 +512,162 @@
        
       </div>
 
+      <div class="page-content" id="transferPage">
+        <div class="page-header">
+          <h2>
+            <i class="fas fa-paper-plane" style="color:var(--honey);margin-right:10px;"></i>
+            BeeTransfer — ফাইল পাঠান
+          </h2>
+        </div>
+       
+        <!-- Hero -->
+        <div class="bt-hero">
+          <div class="bt-hero-inner">
+            <div class="bt-hero-left">
+              <div class="bt-hero-badge">
+                <i class="fas fa-shield-halved"></i> নিরাপদ ও এনক্রিপ্টেড
+              </div>
+              <h1>সহজে ফাইল পাঠান,<br><span>নিরাপদে।</span></h1>
+              <p>যেকোনো ফাইল — ছবি, ডকুমেন্ট, ভিডিও — সরাসরি ইমেইলে পাঠান। OTP যাচাইকরণ, ৭ দিনের মেয়াদ।</p>
+              <div class="bt-hero-cta">
+                <button class="bt-btn bt-btn--honey" onclick="BeeTransfer.openModal()">
+                  <i class="fas fa-paper-plane"></i> এখনই ফাইল পাঠান
+                </button>
+                <button class="bt-btn bt-btn--ghost" style="background:rgba(255,255,255,0.1);color:white;" onclick="document.getElementById('bt-track-section').scrollIntoView({behavior:'smooth'})">
+                  <i class="fas fa-search"></i> ট্রান্সফার খুঁজুন
+                </button>
+              </div>
+            </div>
+            <div class="bt-hero-stats">
+              <div class="bt-hero-stat">
+                <div class="bt-hero-stat-num">১৫MB</div>
+                <div class="bt-hero-stat-label">প্রতি ফাইল সীমা</div>
+              </div>
+              <div class="bt-hero-stat">
+                <div class="bt-hero-stat-num">১০টি</div>
+                <div class="bt-hero-stat-label">একসাথে ফাইল</div>
+              </div>
+              <div class="bt-hero-stat">
+                <div class="bt-hero-stat-num">৭ দিন</div>
+                <div class="bt-hero-stat-label">লিংকের মেয়াদ</div>
+              </div>
+            </div>
+          </div>
+        </div>
+       
+        <!-- Feature Cards -->
+        <div class="bt-features">
+          <div class="bt-feature-card">
+            <div class="bt-feature-icon"><i class="fas fa-lock"></i></div>
+            <div>
+              <div class="bt-feature-title">OTP সুরক্ষা</div>
+              <div class="bt-feature-desc">প্রতিটি ট্রান্সফার আপনার ইমেইলে পাঠানো OTP দিয়ে যাচাই করা হয়</div>
+            </div>
+          </div>
+          <div class="bt-feature-card">
+            <div class="bt-feature-icon"><i class="fas fa-bolt"></i></div>
+            <div>
+              <div class="bt-feature-title">তাৎক্ষণিক ডেলিভারি</div>
+              <div class="bt-feature-desc">যাচাইয়ের পরেই প্রাপকের ইমেইলে ডাউনলোড লিংক পৌঁছে যায়</div>
+            </div>
+          </div>
+          <div class="bt-feature-card">
+            <div class="bt-feature-icon"><i class="fas fa-file-arrow-up"></i></div>
+            <div>
+              <div class="bt-feature-title">সব ধরনের ফাইল</div>
+              <div class="bt-feature-desc">PDF, Word, Excel, ছবি, ভিডিও, ZIP — যেকোনো ফরম্যাট সমর্থিত</div>
+            </div>
+          </div>
+          <div class="bt-feature-card">
+            <div class="bt-feature-icon"><i class="fas fa-clock-rotate-left"></i></div>
+            <div>
+              <div class="bt-feature-title">স্বয়ংক্রিয় মুছে যায়</div>
+              <div class="bt-feature-desc">৭ দিন পর ফাইলগুলো স্বয়ংক্রিয়ভাবে সার্ভার থেকে মুছে যায়</div>
+            </div>
+          </div>
+        </div>
+       
+        <!-- Main Content -->
+        <div class="bt-page-layout">
+       
+          <!-- Send Card -->
+          <div class="bt-send-card">
+            <div class="bt-send-card-header">
+              <div class="bt-send-card-header-icon"><i class="fas fa-paper-plane"></i></div>
+              <div>
+                <div class="bt-send-card-header-text">নতুন ফাইল ট্রান্সফার</div>
+                <div class="bt-send-card-header-sub">ফাইল আপলোড করুন এবং প্রাপকের ইমেইল দিন</div>
+              </div>
+            </div>
+            <div class="bt-send-card-body">
+              <p style="font-size:0.875rem;color:#6B7A99;margin-bottom:1.25rem;line-height:1.6;">
+                ফাইল পাঠাতে নিচের বোতামে ক্লিক করুন। একটি সহজ ফর্ম পূরণ করুন এবং OTP যাচাই করলেই প্রাপকের কাছে পৌঁছে যাবে।
+              </p>
+              <button class="bt-btn bt-btn--primary" onclick="BeeTransfer.openModal()">
+                <i class="fas fa-paper-plane"></i> ফাইল ট্রান্সফার শুরু করুন
+              </button>
+            </div>
+          </div>
+       
+          <!-- Track Section -->
+          <div class="bt-track-section" id="bt-track-section">
+            <div class="bt-track-title">
+              <i class="fas fa-search"></i> ট্রান্সফার ট্র্যাক করুন
+            </div>
+            <p style="font-size:0.82rem;color:#6B7A99;margin-bottom:1rem;">ট্রান্সফার আইডি দিয়ে আপনার পাঠানো ফাইল খুঁজুন</p>
+            <div class="bt-track-row">
+              <input 
+                type="text" 
+                class="bt-track-input" 
+                id="bt-track-input-page" 
+                placeholder="BT-20250421-A3F7K" 
+                autocomplete="off" 
+                spellcheck="false"
+                onkeydown="if(event.key==='Enter') BeeTransfer.goToDownload()"
+              />
+              <button class="bt-btn bt-btn--honey bt-btn--sm" onclick="BeeTransfer.goToDownload()" style="white-space:nowrap;padding:10px 18px;">
+                <i class="fas fa-search"></i> খুঁজুন
+              </button>
+            </div>
+          </div>
+       
+          <!-- Download Area (hidden until used) -->
+          <div id="bt-download-page" data-transfer-id="" style="display:none;"></div>
+       
+          <!-- How it works -->
+          <div class="bt-how-it-works">
+            <div class="bt-how-title">
+              <i class="fas fa-circle-question"></i> কীভাবে কাজ করে?
+            </div>
+            <div class="bt-how-steps">
+              <div class="bt-how-step">
+                <div class="bt-how-step-num">১</div>
+                <div>
+                  <div class="bt-how-step-title">ফাইল বাছুন ও তথ্য দিন</div>
+                  <div class="bt-how-step-desc">আপনার ও প্রাপকের ইমেইল দিন, সর্বোচ্চ ১০টি ফাইল (প্রতিটি ১৫MB পর্যন্ত) যোগ করুন।</div>
+                </div>
+              </div>
+              <div class="bt-how-step">
+                <div class="bt-how-step-num">২</div>
+                <div>
+                  <div class="bt-how-step-title">OTP যাচাই করুন</div>
+                  <div class="bt-how-step-desc">আপনার ইমেইলে ৬-সংখ্যার OTP পাঠানো হবে। ১০ মিনিটের মধ্যে যাচাই করুন।</div>
+                </div>
+              </div>
+              <div class="bt-how-step">
+                <div class="bt-how-step-num">৩</div>
+                <div>
+                  <div class="bt-how-step-title">প্রাপক ডাউনলোড করবেন</div>
+                  <div class="bt-how-step-desc">প্রাপকের ইমেইলে একটি ডাউনলোড লিংক যাবে। ৭ দিনের মধ্যে ডাউনলোড করা যাবে।</div>
+                </div>
+              </div>
+            </div>
+          </div>
+       
+        </div><!-- end bt-page-layout -->
+       
+      </div><!-- end transferPage -->
+
       <!-- ── PROFILE PAGE ───────────────────────────────────── -->
       <div class="page-content" id="profilePage">
         <div class="page-header">
@@ -545,6 +709,227 @@
     </button>
   </div>
 </div>
+
+<!-- ═══════════════════════════════════
+  TRANSFER MODAL — add before </body>
+═══════════════════════════════════ -->
+<div class="bt-modal" id="bt-modal">
+  <div class="bt-modal-box">
+    
+    <!-- Header -->
+    <div class="bt-modal-header">
+      <div class="bt-modal-title">
+        <div class="bt-modal-title-icon">🐝</div>
+        BeeTransfer
+      </div>
+      <button class="bt-modal-close" onclick="BeeTransfer.closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+ 
+    <div class="bt-modal-body">
+ 
+      <!-- Step Indicators -->
+      <div class="bt-step-indicators">
+        <div class="bt-step-ind active" id="bt-ind-form">
+          <div class="bt-step-ind-wrapper">
+            <div class="bt-step-ind-dot">১</div>
+            <div class="bt-step-ind-label">তথ্য ও ফাইল</div>
+          </div>
+        </div>
+        <div class="bt-step-ind-connector" id="bt-conn-1"></div>
+        <div class="bt-step-ind" id="bt-ind-otp">
+          <div class="bt-step-ind-wrapper">
+            <div class="bt-step-ind-dot">২</div>
+            <div class="bt-step-ind-label">OTP যাচাই</div>
+          </div>
+        </div>
+        <div class="bt-step-ind-connector" id="bt-conn-2"></div>
+        <div class="bt-step-ind" id="bt-ind-success">
+          <div class="bt-step-ind-wrapper">
+            <div class="bt-step-ind-dot">✓</div>
+            <div class="bt-step-ind-label">সম্পন্ন</div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- ── STEP 1: FORM ── -->
+      <div id="bt-step-form">
+ 
+        <!-- Sender info -->
+        <div class="bt-section-title">
+          <i class="fas fa-user"></i> আপনার তথ্য (প্রেরক)
+        </div>
+        <div class="bt-form-row">
+          <div class="bt-form-group">
+            <label>ইমেইল ঠিকানা *</label>
+            <input type="email" id="bt-sender-email" placeholder="আপনার ইমেইল" autocomplete="email" />
+            <div id="bt-sender-email-msg" class="bt-field-msg"></div>
+          </div>
+          <div class="bt-form-group">
+            <label>আপনার নাম (ঐচ্ছিক)</label>
+            <input type="text" id="bt-sender-name" placeholder="আপনার নাম" autocomplete="name" />
+          </div>
+        </div>
+ 
+        <div class="bt-divider"></div>
+ 
+        <!-- Receiver info -->
+        <div class="bt-section-title">
+          <i class="fas fa-user-check"></i> প্রাপকের তথ্য
+        </div>
+        <div class="bt-form-row">
+          <div class="bt-form-group">
+            <label>প্রাপকের ইমেইল *</label>
+            <input type="email" id="bt-receiver-email" placeholder="প্রাপকের ইমেইল" autocomplete="off" />
+            <div id="bt-receiver-email-msg" class="bt-field-msg"></div>
+          </div>
+          <div class="bt-form-group">
+            <label>প্রাপকের নাম (ঐচ্ছিক)</label>
+            <input type="text" id="bt-receiver-name" placeholder="প্রাপকের নাম" autocomplete="off" />
+          </div>
+        </div>
+ 
+        <div class="bt-form-group">
+          <label>বার্তা (ঐচ্ছিক)</label>
+          <textarea id="bt-message" placeholder="প্রাপকের জন্য কোনো বার্তা..." rows="2" maxlength="500"></textarea>
+        </div>
+ 
+        <div class="bt-divider"></div>
+ 
+        <!-- File Dropzone -->
+        <div class="bt-section-title">
+          <i class="fas fa-paperclip"></i> ফাইল যোগ করুন (সর্বোচ্চ ১০টি, প্রতিটি ১৫MB)
+        </div>
+        <div class="bt-dropzone-section">
+          <div class="bt-dropzone" id="bt-dropzone">
+            <div class="bt-dropzone-placeholder" id="bt-dropzone-placeholder">
+              <div class="bt-dropzone-placeholder-icon">
+                <i class="fas fa-cloud-arrow-up"></i>
+              </div>
+              <h4>ফাইল টেনে ছেড়ে দিন</h4>
+              <p>অথবা নিচের বোতামে ক্লিক করে ফাইল বাছুন</p>
+              <button class="bt-dropzone-browse-btn" onclick="event.stopPropagation(); document.getElementById('bt-file-input').click()">
+                <i class="fas fa-folder-open"></i> ফাইল বাছুন
+              </button>
+            </div>
+            <div class="bt-file-list" id="bt-file-list"></div>
+            <div class="bt-file-counter" id="bt-file-counter"></div>
+          </div>
+          <input type="file" id="bt-file-input" multiple style="display:none;" accept="*/*" />
+        </div>
+ 
+        <!-- Form Message -->
+        <div id="bt-form-msg" class="bt-form-msg"></div>
+ 
+        <!-- Submit Button -->
+        <button class="bt-btn bt-btn--primary" id="bt-send-btn" onclick="BeeTransfer.initiate()" disabled>
+          <i class="fas fa-paper-plane"></i> ফাইল পাঠান ও OTP নিন
+        </button>
+ 
+        <p style="font-size:0.72rem;color:#A0ABBE;text-align:center;margin-top:0.75rem;line-height:1.5;">
+          <i class="fas fa-lock" style="color:#C47F11;"></i>
+          আপনার ইমেইলে একটি OTP পাঠানো হবে। OTP যাচাই করলেই প্রাপকের কাছে ফাইল পৌঁছাবে।
+        </p>
+      </div>
+ 
+      <!-- ── STEP 2: OTP ── -->
+      <div id="bt-step-otp" style="display:none;">
+        <div class="bt-otp-info">
+          <div class="bt-otp-info-email">
+            OTP পাঠানো হয়েছে: <strong id="bt-otp-email"></strong>
+          </div>
+          <div class="bt-otp-info-tid" id="bt-otp-transfer-id"></div>
+        </div>
+ 
+        <div class="bt-otp-label">
+          আপনার ইমেইল চেক করুন এবং ৬-সংখ্যার OTP নিচে লিখুন
+        </div>
+ 
+        <div class="bt-otp-inputs">
+          <input type="tel" class="bt-otp-input" maxlength="1" inputmode="numeric" placeholder="·" />
+          <input type="tel" class="bt-otp-input" maxlength="1" inputmode="numeric" placeholder="·" />
+          <input type="tel" class="bt-otp-input" maxlength="1" inputmode="numeric" placeholder="·" />
+          <input type="tel" class="bt-otp-input" maxlength="1" inputmode="numeric" placeholder="·" />
+          <input type="tel" class="bt-otp-input" maxlength="1" inputmode="numeric" placeholder="·" />
+          <input type="tel" class="bt-otp-input" maxlength="1" inputmode="numeric" placeholder="·" />
+        </div>
+ 
+        <div class="bt-otp-timer-row">
+          <span>OTP মেয়াদ শেষ হবে:</span>
+          <span class="bt-otp-timer" id="bt-otp-timer">10:00</span>
+        </div>
+ 
+        <div class="bt-otp-warning">
+          ⚠️ এই OTP কোড <strong>কারো সাথে শেয়ার করবেন না।</strong> BeeTransfer কখনো আপনার OTP জিজ্ঞেস করবে না।
+        </div>
+ 
+        <!-- OTP Message -->
+        <div id="bt-otp-msg" class="bt-form-msg" style="margin-bottom:1rem;"></div>
+ 
+        <button class="bt-btn bt-btn--primary" id="bt-verify-btn" onclick="BeeTransfer.verifyOtp()">
+          <i class="fas fa-check-circle"></i> OTP যাচাই করুন
+        </button>
+ 
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;flex-wrap:wrap;gap:0.5rem;">
+          <button class="bt-btn bt-btn--ghost bt-btn--sm" id="bt-resend-btn" onclick="BeeTransfer.resendOtp()">
+            <i class="fas fa-rotate-right"></i> নতুন OTP পাঠান
+          </button>
+          <button class="bt-btn bt-btn--ghost bt-btn--sm" onclick="BeeTransfer.showStep('form'); BeeTransfer.resetOtp()">
+            <i class="fas fa-arrow-left"></i> পিছনে যান
+          </button>
+        </div>
+      </div>
+ 
+      <!-- ── STEP 3: SUCCESS ── -->
+      <div id="bt-step-success" style="display:none;">
+        <div class="bt-success">
+          <div class="bt-success-icon">
+            <i class="fas fa-paper-plane"></i>
+          </div>
+          <h3>ফাইল সফলভাবে পাঠানো হয়েছে!</h3>
+          <p>প্রাপকের ইমেইলে একটি ডাউনলোড লিংক পাঠানো হয়েছে। আপনিও একটি কনফার্মেশন পাবেন।</p>
+ 
+          <div class="bt-success-card">
+            <div class="bt-success-card-row">
+              <span class="bt-success-card-label">ট্রান্সফার আইডি</span>
+              <span class="bt-success-card-value" id="bt-success-transfer-id"></span>
+            </div>
+            <div class="bt-success-card-row">
+              <span class="bt-success-card-label">প্রাপক</span>
+              <span class="bt-success-card-value" id="bt-success-receiver"></span>
+            </div>
+            <div class="bt-success-card-row">
+              <span class="bt-success-card-label">ফাইল</span>
+              <span class="bt-success-card-value" id="bt-success-files-count"></span>
+            </div>
+            <div class="bt-success-card-row">
+              <span class="bt-success-card-label">মোট সাইজ</span>
+              <span class="bt-success-card-value" id="bt-success-total-size"></span>
+            </div>
+            <div class="bt-success-card-row">
+              <span class="bt-success-card-label">মেয়াদ শেষ</span>
+              <span class="bt-success-card-value" id="bt-success-expiry"></span>
+            </div>
+          </div>
+ 
+          <div class="bt-success-actions">
+            <button class="bt-btn bt-btn--honey" onclick="BeeTransfer.closeModal(); BeeTransfer.showDownloadSection(document.getElementById('bt-success-transfer-id').textContent)">
+              <i class="fas fa-download"></i> ডাউনলোড পেজ দেখুন
+            </button>
+            <button class="bt-btn bt-btn--ghost bt-btn--full" onclick="BeeTransfer.resetForm(); BeeTransfer.openModal()">
+              <i class="fas fa-plus"></i> আরেকটি ট্রান্সফার করুন
+            </button>
+            <button class="bt-btn bt-btn--ghost bt-btn--full" onclick="BeeTransfer.closeModal()">
+              <i class="fas fa-check"></i> সম্পন্ন
+            </button>
+          </div>
+        </div>
+      </div>
+ 
+    </div><!-- end bt-modal-body -->
+  </div><!-- end bt-modal-box -->
+</div><!-- end bt-modal -->
 
     <!-- ═══ CHECKOUT MODAL ════════════════════════════════════ -->
     <div class="modal" id="checkoutModal">
@@ -1194,6 +1579,16 @@
       <span class="pnav-label">ব্লগ</span>
     </div> -->
 
+    <div class="pnav-item" data-page="transfer" onclick="navigateTo('transfer'); setPnavActive(this)">
+      <div class="pnav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </div>
+      <span class="pnav-label">পাঠান</span>
+    </div>
+
     <div class="pnav-item" data-page="orders" onclick="navigateTo('orders'); setPnavActive(this)">
       <div class="pnav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
@@ -1651,8 +2046,46 @@
     }
   })();
 </script>
+<script>
+  // Handle direct email links (when user clicks download link from email)
+  (function() {
+    // Check URL for transfer parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    let transferId = urlParams.get('transfer') || urlParams.get('id');
+    
+    // Check hash
+    if (!transferId && window.location.hash.includes('transfer/')) {
+      transferId = window.location.hash.split('transfer/')[1];
+    }
+    
+    // Check localStorage for pending transfer
+    const pendingTransfer = localStorage.getItem('pending_transfer_download');
+    if (pendingTransfer && !transferId) {
+      transferId = pendingTransfer;
+      localStorage.removeItem('pending_transfer_download');
+    }
+    
+    if (transferId) {
+      console.log('📧 Direct email link detected:', transferId);
+      // Store for later
+      localStorage.setItem('auto_open_transfer', transferId);
+      
+      // If BeeTransfer is loaded, show download
+      if (typeof BeeTransfer !== 'undefined' && BeeTransfer.showDownloadSection) {
+        setTimeout(() => {
+          BeeTransfer.showDownloadSection(transferId);
+          // Also navigate to transfer page
+          if (typeof navigateTo === 'function') {
+            navigateTo('transfer');
+          }
+        }, 500);
+      }
+    }
+  })();
+  </script>
 <script src="js/god-tracker.js"></script>
-    <script src="js/customer.min.js"></script>
+    <script src="js/customer.js"></script>
     <script src="js/blog.js"></script>
+    <script src="js/beetransfer.js"></script>
   </body>
 </html>
