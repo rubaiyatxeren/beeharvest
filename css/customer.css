@@ -2634,7 +2634,7 @@
 
 .pnav-pill {
   width: 100%;
-  max-width: 420px;
+  max-width: 430px;
   background: rgba(13, 27, 62, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.13);
   backdrop-filter: blur(28px) saturate(1.8);
@@ -8243,3 +8243,49 @@ body { padding-bottom: 0; }
 .pnav-item[data-page="transfer"] {
   display: flex;
 }
+
+/* Ensure send button is visible on all devices */
+.bt-nav-btn {
+  display: inline-flex !important;
+}
+
+/* Adjust navbar for mobile to accommodate send button */
+@media (max-width: 768px) {
+  .nav-actions {
+    gap: 0.5rem;
+  }
+  
+  .bt-nav-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+  
+  .bt-nav-btn span {
+    display: inline; /* Keep text on mobile */
+  }
+  
+  /* Hide the "কার্ট" text on mobile to save space */
+  .cart-btn span {
+    display: none;
+  }
+  
+  .cart-btn {
+    padding: 0.5rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bt-nav-btn span {
+    display: none; /* Hide text on very small screens, show only icon */
+  }
+  
+  .bt-nav-btn {
+    padding: 8px 10px;
+  }
+  
+  .bt-nav-btn i {
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
