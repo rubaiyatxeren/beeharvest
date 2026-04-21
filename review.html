@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>রিভিউ দিন — BeeHarvest</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --honey: #F5A623; --honey-light: #FDD882; --honey-dark: #C47F11;
+      --navy: #0D1B3E; --navy-mid: #1A2E5A;
+      --cream: #FFF9F0; --cream-dark: #F0E8D8; --surface: #FFFFFF;
+      --text-primary: #0D1B3E; --text-muted: #6B7A99; --text-light: #A0ABBE;
+      --success: #1E8A4A; --success-bg: #E8F5EE;
+      --danger: #C0392B; --danger-bg: #FDEDEC;
+      --border: #E8EBF4;
+      --shadow-sm: 0 2px 8px rgba(13,27,62,0.06);
+      --shadow-md: 0 8px 24px rgba(13,27,62,0.10);
+      --shadow-lg: 0 20px 48px rgba(13,27,62,0.14);
+      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px; --radius-xl: 28px;
+      --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:'Hind Siliguri','DM Sans',sans-serif;
+      background:var(--cream);color:var(--text-primary);
+      min-height:100vh;padding:0;
+    }
+    body::before{
+      content:'';position:fixed;top:0;left:0;right:0;height:280px;
+      background:linear-gradient(180deg,rgba(245,166,35,0.05) 0%,transparent 100%);
+      pointer-events:none;z-index:0;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar{background:var(--navy);position:sticky;top:0;z-index:900;box-shadow:0 2px 20px rgba(13,27,62,0.25)}
+    .nav-container{max-width:640px;margin:0 auto;padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+    .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--honey),var(--honey-dark));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:white}
+    .logo-name{font-family:'DM Serif Display',serif;font-size:1.1rem;color:#fff}
+    .logo-tag{font-size:0.6rem;color:var(--honey-light);font-weight:400}
+    .nav-back{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:500;display:flex;align-items:center;gap:6px;transition:color var(--transition)}
+    .nav-back:hover{color:var(--honey)}
+
+    /* ── MAIN WRAPPER ── */
+    .page-wrap{max-width:640px;margin:0 auto;padding:2rem 1.5rem 3rem;position:relative;z-index:1}
+
+    /* ── TOKEN LOADING / ERROR STATES ── */
+    .state-card{background:var(--surface);border-radius:var(--radius-xl);padding:2.5rem 2rem;text-align:center;box-shadow:var(--shadow-md);border:1px solid var(--border)}
+    .state-icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:1.8rem}
+    .state-icon.loading{background:rgba(245,166,35,0.15);color:var(--honey)}
+    .state-icon.error{background:var(--danger-bg);color:var(--danger)}
+    .state-icon.used{background:var(--success-bg);color:var(--success)}
+    .state-h{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--navy);margin-bottom:0.5rem}
+    .state-p{font-size:0.875rem;color:var(--text-muted);line-height:1.7}
+    .spin{animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── PRODUCT INFO CARD ── */
+    .product-info-card{
+      background:var(--surface);border-radius:var(--radius-xl);
+      padding:1.5rem;box-shadow:var(--shadow-md);
+      border:1px solid var(--border);margin-bottom:1.5rem;
+      display:flex;gap:1.25rem;align-items:center;
+    }
+    .product-img{width:72px;height:72px;border-radius:var(--radius-md);object-fit:cover;flex-shrink:0;background:var(--cream-dark)}
+    .product-img-placeholder{width:72px;height:72px;border-radius:var(--radius-md);background:var(--cream-dark);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0}
+    .product-details{}
+    .product-name{font-weight:700;font-size:1rem;color:var(--navy);line-height:1.3;margin-bottom:4px}
+    .product-order{font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+    .verified-badge{display:inline-flex;align-items:center;gap:4px;background:var(--success-bg);color:var(--success);font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:50px;border:1px solid rgba(30,138,74,0.2);margin-top:5px}
+
+    /* ── REVIEW FORM CARD ── */
+    .review-card{
+      background:var(--surface);border-radius:var(--radius-xl);
+      padding:1.75rem;box-shadow:var(--shadow-md);border:1px solid var(--border);
+    }
+    .section-title{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy);margin-bottom:1.25rem;display:flex;align-items:center;gap:8px}
+    .section-title i{color:var(--honey);font-size:1rem}
+
+    /* ── STAR RATING ── */
+    .star-section{margin-bottom:1.5rem}
+    .star-label{font-size:0.82rem;font-weight:600;color:var(--text-primary);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.4px}
+    .star-row{display:flex;gap:6px;margin-bottom:8px}
+    .star-btn{
+      background:none;border:none;cursor:pointer;padding:4px;
+      font-size:2.2rem;color:var(--border);
+      transition:all 0.15s cubic-bezier(0.34,1.56,0.64,1);
+      line-height:1;
+    }
+    .star-btn:hover,.star-btn.active{color:var(--honey);transform:scale(1.15)}
+    .star-btn.half-active{color:var(--honey-light)}
+    .star-feedback{font-size:0.82rem;font-weight:600;min-height:22px;transition:all var(--transition)}
+    .star-feedback.s1{color:#e53e3e}
+    .star-feedback.s2{color:#dd6b20}
+    .star-feedback.s3{color:#d69e2e}
+    .star-feedback.s4{color:var(--honey-dark)}
+    .star-feedback.s5{color:var(--success)}
+
+    /* ── FORM FIELDS ── */
+    .form-group{margin-bottom:1.1rem}
+    .form-group label{display:block;font-size:0.8rem;font-weight:600;color:var(--text-primary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px}
+    .form-group input,.form-group textarea{
+      width:100%;padding:11px 14px;
+      border:2px solid var(--border);border-radius:var(--radius-sm);
+      font-family:'Hind Siliguri',sans-serif;font-size:0.9rem;
+      background:var(--cream);color:var(--text-primary);
+      transition:border-color var(--transition),box-shadow var(--transition);
+      resize:vertical;
+    }
+    .form-group input:focus,.form-group textarea:focus{
+      outline:none;border-color:var(--honey);
+      box-shadow:0 0 0 3px rgba(245,166,35,0.15);background:#fff;
+    }
+    .form-group input::placeholder,.form-group textarea::placeholder{color:var(--text-light)}
+    .char-count{font-size:0.7rem;color:var(--text-muted);text-align:right;margin-top:3px}
+
+    /* ── SUBMIT BUTTON ── */
+    .submit-btn{
+      width:100%;background:linear-gradient(135deg,var(--honey) 0%,var(--honey-dark) 100%);
+      color:var(--navy);border:none;padding:14px 24px;border-radius:var(--radius-md);
+      font-family:'Hind Siliguri',sans-serif;font-size:1rem;font-weight:800;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+      transition:all var(--transition);margin-top:1.25rem;
+      box-shadow:0 4px 16px rgba(245,166,35,0.35);
+    }
+    .submit-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,166,35,0.45)}
+    .submit-btn:disabled{opacity:0.55;cursor:not-allowed;transform:none}
+
+    /* ── SUCCESS STATE ── */
+    .success-card{
+      background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);
+      border-radius:var(--radius-xl);padding:2.5rem 2rem;text-align:center;
+      box-shadow:var(--shadow-lg);animation:successPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes successPop{from{opacity:0;transform:scale(0.92) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .success-icon{width:80px;height:80px;background:linear-gradient(135deg,var(--honey),var(--honey-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:2rem;color:white;animation:bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both}
+    @keyframes bounceIn{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+    .success-h{font-family:'DM Serif Display',serif;font-size:1.5rem;color:#fff;margin-bottom:0.75rem}
+    .success-p{color:rgba(255,255,255,0.65);font-size:0.875rem;line-height:1.7;margin-bottom:1.5rem}
+    .success-home-btn{
+      display:inline-flex;align-items:center;gap:8px;
+      background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);
+      color:white;padding:10px 22px;border-radius:var(--radius-sm);
+      text-decoration:none;font-size:0.875rem;font-weight:600;
+      transition:all var(--transition);
+    }
+    .success-home-btn:hover{background:var(--honey);border-color:var(--honey);color:var(--navy)}
+
+    /* ── TOAST ── */
+    .toast{
+      position:fixed;bottom:24px;right:20px;
+      background:var(--surface);padding:0.875rem 1.25rem;
+      border-radius:var(--radius-md);box-shadow:var(--shadow-lg);
+      display:flex;align-items:center;gap:10px;z-index:9999;
+      max-width:300px;font-size:0.875rem;font-weight:500;
+      animation:toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      border-left:4px solid var(--border);
+    }
+    @keyframes toastIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+    .toast.success{border-left-color:var(--success)}.toast.success i{color:var(--success)}
+    .toast.error{border-left-color:var(--danger)}.toast.error i{color:var(--danger)}
+
+    /* ── GUIDELINES ── */
+    .guidelines{background:rgba(245,166,35,0.06);border:1px solid rgba(245,166,35,0.2);border-radius:var(--radius-md);padding:1rem 1.1rem;margin-bottom:1.25rem}
+    .guide-title{font-size:0.8rem;font-weight:700;color:var(--honey-dark);margin-bottom:0.5rem;display:flex;align-items:center;gap:6px}
+    .guide-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+    .guide-list li{font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+    .guide-list li::before{content:'✓';color:var(--honey);font-weight:700;flex-shrink:0}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:480px){
+      .page-wrap{padding:1.25rem 1rem 2rem}
+      .product-info-card{flex-direction:column;text-align:center;gap:0.875rem}
+      .review-card{padding:1.25rem}
+      .star-btn{font-size:2rem}
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo" onclick="window.location.href='index.html'">
+      <div class="logo-icon">🐝</div>
+      <div>
+        <div class="logo-name">BeeHarvest</div>
+        <div class="logo-tag">বাংলাদেশের বিশ্বস্ত অনলাইন শপ</div>
+      </div>
+    </div>
+    <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> হোমে ফিরুন</a>
+  </div>
+</nav>
+
+<div class="page-wrap" id="pageWrap">
+
+  <!-- LOADING STATE -->
+  <div id="loadingState" class="state-card">
+    <div class="state-icon loading">
+      <i class="fas fa-circle-notch spin"></i>
+    </div>
+    <div class="state-h">তথ্য লোড হচ্ছে...</div>
+    <p class="state-p">অনুগ্রহ করে একটু অপেক্ষা করুন</p>
+  </div>
+
+  <!-- TOKEN ERROR STATE -->
+  <div id="errorState" class="state-card" style="display:none">
+    <div class="state-icon error">
+      <i class="fas fa-link-slash"></i>
+    </div>
+    <div class="state-h" id="errorTitle">লিংকটি অকার্যকর</div>
+    <p class="state-p" id="errorMsg">এই রিভিউ লিংকটি মেয়াদোত্তীর্ণ বা ইতিমধ্যে ব্যবহার করা হয়েছে।</p>
+    <br>
+    <a href="index.html" style="color:var(--honey-dark);font-weight:600;font-size:0.875rem;text-decoration:none">
+      <i class="fas fa-home"></i> হোমে যান
+    </a>
+  </div>
+
+  <!-- REVIEW FORM -->
+  <div id="reviewForm" style="display:none">
+
+    <!-- Product Info -->
+    <div class="product-info-card" id="productInfoCard">
+      <div class="product-img-placeholder" id="productImgPlaceholder">🍯</div>
+      <div class="product-details">
+        <div class="product-name" id="productName">পণ্যের নাম লোড হচ্ছে...</div>
+        <div class="product-order"><i class="fas fa-hashtag"></i> <span id="orderNumberDisplay">—</span></div>
+        <div class="verified-badge"><i class="fas fa-check-circle"></i> যাচাইকৃত ক্রয়</div>
+      </div>
+    </div>
+
+    <div class="review-card">
+      <div class="section-title"><i class="fas fa-star"></i> আপনার রিভিউ লিখুন</div>
+
+      <!-- Guidelines -->
+      <div class="guidelines">
+        <div class="guide-title"><i class="fas fa-lightbulb"></i> ভালো রিভিউ লেখার টিপস</div>
+        <ul class="guide-list">
+          <li>পণ্যের মান, ব্যবহার অভিজ্ঞতা শেয়ার করুন</li>
+          <li>সত্য ও নিরপেক্ষ মতামত দিন</li>
+          <li>ছবি বা ভিডিও থাকলে উল্লেখ করুন</li>
+          <li>ব্যক্তিগত তথ্য শেয়ার করা থেকে বিরত থাকুন</li>
+        </ul>
+      </div>
+
+      <!-- Star Rating -->
+      <div class="star-section">
+        <div class="star-label">রেটিং দিন *</div>
+        <div class="star-row" id="starRow">
+          <button class="star-btn" data-val="1" onclick="setRating(1)" onmouseenter="hoverRating(1)" onmouseleave="resetHover()">★</button>
+          <button class="star-btn" data-val="2" onclick="setRating(2)" onmouseenter="hoverRating(2)" onmouseleave="resetHover()">★</button>
+          <button class="star-btn" data-val="3" onclick="setRating(3)" onmouseenter="hoverRating(3)" onmouseleave="resetHover()">★</button>
+          <button class="star-btn" data-val="4" onclick="setRating(4)" onmouseenter="hoverRating(4)" onmouseleave="resetHover()">★</button>
+          <button class="star-btn" data-val="5" onclick="setRating(5)" onmouseenter="hoverRating(5)" onmouseleave="resetHover()">★</button>
+        </div>
+        <div class="star-feedback" id="starFeedback">একটি রেটিং নির্বাচন করুন</div>
+      </div>
+
+      <!-- Title -->
+      <div class="form-group">
+        <label>রিভিউর শিরোনাম</label>
+        <input type="text" id="reviewTitle" placeholder="যেমন: অসাধারণ মানের পণ্য!" maxlength="120" oninput="updateCharCount('reviewTitle','titleCount',120)"/>
+        <div class="char-count"><span id="titleCount">0</span>/120</div>
+      </div>
+
+      <!-- Body -->
+      <div class="form-group">
+        <label>বিস্তারিত রিভিউ *</label>
+        <textarea id="reviewBody" rows="5" placeholder="এই পণ্যটি ব্যবহার করে আপনার অভিজ্ঞতা বিস্তারিত লিখুন..." maxlength="2000" oninput="updateCharCount('reviewBody','bodyCount',2000)"></textarea>
+        <div class="char-count"><span id="bodyCount">0</span>/2000</div>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="submitReview()" disabled>
+        <i class="fas fa-paper-plane"></i> রিভিউ জমা দিন
+      </button>
+
+      <p style="font-size:0.72rem;color:var(--text-muted);text-align:center;margin-top:0.875rem;line-height:1.6">
+        <i class="fas fa-shield-halved" style="color:var(--honey-dark)"></i>
+        অনুমোদনের পর রিভিউটি প্রকাশিত হবে। এই লিংক শুধুমাত্র একবার ব্যবহার করা যাবে।
+      </p>
+    </div>
+  </div>
+
+  <!-- SUCCESS STATE -->
+  <div id="successState" style="display:none">
+    <div class="success-card">
+      <div class="success-icon"><i class="fas fa-check"></i></div>
+      <div class="success-h">রিভিউ সফলভাবে জমা হয়েছে! 🎉</div>
+      <p class="success-p">আপনার রিভিউটি আমাদের টিম পর্যালোচনা করবে। অনুমোদনের পর এটি সাইটে প্রকাশিত হবে। আপনার মতামতের জন্য ধন্যবাদ!</p>
+      <a href="index.html" class="success-home-btn"><i class="fas fa-home"></i> হোমে যান</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API_URL = "https://beeyond-harvest-admin.onrender.com/api";
+  let reviewToken = null;
+  let selectedRating = 0;
+
+  const STAR_LABELS = {
+    1: { text: "খুবই খারাপ 😞", cls: "s1" },
+    2: { text: "খারাপ 😕", cls: "s2" },
+    3: { text: "মোটামুটি 😐", cls: "s3" },
+    4: { text: "ভালো 😊", cls: "s4" },
+    5: { text: "অসাধারণ! 🤩", cls: "s5" },
+  };
+
+  // ── Init ──────────────────────────────────────────────────
+  window.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    reviewToken = params.get("token");
+
+    if (!reviewToken) {
+      showError("লিংক নেই", "এই পেজে আসার সঠিক লিংক নেই। আপনার ইমেইলের রিভিউ লিংকটি ব্যবহার করুন।");
+      return;
+    }
+    validateToken();
+  });
+
+  async function validateToken() {
+    try {
+      const res = await fetch(`${API_URL}/reviews/validate-token?token=${encodeURIComponent(reviewToken)}`);
+      const data = await res.json();
+
+      if (!data.success) {
+        const codeMap = {
+          TOKEN_INVALID: ["লিংক মেয়াদোত্তীর্ণ", "এই রিভিউ লিংকটির মেয়াদ শেষ হয়ে গেছে (৭ দিনের মেয়াদ)।"],
+          TOKEN_USED: ["রিভিউ দেওয়া হয়েছে", "এই লিংক দিয়ে ইতিমধ্যে একটি রিভিউ দেওয়া হয়েছে।"],
+          NOT_DELIVERED: ["ডেলিভারি হয়নি", "অর্ডার ডেলিভারি সম্পন্ন হলেই রিভিউ দেওয়া যাবে।"],
+        };
+        const [title, msg] = codeMap[data.code] || ["সমস্যা হয়েছে", data.message || "রিভিউ লিংকটি অকার্যকর।"];
+        if (data.code === "TOKEN_USED") {
+          showUsed(title, msg);
+        } else {
+          showError(title, msg);
+        }
+        return;
+      }
+
+      populateForm(data.data);
+    } catch (err) {
+      showError("সংযোগ সমস্যা", "সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না। ইন্টারনেট চেক করুন।");
+    }
+  }
+
+  function populateForm(info) {
+    document.getElementById("loadingState").style.display = "none";
+    document.getElementById("reviewForm").style.display = "block";
+
+    document.getElementById("productName").textContent = info.product?.name || "পণ্য";
+    document.getElementById("orderNumberDisplay").textContent = info.orderNumber || "—";
+
+    const img = info.product?.image;
+    const placeholder = document.getElementById("productImgPlaceholder");
+    if (img) {
+      const imgEl = document.createElement("img");
+      imgEl.src = img;
+      imgEl.className = "product-img";
+      imgEl.alt = info.product.name;
+      imgEl.onerror = () => imgEl.remove();
+      placeholder.replaceWith(imgEl);
+    }
+  }
+
+  function showError(title, msg) {
+    document.getElementById("loadingState").style.display = "none";
+    document.getElementById("errorTitle").textContent = title;
+    document.getElementById("errorMsg").textContent = msg;
+    document.getElementById("errorState").style.display = "block";
+  }
+
+  function showUsed(title, msg) {
+    document.getElementById("loadingState").style.display = "none";
+    const errState = document.getElementById("errorState");
+    errState.style.display = "block";
+    errState.querySelector(".state-icon").className = "state-icon used";
+    errState.querySelector(".state-icon").innerHTML = '<i class="fas fa-check-double"></i>';
+    document.getElementById("errorTitle").textContent = title;
+    document.getElementById("errorMsg").textContent = msg;
+  }
+
+  // ── Star Rating ───────────────────────────────────────────
+  function hoverRating(val) {
+    highlightStars(val, true);
+  }
+
+  function resetHover() {
+    highlightStars(selectedRating, false);
+    updateFeedbackText(selectedRating);
+  }
+
+  function setRating(val) {
+    selectedRating = val;
+    highlightStars(val, false);
+    updateFeedbackText(val);
+    checkSubmitEnabled();
+  }
+
+  function highlightStars(upTo, isHover) {
+    document.querySelectorAll(".star-btn").forEach((btn, i) => {
+      btn.classList.toggle("active", i < upTo);
+    });
+    if (isHover && upTo > 0) {
+      const fb = document.getElementById("starFeedback");
+      const info = STAR_LABELS[upTo];
+      fb.textContent = info.text;
+      fb.className = "star-feedback " + info.cls;
+    }
+  }
+
+  function updateFeedbackText(val) {
+    const fb = document.getElementById("starFeedback");
+    if (val === 0) {
+      fb.textContent = "একটি রেটিং নির্বাচন করুন";
+      fb.className = "star-feedback";
+    } else {
+      const info = STAR_LABELS[val];
+      fb.textContent = info.text;
+      fb.className = "star-feedback " + info.cls;
+    }
+  }
+
+  function updateCharCount(fieldId, countId, max) {
+    const len = document.getElementById(fieldId).value.length;
+    document.getElementById(countId).textContent = len;
+    checkSubmitEnabled();
+  }
+
+  function checkSubmitEnabled() {
+    const body = document.getElementById("reviewBody").value.trim();
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = !(selectedRating > 0 && body.length >= 10);
+  }
+
+  // ── Submit ────────────────────────────────────────────────
+  async function submitReview() {
+    const title = document.getElementById("reviewTitle").value.trim();
+    const body = document.getElementById("reviewBody").value.trim();
+
+    if (!selectedRating) { showToast("রেটিং নির্বাচন করুন", "error"); return; }
+    if (body.length < 10) { showToast("কমপক্ষে ১০ অক্ষর লিখুন", "error"); return; }
+
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> জমা হচ্ছে...';
+
+    try {
+      const res = await fetch(`${API_URL}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: reviewToken, rating: selectedRating, title, body }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        showToast(data.message || "জমা দেওয়া যায়নি", "error");
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> রিভিউ জমা দিন';
+        return;
+      }
+
+      // Show success
+      document.getElementById("reviewForm").style.display = "none";
+      document.getElementById("successState").style.display = "block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+    } catch (err) {
+      showToast("নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।", "error");
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> রিভিউ জমা দিন';
+    }
+  }
+
+  // ── Toast ─────────────────────────────────────────────────
+  function showToast(msg, type = "info") {
+    document.querySelectorAll(".toast").forEach(t => t.remove());
+    const t = document.createElement("div");
+    t.className = `toast ${type}`;
+    const icon = type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-circle" : "fa-info-circle";
+    t.innerHTML = `<i class="fas ${icon}"></i><span>${msg}</span>`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+</script>
+</body>
+</html>
