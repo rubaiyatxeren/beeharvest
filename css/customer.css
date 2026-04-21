@@ -6670,15 +6670,15 @@ body.modal-open {
     }
   
     /* ── Rating: hide on mobile to save space ──────────────── */
-    /* .pc-rating-row {
+    .pc-rating-row {
       display: none !important;
-    } */
+    }
   
     /* ── Price block ───────────────────────────────────────── */
     .pc-price-main {
       align-items: baseline !important;
       flex-wrap: wrap !important;
-      gap: 1.2px !important;
+      gap: 2px !important;
     }
   
     .pc-price-currency {
@@ -8289,3 +8289,64 @@ body { padding-bottom: 0; }
   }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   FORCE SHOW RATINGS ON MOBILE - OVERRIDE
+   ═══════════════════════════════════════════════════════════ */
+
+/* Override the hidden rating on mobile */
+@media (max-width: 640px) {
+  .pc-rating-row {
+    display: flex !important;
+    margin: 4px 0 6px 0 !important;
+    gap: 6px !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+  }
+  
+  /* Make stars slightly smaller on mobile */
+  .pc-stars {
+    gap: 2px !important;
+  }
+  
+  .pc-stars i {
+    font-size: 0.7rem !important;
+  }
+  
+  .pc-rating-num {
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    color: var(--honey-dark) !important;
+  }
+  
+  .pc-rating-count {
+    font-size: 0.65rem !important;
+    color: var(--text-muted) !important;
+  }
+}
+
+/* Also ensure on very small screens */
+@media (max-width: 480px) {
+  .pc-stars i {
+    font-size: 0.6rem !important;
+  }
+  
+  .pc-rating-num {
+    font-size: 0.65rem !important;
+  }
+  
+  .pc-rating-count {
+    font-size: 0.55rem !important;
+  }
+}
+
+/* Tablet view */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .pc-rating-row {
+    display: flex !important;
+    margin: 6px 0 !important;
+  }
+  
+  .pc-stars i {
+    font-size: 0.75rem !important;
+  }
+}
