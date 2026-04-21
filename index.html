@@ -20,6 +20,9 @@
     <link rel="stylesheet" href="css/customer.css" />
     <link rel="stylesheet" href="css/beetransfer.css" />
     <link rel="stylesheet" href="css/blog-premium.css" />
+    <style>
+      @keyframes rvBounce{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+      </style>
   </head>
   <body style="padding-bottom: 0 !important; margin-bottom: 0 !important;">
     <!-- ═══ LOADING OVERLAY ═══════════════════════════════════ -->
@@ -1528,6 +1531,99 @@
       </div>
     </div>
 
+    <!-- ═══ REVIEW MODAL ════════════════════════════════════════ -->
+<div class="modal" id="reviewModal">
+  <div class="modal-content modal-small" style="max-width:520px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#0D1B3E,#1A2E5A);">
+      <h3 style="display:flex;align-items:center;gap:10px;color:#fff;">
+        <i class="fas fa-star" style="color:#F5A623;"></i> পণ্য রিভিউ দিন
+      </h3>
+      <button class="close-modal" onclick="closeReviewModal()" style="background:rgba(255,255,255,0.1);">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body" id="reviewModalBody" style="padding:1.5rem;">
+      <!-- Loading -->
+      <div id="rv-modal-loading" style="text-align:center;padding:2rem;">
+        <i class="fas fa-circle-notch fa-spin" style="font-size:2rem;color:#F5A623;"></i>
+        <p style="margin-top:1rem;color:#6B7A99;">তথ্য লোড হচ্ছে...</p>
+      </div>
+      <!-- Error -->
+      <div id="rv-modal-error" style="display:none;text-align:center;padding:2rem;">
+        <div style="width:64px;height:64px;background:#FDEDEC;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.5rem;color:#C0392B;">
+          <i class="fas fa-link-slash"></i>
+        </div>
+        <h4 id="rv-modal-error-title" style="font-family:'DM Serif Display',serif;color:#0D1B3E;margin-bottom:0.5rem;">লিংক সমস্যা</h4>
+        <p id="rv-modal-error-msg" style="font-size:0.875rem;color:#6B7A99;"></p>
+      </div>
+      <!-- Form -->
+      <div id="rv-modal-form" style="display:none;">
+        <!-- Product info -->
+        <div style="display:flex;gap:1rem;align-items:center;background:#FFF9F0;border-radius:12px;padding:1rem;margin-bottom:1.25rem;border:1px solid rgba(245,166,35,0.2);">
+          <div id="rv-modal-product-img" style="width:60px;height:60px;border-radius:10px;background:#F0E8D8;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🍯</div>
+          <div>
+            <div id="rv-modal-product-name" style="font-weight:700;font-size:0.95rem;color:#0D1B3E;"></div>
+            <div id="rv-modal-order-num" style="font-size:0.72rem;color:#6B7A99;margin-top:3px;"></div>
+            <div style="display:inline-flex;align-items:center;gap:4px;background:#E8F5EE;color:#1E8A4A;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:50px;border:1px solid rgba(30,138,74,0.2);margin-top:5px;">
+              <i class="fas fa-check-circle"></i> যাচাইকৃত ক্রয়
+            </div>
+          </div>
+        </div>
+        <!-- Stars -->
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:0.78rem;font-weight:600;color:#0D1B3E;margin-bottom:0.625rem;text-transform:uppercase;letter-spacing:0.4px;">রেটিং দিন *</div>
+          <div id="rv-modal-stars" style="display:flex;gap:6px;margin-bottom:6px;">
+            <button class="rv-modal-star" data-val="1" style="background:none;border:none;cursor:pointer;font-size:2.2rem;color:#E8EBF4;transition:all 0.15s;padding:2px;" onclick="rvSetRating(1)" onmouseenter="rvHover(1)" onmouseleave="rvHoverEnd()">★</button>
+            <button class="rv-modal-star" data-val="2" style="background:none;border:none;cursor:pointer;font-size:2.2rem;color:#E8EBF4;transition:all 0.15s;padding:2px;" onclick="rvSetRating(2)" onmouseenter="rvHover(2)" onmouseleave="rvHoverEnd()">★</button>
+            <button class="rv-modal-star" data-val="3" style="background:none;border:none;cursor:pointer;font-size:2.2rem;color:#E8EBF4;transition:all 0.15s;padding:2px;" onclick="rvSetRating(3)" onmouseenter="rvHover(3)" onmouseleave="rvHoverEnd()">★</button>
+            <button class="rv-modal-star" data-val="4" style="background:none;border:none;cursor:pointer;font-size:2.2rem;color:#E8EBF4;transition:all 0.15s;padding:2px;" onclick="rvSetRating(4)" onmouseenter="rvHover(4)" onmouseleave="rvHoverEnd()">★</button>
+            <button class="rv-modal-star" data-val="5" style="background:none;border:none;cursor:pointer;font-size:2.2rem;color:#E8EBF4;transition:all 0.15s;padding:2px;" onclick="rvSetRating(5)" onmouseenter="rvHover(5)" onmouseleave="rvHoverEnd()">★</button>
+          </div>
+          <div id="rv-modal-star-feedback" style="font-size:0.8rem;font-weight:600;min-height:20px;color:#6B7A99;">একটি রেটিং নির্বাচন করুন</div>
+        </div>
+        <!-- Title -->
+        <div style="margin-bottom:1rem;">
+          <label style="display:block;font-size:0.78rem;font-weight:600;color:#0D1B3E;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px;">রিভিউর শিরোনাম</label>
+          <input type="text" id="rv-modal-title" maxlength="120" placeholder="যেমন: অসাধারণ মানের পণ্য!"
+            style="width:100%;padding:10px 14px;border:2px solid #E8EBF4;border-radius:8px;font-family:'Hind Siliguri',sans-serif;font-size:0.875rem;background:#FFF9F0;color:#0D1B3E;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#F5A623'" onblur="this.style.borderColor='#E8EBF4'"
+            oninput="document.getElementById('rv-modal-title-count').textContent=this.value.length"/>
+          <div style="text-align:right;font-size:0.68rem;color:#A0ABBE;margin-top:2px;"><span id="rv-modal-title-count">0</span>/120</div>
+        </div>
+        <!-- Body -->
+        <div style="margin-bottom:1.25rem;">
+          <label style="display:block;font-size:0.78rem;font-weight:600;color:#0D1B3E;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px;">বিস্তারিত রিভিউ *</label>
+          <textarea id="rv-modal-body" rows="4" maxlength="2000" placeholder="এই পণ্যটি ব্যবহার করে আপনার অভিজ্ঞতা লিখুন..."
+            style="width:100%;padding:10px 14px;border:2px solid #E8EBF4;border-radius:8px;font-family:'Hind Siliguri',sans-serif;font-size:0.875rem;background:#FFF9F0;color:#0D1B3E;resize:vertical;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#F5A623'" onblur="this.style.borderColor='#E8EBF4'"
+            oninput="document.getElementById('rv-modal-body-count').textContent=this.value.length;rvCheckSubmit()"></textarea>
+          <div style="text-align:right;font-size:0.68rem;color:#A0ABBE;margin-top:2px;"><span id="rv-modal-body-count">0</span>/2000</div>
+        </div>
+        <!-- Submit -->
+        <button id="rv-modal-submit" disabled onclick="rvSubmit()"
+          style="width:100%;background:linear-gradient(135deg,#F5A623,#C47F11);color:#0D1B3E;border:none;padding:13px 24px;border-radius:10px;font-family:'Hind Siliguri',sans-serif;font-size:0.95rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.25s;box-shadow:0 4px 16px rgba(245,166,35,0.35);">
+          <i class="fas fa-paper-plane"></i> রিভিউ জমা দিন
+        </button>
+        <p style="font-size:0.7rem;color:#A0ABBE;text-align:center;margin-top:0.75rem;line-height:1.6;">
+          <i class="fas fa-shield-halved" style="color:#C47F11;"></i>
+          অনুমোদনের পর রিভিউটি প্রকাশিত হবে।
+        </p>
+      </div>
+      <!-- Success -->
+      <div id="rv-modal-success" style="display:none;text-align:center;padding:1.5rem 1rem;">
+        <div style="width:72px;height:72px;background:linear-gradient(135deg,#F5A623,#C47F11);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.8rem;color:white;animation:rvBounce 0.6s cubic-bezier(0.34,1.56,0.64,1);">
+          <i class="fas fa-check"></i>
+        </div>
+        <h3 style="font-family:'DM Serif Display',serif;font-size:1.3rem;color:#0D1B3E;margin-bottom:0.5rem;">রিভিউ সফলভাবে জমা হয়েছে! 🎉</h3>
+        <p style="font-size:0.85rem;color:#6B7A99;line-height:1.7;margin-bottom:1.25rem;">আপনার রিভিউটি আমাদের টিম পর্যালোচনা করবে। অনুমোদনের পর এটি সাইটে প্রকাশিত হবে।</p>
+        <button onclick="closeReviewModal()" style="background:#0D1B3E;color:white;border:none;padding:10px 24px;border-radius:8px;font-family:'Hind Siliguri',sans-serif;font-size:0.875rem;font-weight:600;cursor:pointer;">
+          <i class="fas fa-home"></i> হোমে যান
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- ═══ PREMIUM GLASS BOTTOM NAV ════════════════════════════ -->
 <div class="premium-mobile-nav" id="premiumNav">
@@ -2086,10 +2182,10 @@
   })();
   </script>
   <script src="js/reviews.js"></script>
-  <div id="myReviewsContainer"></div>
-  <script>
+  <!-- <div id="myReviewsContainer"></div> -->
+  <!-- <script>
     ReviewsWidget.init("PRODUCT_ID", document.getElementById("myReviewsContainer"));
-  </script>
+  </script> -->
 <script src="js/god-tracker.js"></script>
     <script src="js/customer.min.js"></script>
     <script src="js/blog.js"></script>
