@@ -8226,3 +8226,20 @@ body { padding-bottom: 0; }
   .blog-detail-title { font-size: 1.2rem; }
   .blog-content-area { font-size: 0.9rem; }
 }
+
+/* Hide desktop send button on mobile */
+@media (max-width: 768px) {
+  .bt-nav-btn.desktop-only {
+    display: none !important;
+  }
+  
+  /* Show send in bottom nav instead */
+  .pnav-item[data-page="transfer"] {
+    display: flex !important;
+  }
+}
+
+/* Make sure transfer is visible in bottom nav */
+.pnav-item[data-page="transfer"] {
+  display: flex;
+}
