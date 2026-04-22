@@ -706,13 +706,15 @@
     font-size: 0.8rem;
   }
   
-  /* ── CTA Row (Mobile) ─────────────────────────────────────── */
-  .reviews-cta-row {
+/* ── CTA Row (Mobile & Desktop same row) ─────────────────── */
+.reviews-cta-row {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    margin-top: 1.25rem;
-    gap: 0.75rem;
+    flex-direction: row;  /* Always row, never column */
+    align-items: center;
+    justify-content: center;
+    margin-top: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
   
   .rv-cta-btn {
@@ -720,15 +722,39 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px 16px;
-    border-radius: 40px;
+    padding: 11px 24px;
+    border-radius: 50px;
     font-family: 'Hind Siliguri', sans-serif;
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.25s ease;
     border: none;
-    width: 100%;
+    white-space: nowrap;  /* Prevent text wrapping */
+  }
+  
+  /* Mobile adjustment - keep in row but smaller */
+  @media (max-width: 768px) {
+    .reviews-cta-row {
+      gap: 0.75rem;
+    }
+    
+    .rv-cta-btn {
+      padding: 10px 16px;
+      font-size: 0.8rem;
+      flex: 1;  /* Equal width on mobile */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .rv-cta-btn {
+      padding: 8px 12px;
+      font-size: 0.72rem;
+    }
+    
+    .rv-cta-btn i {
+      font-size: 0.7rem;
+    }
   }
   
   .rv-cta-btn--primary {
