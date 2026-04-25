@@ -1,0 +1,1177 @@
+/* ═══════════════════════════════════════════════════════════
+   BEEHARVEST — COMPLAINT SECTION CSS
+   Theme: Warm Honey × Deep Navy (matches customer.css)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Section wrapper ─────────────────────────────────────── */
+.complaint-section {
+    margin: 3rem 0 2rem;
+    padding: 0;
+  }
+  
+  .complaint-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .complaint-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .complaint-section-title h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.7rem;
+    color: #0D1B3E;
+  }
+  
+  .complaint-section-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #F5A623 0%, #C47F11 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  
+  /* ── Hero card ───────────────────────────────────────────── */
+  .complaint-hero {
+    background: linear-gradient(135deg, #0D1B3E 0%, #1A2E5A 60%, #0F2347 100%);
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-bottom: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    color: white;
+  }
+  
+  .complaint-hero::before {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(245,166,35,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  
+  .complaint-hero::after {
+    content: '📋';
+    position: absolute;
+    bottom: -15px; right: 2.5rem;
+    font-size: 6rem;
+    opacity: 0.07;
+    pointer-events: none;
+  }
+  
+  .complaint-hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .complaint-hero-text {}
+  
+  .complaint-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245,166,35,0.2);
+    border: 1px solid rgba(245,166,35,0.4);
+    color: #FDD882;
+    padding: 4px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.875rem;
+  }
+  
+  .complaint-hero h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    line-height: 1.3;
+    margin-bottom: 0.625rem;
+    color: white;
+  }
+  
+  .complaint-hero p {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.7;
+    max-width: 380px;
+    margin-bottom: 1.25rem;
+  }
+  
+  .complaint-hero-cta {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  .complaint-hero-stats {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .complaint-hero-stat {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    text-align: center;
+    min-width: 90px;
+  }
+  
+  .complaint-hero-stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: #F5A623;
+    line-height: 1;
+  }
+  
+  .complaint-hero-stat-label {
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.55);
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+  
+  /* ── Process steps ───────────────────────────────────────── */
+  .complaint-process {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+  
+  .complaint-process-step {
+    background: white;
+    border: 1.5px solid #E8EBF4;
+    border-radius: 16px;
+    padding: 1.25rem;
+    position: relative;
+    transition: all 0.25s ease;
+  }
+  
+  .complaint-process-step:hover {
+    border-color: rgba(245,166,35,0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(13,27,62,0.1);
+  }
+  
+  .complaint-process-step-num {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #0D1B3E, #1A2E5A);
+    color: #F5A623;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    flex-shrink: 0;
+  }
+  
+  .complaint-process-step-title {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: #0D1B3E;
+    margin-bottom: 0.375rem;
+  }
+  
+  .complaint-process-step-desc {
+    font-size: 0.75rem;
+    color: #6B7A99;
+    line-height: 1.55;
+  }
+  
+  /* ── Main form card ──────────────────────────────────────── */
+  .complaint-form-card {
+    background: white;
+    border-radius: 20px;
+    border: 1.5px solid #E8EBF4;
+    box-shadow: 0 4px 20px rgba(13,27,62,0.06);
+    overflow: hidden;
+    margin-bottom: 1.75rem;
+  }
+  
+  .complaint-form-card-header {
+    background: linear-gradient(135deg, #0D1B3E, #1A2E5A);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .complaint-form-card-header-icon {
+    width: 42px;
+    height: 42px;
+    background: rgba(245,166,35,0.2);
+    border: 1px solid rgba(245,166,35,0.35);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: #F5A623;
+    flex-shrink: 0;
+  }
+  
+  .complaint-form-card-header-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: white;
+  }
+  
+  .complaint-form-card-header-sub {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.55);
+    margin-top: 2px;
+  }
+  
+  .complaint-form-body {
+    padding: 1.5rem;
+  }
+  
+  /* Form steps indicator */
+  .complaint-steps-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 0;
+  }
+  
+  .complaint-step-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+  
+  .complaint-step-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #E8EBF4;
+    color: #A0ABBE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .complaint-step-dot.active {
+    background: linear-gradient(135deg, #F5A623, #C47F11);
+    color: #0D1B3E;
+    box-shadow: 0 4px 12px rgba(245,166,35,0.4);
+  }
+  
+  .complaint-step-dot.done {
+    background: linear-gradient(135deg, #1E8A4A, #27AE60);
+    color: white;
+  }
+  
+  .complaint-step-line {
+    flex: 1;
+    height: 2px;
+    background: #E8EBF4;
+    margin: 0 4px;
+    transition: background 0.3s ease;
+  }
+  
+  .complaint-step-line.done {
+    background: linear-gradient(90deg, #27AE60, #1E8A4A);
+  }
+  
+  .complaint-step-label {
+    font-size: 0.62rem;
+    color: #A0ABBE;
+    text-align: center;
+    margin-top: 5px;
+    white-space: nowrap;
+  }
+  
+  .complaint-step-label.active {
+    color: #C47F11;
+    font-weight: 600;
+  }
+  
+  .complaint-step-label.done {
+    color: #1E8A4A;
+  }
+  
+  .complaint-step-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Category grid */
+  .complaint-category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.625rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .complaint-category-item {
+    border: 1.5px solid #E8EBF4;
+    border-radius: 12px;
+    padding: 0.875rem 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    background: #FFFBF5;
+    position: relative;
+  }
+  
+  .complaint-category-item:hover {
+    border-color: rgba(245,166,35,0.5);
+    background: rgba(245,166,35,0.05);
+  }
+  
+  .complaint-category-item.selected {
+    border-color: #F5A623;
+    background: rgba(245,166,35,0.08);
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.15);
+  }
+  
+  .complaint-category-item.selected::after {
+    content: '✓';
+    position: absolute;
+    top: -8px; right: -8px;
+    width: 20px; height: 20px;
+    background: #F5A623;
+    color: #0D1B3E;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 20px;
+    text-align: center;
+  }
+  
+  .complaint-category-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+  
+  .complaint-category-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #0D1B3E;
+    line-height: 1.3;
+  }
+  
+  /* Form fields */
+  .complaint-form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .complaint-form-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0D1B3E;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  
+  .complaint-form-group label i {
+    color: #C47F11;
+    font-size: 0.72rem;
+  }
+  
+  .complaint-form-group label .req {
+    color: #e53e3e;
+    margin-left: 2px;
+  }
+  
+  .complaint-form-group input,
+  .complaint-form-group textarea,
+  .complaint-form-group select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #E8EBF4;
+    border-radius: 10px;
+    font-family: 'Hind Siliguri', sans-serif;
+    font-size: 0.9rem;
+    background: #FFFBF5;
+    color: #0D1B3E;
+    transition: all 0.2s ease;
+  }
+  
+  .complaint-form-group input:focus,
+  .complaint-form-group textarea:focus,
+  .complaint-form-group select:focus {
+    outline: none;
+    border-color: #F5A623;
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.12);
+    background: white;
+  }
+  
+  .complaint-form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .complaint-form-group .char-counter {
+    text-align: right;
+    font-size: 0.68rem;
+    color: #A0ABBE;
+    margin-top: 3px;
+  }
+  
+  .complaint-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  
+  /* ── Nav buttons inside form ─────────────────────────────── */
+  .complaint-form-nav {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+  }
+  
+  .complaint-btn-next {
+    background: linear-gradient(135deg, #F5A623 0%, #C47F11 100%);
+    color: #0D1B3E;
+    border: none;
+    padding: 11px 24px;
+    border-radius: 10px;
+    font-family: 'Hind Siliguri', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.2s ease;
+  }
+  
+  .complaint-btn-next:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(245,166,35,0.4);
+  }
+  
+  .complaint-btn-next:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .complaint-btn-back {
+    background: rgba(13,27,62,0.06);
+    color: #0D1B3E;
+    border: none;
+    padding: 11px 18px;
+    border-radius: 10px;
+    font-family: 'Hind Siliguri', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+  
+  .complaint-btn-back:hover { background: rgba(13,27,62,0.1); }
+  
+  /* ── Submission success state ────────────────────────────── */
+  .complaint-success-state {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    display: none;
+  }
+  
+  .complaint-success-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #F5A623 0%, #C47F11 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 2rem;
+    color: white;
+    animation: cSuccessPop 0.6s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  
+  @keyframes cSuccessPop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  
+  .complaint-success-state h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: #0D1B3E;
+    margin-bottom: 0.625rem;
+  }
+  
+  .complaint-success-state p {
+    color: #6B7A99;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    margin-bottom: 1.25rem;
+  }
+  
+  .complaint-ticket-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #0D1B3E;
+    color: #FDD882;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 0.625rem 0 1.25rem;
+  }
+  
+  /* ── Track complaint section ─────────────────────────────── */
+  .complaint-track-card {
+    background: white;
+    border-radius: 20px;
+    border: 1.5px solid #E8EBF4;
+    overflow: hidden;
+    margin-bottom: 1.75rem;
+  }
+  
+  .complaint-track-header {
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid #E8EBF4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  
+  .complaint-track-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    color: #0D1B3E;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .complaint-track-title i { color: #C47F11; }
+  
+  .complaint-track-body {
+    padding: 1.4rem;
+  }
+  
+  .complaint-track-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+  
+  .complaint-track-inputs {
+    display: flex;
+    gap: 0.625rem;
+    flex: 1;
+    flex-wrap: wrap;
+  }
+  
+  .complaint-track-inputs input {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px 14px;
+    border: 1.5px solid #E8EBF4;
+    border-radius: 10px;
+    font-family: 'Hind Siliguri', sans-serif;
+    font-size: 0.875rem;
+    background: #FFFBF5;
+    color: #0D1B3E;
+    transition: all 0.2s;
+  }
+  
+  .complaint-track-inputs input:focus {
+    outline: none;
+    border-color: #F5A623;
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.12);
+  }
+  
+  .complaint-track-btn {
+    background: linear-gradient(135deg, #0D1B3E, #1A2E5A);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: 'Hind Siliguri', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .complaint-track-btn:hover {
+    background: linear-gradient(135deg, #F5A623, #C47F11);
+    color: #0D1B3E;
+  }
+  
+  /* ── Tracked complaint result ────────────────────────────── */
+  .complaint-track-result {
+    margin-top: 1.25rem;
+    display: none;
+    animation: cTrackIn 0.35s cubic-bezier(0.34,1.2,0.64,1);
+  }
+  
+  @keyframes cTrackIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .complaint-result-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    border: 1.5px solid;
+    margin-bottom: 1rem;
+  }
+  
+  .complaint-result-ticket {
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0D1B3E;
+  }
+  
+  .complaint-result-date {
+    font-size: 0.72rem;
+    color: #6B7A99;
+    margin-top: 2px;
+  }
+  
+  .complaint-status-badge {
+    padding: 5px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  
+  /* Status colors */
+  .cstatus-open         { background: #EFF6FF; color: #1D4ED8; }
+  .cstatus-under_review { background: #F5F3FF; color: #6D28D9; }
+  .cstatus-on_hold      { background: #FFFBEB; color: #92400E; }
+  .cstatus-escalated    { background: #FEF2F2; color: #B91C1C; }
+  .cstatus-resolved     { background: #ECFDF5; color: #059669; }
+  .cstatus-rejected     { background: #F9FAFB; color: #374151; }
+  .cstatus-closed       { background: #F3F4F6; color: #1F2937; }
+  
+  /* Timeline */
+  .complaint-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .complaint-timeline-item {
+    display: flex;
+    gap: 12px;
+    position: relative;
+    padding-bottom: 1rem;
+  }
+  
+  .complaint-timeline-item:last-child {
+    padding-bottom: 0;
+  }
+  
+  .complaint-timeline-item:last-child .cti-line {
+    display: none;
+  }
+  
+  .cti-dot-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 32px;
+  }
+  
+  .cti-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    border: 2px solid;
+  }
+  
+  .cti-dot.admin-dot {
+    background: rgba(13,27,62,0.08);
+    border-color: rgba(13,27,62,0.2);
+    color: #0D1B3E;
+  }
+  
+  .cti-dot.customer-dot {
+    background: rgba(245,166,35,0.12);
+    border-color: rgba(245,166,35,0.4);
+    color: #C47F11;
+  }
+  
+  .cti-dot.status-dot {
+    background: #ECFDF5;
+    border-color: #10B981;
+    color: #059669;
+  }
+  
+  .cti-line {
+    flex: 1;
+    width: 2px;
+    background: #E8EBF4;
+    min-height: 16px;
+    margin-top: 4px;
+  }
+  
+  .cti-content {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 4px;
+  }
+  
+  .cti-author {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #0D1B3E;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .cti-time {
+    font-size: 0.65rem;
+    color: #A0ABBE;
+    margin-left: auto;
+  }
+  
+  .cti-message {
+    font-size: 0.82rem;
+    color: #374151;
+    line-height: 1.6;
+    background: #F5F0E8;
+    border-radius: 0 10px 10px 10px;
+    padding: 8px 12px;
+  }
+  
+  .cti-message.admin-msg {
+    background: #EFF6FF;
+    border-radius: 0 10px 10px 10px;
+  }
+  
+  .cti-message.status-msg {
+    background: #ECFDF5;
+    border-radius: 10px;
+    border-left: 3px solid #10B981;
+  }
+  
+  /* Customer reply input in tracked view */
+  .complaint-reply-box {
+    background: #F5F0E8;
+    border-radius: 14px;
+    padding: 1.1rem;
+    margin-top: 1rem;
+  }
+  
+  .complaint-reply-box-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0D1B3E;
+    margin-bottom: 0.625rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .complaint-reply-box-title i { color: #C47F11; }
+  
+  .complaint-reply-box textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #E8EBF4;
+    border-radius: 10px;
+    font-family: 'Hind Siliguri', sans-serif;
+    font-size: 0.875rem;
+    background: white;
+    color: #0D1B3E;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.2s;
+  }
+  
+  .complaint-reply-box textarea:focus {
+    outline: none;
+    border-color: #F5A623;
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.12);
+  }
+  
+  .complaint-reply-send-btn {
+    background: linear-gradient(135deg, #F5A623, #C47F11);
+    color: #0D1B3E;
+    border: none;
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-family: 'Hind Siliguri', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 0.625rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+  
+  .complaint-reply-send-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(245,166,35,0.4);
+  }
+  
+  /* ── Resolution block ────────────────────────────────────── */
+  .complaint-resolution-block {
+    background: linear-gradient(135deg, #0D1B3E, #1A2E5A);
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    margin-top: 1rem;
+  }
+  
+  .complaint-resolution-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #FDD882;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.625rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .complaint-resolution-detail {
+    font-size: 0.875rem;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+  }
+  
+  .complaint-resolution-amount {
+    font-size: 0.9rem;
+    color: #86efac;
+    font-weight: 600;
+  }
+  
+  .complaint-resolution-coupon {
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #FDD882;
+    letter-spacing: 2px;
+    background: rgba(255,255,255,0.08);
+    padding: 6px 14px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-top: 4px;
+  }
+  
+  /* ── Satisfaction rating ─────────────────────────────────── */
+  .complaint-satisfaction {
+    background: #FFF9F0;
+    border: 1.5px solid rgba(245,166,35,0.3);
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    margin-top: 1rem;
+    text-align: center;
+  }
+  
+  .complaint-satisfaction-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0D1B3E;
+    margin-bottom: 0.75rem;
+  }
+  
+  .complaint-satisfaction-stars {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 0.75rem;
+  }
+  
+  .complaint-sat-star {
+    font-size: 2rem;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    background: none;
+    border: none;
+    padding: 2px;
+    line-height: 1;
+  }
+  
+  .complaint-sat-star:hover,
+  .complaint-sat-star.hovered {
+    transform: scale(1.2);
+  }
+  
+  /* ── FAQ mini section ────────────────────────────────────── */
+  .complaint-faq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.875rem;
+    margin-top: 1.5rem;
+  }
+  
+  .complaint-faq-item {
+    background: white;
+    border: 1.5px solid #E8EBF4;
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    transition: all 0.2s ease;
+  }
+  
+  .complaint-faq-item:hover {
+    border-color: rgba(245,166,35,0.4);
+    box-shadow: 0 4px 14px rgba(13,27,62,0.07);
+  }
+  
+  .complaint-faq-icon {
+    width: 34px;
+    height: 34px;
+    background: rgba(245,166,35,0.12);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #C47F11;
+    font-size: 0.85rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .complaint-faq-q {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #0D1B3E;
+    margin-bottom: 0.375rem;
+    line-height: 1.35;
+  }
+  
+  .complaint-faq-a {
+    font-size: 0.72rem;
+    color: #6B7A99;
+    line-height: 1.55;
+  }
+  
+  /* ── Error / loading states ──────────────────────────────── */
+  .complaint-msg {
+    font-size: 0.8rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 0.625rem;
+    min-height: 0;
+  }
+  
+  .complaint-msg:empty { display: none; }
+  
+  .complaint-msg-error {
+    background: #FDEDEC;
+    color: #C0392B;
+    border: 1px solid rgba(192,57,43,0.2);
+  }
+  
+  .complaint-msg-success {
+    background: #E8F5EE;
+    color: #1E8A4A;
+    border: 1px solid rgba(30,138,74,0.2);
+  }
+  
+  .complaint-msg-info {
+    background: #EFF6FF;
+    color: #1D4ED8;
+    border: 1px solid rgba(29,78,216,0.2);
+  }
+  
+  /* ── Skeleton loading ────────────────────────────────────── */
+  .complaint-skel {
+    background: linear-gradient(90deg, #F0E8D8 25%, #F5EDD8 50%, #F0E8D8 75%);
+    background-size: 200%;
+    border-radius: 6px;
+    animation: cSkelShimmer 1.4s infinite;
+  }
+  
+  @keyframes cSkelShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  
+  /* ── Responsive ──────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .complaint-hero {
+      padding: 1.75rem 1.25rem;
+      border-radius: 16px;
+    }
+  
+    .complaint-hero h3 { font-size: 1.3rem; }
+    .complaint-hero::after { display: none; }
+  
+    .complaint-hero-stats {
+      width: 100%;
+      gap: 0.625rem;
+    }
+  
+    .complaint-hero-stat {
+      flex: 1;
+      min-width: 70px;
+      padding: 0.75rem 0.625rem;
+    }
+  
+    .complaint-hero-stat-num { font-size: 1.2rem; }
+  
+    .complaint-process {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+  
+    .complaint-category-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+  
+    .complaint-form-body {
+      padding: 1.1rem;
+    }
+  
+    .complaint-form-row {
+      grid-template-columns: 1fr;
+      gap: 0.625rem;
+    }
+  
+    .complaint-faq-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.625rem;
+    }
+  
+    .complaint-track-inputs {
+      flex-direction: column;
+    }
+  
+    .complaint-track-btn {
+      justify-content: center;
+    }
+  
+    .complaint-steps-bar {
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+  
+    .complaint-form-nav {
+      justify-content: stretch;
+    }
+  
+    .complaint-btn-next,
+    .complaint-btn-back {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .complaint-process {
+      grid-template-columns: 1fr;
+    }
+  
+    .complaint-faq-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .complaint-section-title h2 {
+      font-size: 1.35rem;
+    }
+  
+    .complaint-category-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  
+    .complaint-hero-inner {
+      flex-direction: column;
+    }
+  
+    .complaint-hero-stats {
+      flex-direction: row;
+    }
+  }
+  
+  /* ── Animation entry ─────────────────────────────────────── */
+  .complaint-section {
+    animation: cSectionIn 0.4s ease;
+  }
+  
+  @keyframes cSectionIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Pulse animation for form steps */
+  .complaint-step-dot.active {
+    animation: cStepPulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes cStepPulse {
+    0%, 100% { box-shadow: 0 4px 12px rgba(245,166,35,0.4); }
+    50% { box-shadow: 0 4px 20px rgba(245,166,35,0.7); }
+  }
+
+  
