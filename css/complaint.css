@@ -1219,3 +1219,84 @@
       padding: 1rem;
     }
   }
+
+
+  /* Attachment styles */
+.c-attachment-dropzone {
+    transition: all 0.2s ease;
+  }
+  
+  .c-attachment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .c-attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #F5F0E8;
+    border-radius: 10px;
+    padding: 8px 12px;
+    position: relative;
+  }
+  
+  .c-attachment-preview {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  .c-attachment-preview i {
+    font-size: 1.2rem;
+    color: #C0392B;
+  }
+  
+  .c-attachment-info {
+    flex: 1;
+  }
+  
+  .c-attachment-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #0D1B3E;
+  }
+  
+  .c-attachment-size {
+    font-size: 0.65rem;
+    color: #A0ABBE;
+  }
+  
+  .c-attachment-remove {
+    background: rgba(192,57,43,0.1);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #C0392B;
+    transition: all 0.2s;
+  }
+  
+  .c-attachment-remove:hover {
+    background: #C0392B;
+    color: white;
+  }
+  
+  @media (max-width: 768px) {
+    .c-attachment-item {
+      flex-wrap: wrap;
+    }
+    
+    .c-attachment-remove {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+    }
+  }
