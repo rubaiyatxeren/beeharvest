@@ -1300,3 +1300,97 @@
       right: -8px;
     }
   }
+
+  /* ── Mobile Attachment Fixes ───────────────────────────────── */
+@media (max-width: 768px) {
+    /* Make attachment dropzone visible and tappable */
+    .c-attachment-dropzone {
+      display: block !important;
+      width: 100%;
+      margin: 10px 0;
+      padding: 1rem !important;
+    }
+    
+    .c-attachment-dropzone i {
+      font-size: 1.8rem !important;
+    }
+    
+    .c-attachment-dropzone div {
+      font-size: 0.7rem !important;
+    }
+    
+    /* Make file input accessible */
+    #cFileInput {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+    }
+    
+    /* Attachment list items - make them full width */
+    .c-attachment-list {
+      width: 100%;
+      margin-top: 12px;
+    }
+    
+    .c-attachment-item {
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 8px;
+    }
+    
+    /* Fix preview container */
+    .c-attachment-preview {
+      width: 35px;
+      height: 35px;
+      flex-shrink: 0;
+    }
+    
+    .c-attachment-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Make remove button easier to tap */
+    .c-attachment-remove {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+    }
+    
+    /* Ensure the form group shows attachments */
+    .complaint-form-group {
+      display: block;
+      width: 100%;
+      overflow: visible;
+    }
+    
+    /* Fix any hidden overflow issues */
+    .complaint-form-body {
+      overflow-x: visible;
+    }
+    
+    /* Make dropzone text readable */
+    .c-attachment-dropzone .fa-cloud-upload-alt {
+      font-size: 1.5rem;
+    }
+  }
+  
+  /* Extra small devices (below 480px) */
+  @media (max-width: 480px) {
+    .c-attachment-dropzone {
+      padding: 0.75rem !important;
+    }
+    
+    .c-attachment-dropzone div:first-child {
+      font-size: 0.65rem;
+    }
+    
+    .c-attachment-name {
+      font-size: 0.7rem;
+    }
+    
+    .c-attachment-size {
+      font-size: 0.6rem;
+    }
+  }
