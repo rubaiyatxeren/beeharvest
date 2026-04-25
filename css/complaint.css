@@ -1174,4 +1174,48 @@
     50% { box-shadow: 0 4px 20px rgba(245,166,35,0.7); }
   }
 
-  
+  /* ── FIX: Track button full width on mobile ───────────────── */
+@media (max-width: 768px) {
+    .complaint-track-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .complaint-track-inputs {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 0.75rem;
+    }
+    
+    .complaint-track-inputs input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+    
+    .complaint-track-btn {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px 20px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #F5A623, #C47F11);
+      color: #0D1B3E;
+      border-radius: 10px;
+      gap: 8px;
+    }
+    
+    .complaint-track-btn i {
+      font-size: 1rem;
+    }
+    
+    /* Fix for the track card body padding */
+    .complaint-track-body {
+      padding: 1rem;
+    }
+  }
