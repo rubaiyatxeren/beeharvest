@@ -17,8 +17,111 @@
       submitting: false,
       tracking: false,
       trackedComplaint: null,
+      attachments: [], // Store attachment files
+        maxSize: 5 * 1024 * 1024, // 5MB max per file
+    maxFiles: 5, // Max 5 files
     };
+    
+    /* ── Attachment Helpers ─────────────────────────────────── */
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
   
+  function validateFile(file) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      showMsg('cAttachMsg', 'শুধু ছবি (JPG, PNG, GIF) বা PDF ফাইল সমর্থিত', 'error');
+      setTimeout(() => {
+        const msgEl = document.getElementById('cAttachMsg');
+        if (msgEl && msgEl.classList.contains('complaint-msg-error')) {
+          msgEl.innerHTML = '';
+          msgEl.className = 'complaint-msg';
+        }
+      }, 3000);
+      return false;
+    }
+    if (file.size > state.maxSize) {
+      showMsg('cAttachMsg', `ফাইল সাইজ ${formatFileSize(state.maxSize)} এর বেশি হতে পারবে না`, 'error');
+      setTimeout(() => {
+        const msgEl = document.getElementById('cAttachMsg');
+        if (msgEl && msgEl.classList.contains('complaint-msg-error')) {
+          msgEl.innerHTML = '';
+          msgEl.className = 'complaint-msg';
+        }
+      }, 3000);
+      return false;
+    }
+    return true;
+  }
+  
+  function addAttachment(file) {
+    if (!validateFile(file)) return false;
+    if (state.attachments.length >= state.maxFiles) {
+      showMsg('cAttachMsg', `সর্বোচ্চ ${state.maxFiles}টি ফাইল যোগ করা যাবে`, 'error');
+      return false;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      state.attachments.push({
+        file: file,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        data: e.target.result.split(',')[1],
+        preview: file.type.startsWith('image/') ? e.target.result : null
+      });
+      renderAttachmentList();
+      showMsg('cAttachMsg', `${file.name} যোগ হয়েছে`, 'success');
+      // Clear success message after 2 seconds
+      setTimeout(() => {
+        const msgEl = document.getElementById('cAttachMsg');
+        if (msgEl && msgEl.classList.contains('complaint-msg-success')) {
+          msgEl.innerHTML = '';
+          msgEl.className = 'complaint-msg';
+        }
+      }, 2000);
+    };
+    reader.readAsDataURL(file);
+    return true;
+  }
+  
+  function removeAttachment(index) {
+    state.attachments.splice(index, 1);
+    renderAttachmentList();
+    showMsg('cAttachMsg', 'ফাইল সরানো হয়েছে', 'info');
+    // Clear the message after 2 seconds
+    setTimeout(() => {
+      const msgEl = document.getElementById('cAttachMsg');
+      if (msgEl) msgEl.innerHTML = '';
+    }, 2000);
+  }
+  
+  function renderAttachmentList() {
+    const container = document.getElementById('cAttachmentList');
+    if (!container) return;
+    
+    if (state.attachments.length === 0) {
+      container.innerHTML = '<div style="font-size:0.7rem;color:#A0ABBE;padding:8px 0;">কোনো ফাইল যোগ করা হয়নি</div>';
+      return;
+    }
+    
+    container.innerHTML = state.attachments.map((att, i) => `
+      <div class="c-attachment-item">
+        <div class="c-attachment-preview">${att.preview ? `<img src="${att.preview}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;">` : '<i class="fas fa-file-pdf"></i>'}</div>
+        <div class="c-attachment-info">
+          <div class="c-attachment-name">${esc(att.name)}</div>
+          <div class="c-attachment-size">${formatFileSize(att.size)}</div>
+        </div>
+        <button type="button" class="c-attachment-remove" onclick="ComplaintModule.removeAttachment(${i})">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    `).join('');
+  }
+
     /* ── Category definitions ───────────────────────────────── */
     const CATEGORIES = [
       { key: "wrong_product", icon: "📦", label: "ভুল পণ্য পেয়েছি" },
@@ -419,6 +522,23 @@
             <span><span id="cDescCount">${(fd.description || "").length}</span>/3000</span>
           </div>
         </div>
+
+        <!-- Attachments -->
+<div class="complaint-form-group">
+  <label><i class="fas fa-paperclip"></i> সংযুক্তি (ঐচ্ছিক)</label>
+  <div class="c-attachment-dropzone" id="cAttachmentDropzone" style="border:2px dashed #E8EBF4;border-radius:12px;padding:1rem;text-align:center;cursor:pointer;background:#FFFBF5;transition:all 0.2s;" 
+       onclick="document.getElementById('cFileInput').click()"
+       ondragover="event.preventDefault();this.style.borderColor='#F5A623';this.style.background='rgba(245,166,35,0.05)';"
+       ondragleave="event.preventDefault();this.style.borderColor='#E8EBF4';this.style.background='#FFFBF5';"
+       ondrop="event.preventDefault();ComplaintModule.handleDrop(event);">
+    <i class="fas fa-cloud-upload-alt" style="font-size:2rem;color:#A0ABBE;margin-bottom:8px;display:block;"></i>
+    <div style="font-size:0.75rem;color:#6B7A99;">ফাইল টেনে আনুন বা ক্লিক করুন</div>
+    <div style="font-size:0.65rem;color:#A0ABBE;margin-top:4px;">সর্বোচ্চ ৫টি ফাইল (JPG, PNG, PDF) — প্রতিটি ৫MB পর্যন্ত</div>
+  </div>
+  <input type="file" id="cFileInput" multiple accept="image/jpeg,image/png,image/jpg,image/gif,application/pdf" style="display:none;" onchange="ComplaintModule.handleFileSelect(this)">
+  <div id="cAttachmentList" class="c-attachment-list" style="margin-top:10px;"></div>
+  <div id="cAttachMsg" class="complaint-msg"></div>
+</div>
   
         <div id="cStep3Msg" class="complaint-msg"></div>
         <div class="complaint-form-nav">
@@ -571,65 +691,77 @@
        SUBMIT COMPLAINT
     ══════════════════════════════════════════════════════════ */
     async function submitComplaint() {
-      if (state.submitting) return;
-      state.submitting = true;
-  
-      const btn = document.getElementById("cSubmitBtn");
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> দাখিল হচ্ছে...';
-      }
-  
-      showMsg("cStep4Msg", "");
-  
-      const payload = {
-        customer: {
+        if (state.submitting) return;
+        state.submitting = true;
+      
+        const btn = document.getElementById("cSubmitBtn");
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> দাখিল হচ্ছে...';
+        }
+      
+        showMsg("cStep4Msg", "");
+      
+        // Create FormData for file upload
+        const formData = new FormData();
+        
+        // Add customer data as JSON string
+        const customerData = {
           name: state.formData.name,
           email: state.formData.email,
           phone: state.formData.phone || undefined,
-        },
-        category: state.category,
-        subject: state.formData.subject,
-        description: state.formData.description,
-        orderNumber: state.formData.orderNumber || undefined,
-      };
-  
-      try {
-        const res = await fetch(`${API}/complaints`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+        };
+        formData.append("customer", JSON.stringify(customerData));
+        formData.append("category", state.category);
+        formData.append("subject", state.formData.subject);
+        formData.append("description", state.formData.description);
+        if (state.formData.orderNumber) {
+          formData.append("orderNumber", state.formData.orderNumber);
+        }
+        
+        // Add attachments
+        state.attachments.forEach((att) => {
+          formData.append("attachments", att.file);
         });
-        const data = await res.json();
-  
-        if (!data.success) throw new Error(data.message || "অভিযোগ দাখিল ব্যর্থ");
-  
-        // Show success
-        const stepContent = document.getElementById("complaintStepContent");
-        const successState = document.getElementById("complaintSuccessState");
-        if (stepContent) stepContent.style.display = "none";
-        if (successState) successState.style.display = "block";
-  
-        const ticketEl = document.getElementById("cSuccessTicket");
-        if (ticketEl) ticketEl.textContent = data.data.ticketNumber;
-  
-        // Update steps bar to all done
-        updateStepsBar(5);
-  
-        // Save ticket for track
-        state.lastTicket = data.data.ticketNumber;
-        state.lastEmail = state.formData.email;
-  
-      } catch (err) {
-        showMsg("cStep4Msg", err.message || "একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।", "error");
-      } finally {
-        state.submitting = false;
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-paper-plane"></i> অভিযোগ দাখিল করুন';
+      
+        try {
+          const res = await fetch(`${API}/complaints`, {
+            method: "POST",
+            body: formData, // Don't set Content-Type header - browser sets it with boundary
+          });
+          
+          const data = await res.json();
+      
+          if (!data.success) throw new Error(data.message || "অভিযোগ দাখিল ব্যর্থ");
+      
+          // Show success
+          const stepContent = document.getElementById("complaintStepContent");
+          const successState = document.getElementById("complaintSuccessState");
+          if (stepContent) stepContent.style.display = "none";
+          if (successState) successState.style.display = "block";
+      
+          const ticketEl = document.getElementById("cSuccessTicket");
+          if (ticketEl) ticketEl.textContent = data.data.ticketNumber;
+      
+          updateStepsBar(5);
+          state.lastTicket = data.data.ticketNumber;
+          state.lastEmail = state.formData.email;
+          
+          // Clear attachments after successful submission
+          state.attachments = [];
+          renderAttachmentList();
+      
+        } catch (err) {
+          console.error("Submit error details:", err);
+          showMsg("cStep4Msg", err.message || "একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।", "error");
+        } finally {
+          state.submitting = false;
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> অভিযোগ দাখিল করুন';
+          }
         }
       }
-    }
   
     /* ══════════════════════════════════════════════════════════
        TRACK COMPLAINT
@@ -965,24 +1097,40 @@
   
     /* ── Public API ─────────────────────────────────────────── */
     return {
-      init: renderSection,
-      renderStep,
-      selectCategory,
-      next1,
-      next2,
-      next3,
-      submitComplaint,
-      trackComplaint,
-      sendReply,
-      setSatRating,
-      hoverSat,
-      hoverSatEnd,
-      resetForm,
-      goToForm,
-      focusTrack,
-      trackFromSuccess,
-      autoFillFromCheckout: autoFillFromSaved,
-    };
+        init: renderSection,
+        renderStep,
+        selectCategory,
+        next1,
+        next2,
+        next3,
+        submitComplaint,
+        trackComplaint,
+        sendReply,
+        setSatRating,
+        hoverSat,
+        hoverSatEnd,
+        resetForm,
+        goToForm,
+        focusTrack,
+        trackFromSuccess,
+        autoFillFromCheckout: autoFillFromSaved,
+        // ── Attachment functions ──────────────────────────────
+        handleFileSelect: function(input) {
+          Array.from(input.files).forEach(file => addAttachment(file));
+          input.value = '';
+        },
+        handleDrop: function(e) {
+          e.preventDefault();
+          const files = Array.from(e.dataTransfer.files);
+          files.forEach(file => addAttachment(file));
+          const dropzone = document.getElementById('cAttachmentDropzone');
+          if (dropzone) {
+            dropzone.style.borderColor = '#E8EBF4';
+            dropzone.style.background = '#FFFBF5';
+          }
+        },
+        removeAttachment: removeAttachment,
+      };
   })();
   
   // Auto-init when DOM is ready
