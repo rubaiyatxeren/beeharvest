@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="css/beetransfer.css" />
     <link rel="stylesheet" href="css/blog-premium.css" />
     <link rel="stylesheet" href="css/reviews-section.css" />
+    <link rel="stylesheet" href="css/complaint.css" />
     <style>
       @keyframes rvBounce{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
       </style>
@@ -72,6 +73,9 @@
           <a href="#" class="nav-link" data-page="profile"
             ><i class="fas fa-user"></i> প্রোফাইল</a
           >
+          <a href="#" class="nav-link" data-page="complaint">
+            <i class="fas fa-headset"></i> সাপোর্ট
+          </a>
         </div>
 
         <div class="nav-actions">
@@ -405,6 +409,66 @@
   <div class="reviews-section" id="reviews-section">
     <!-- populated dynamically by ReviewsSection.init() -->
   </div>
+
+  <div class="complaint-home-section" style="margin: 2rem 0 1rem;">
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">সহায়তা কেন্দ্র</div>
+        <h2 class="sec-title">অভিযোগ ও <em>সাপোর্ট</em></h2>
+      </div>
+    </div>
+  
+    <!-- Complaint Container -->
+    <div style="background: linear-gradient(135deg, #FFF9F0 0%, #FFF5E6 100%); border-radius: 24px; padding: 2.5rem 2rem; margin: 1rem 0; position: relative; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.05);">
+      
+      <!-- Decorative elements -->
+      <div style="position: absolute; top: -30px; right: -30px; font-size: 120px; opacity: 0.08; pointer-events: none;">🎧</div>
+      <div style="position: absolute; bottom: -20px; left: -20px; font-size: 100px; opacity: 0.06; pointer-events: none;">📋</div>
+      
+      <!-- Content -->
+      <div style="text-align: center; position: relative; z-index: 1;">
+        
+        <!-- Badge -->
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(245,166,35,0.15); border: 1px solid rgba(245,166,35,0.3); padding: 6px 16px; border-radius: 50px; font-size: 0.75rem; font-weight: 600; color: #C47F11; margin-bottom: 1rem;">
+          <i class="fas fa-clock"></i> ২৪ ঘণ্টার মধ্যে জবাব
+        </div>
+        
+        <!-- Title -->
+        <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: #0D1B3E; margin-bottom: 0.5rem;">
+          সমস্যা হয়েছে? <span style="color: #F5A623;">আমরা আছি আপনার পাশে</span>
+        </h3>
+        
+        <!-- Description -->
+        <p style="color: #6B7A99; font-size: 0.9rem; max-width: 500px; margin: 0 auto 1.5rem auto; line-height: 1.6;">
+          পণ্য নিয়ে কোনো সমস্যা? আমাদের সহজ অভিযোগ সিস্টেমে জানান। আমাদের টিম দ্রুত সমাধান করবে।
+        </p>
+        
+        <!-- Buttons -->
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+          <button onclick="navigateTo('complaint'); setTimeout(() => window.scrollTo({top: 0, behavior: 'smooth'}), 150);" style="background: linear-gradient(135deg, #0D1B3E, #1A2E5A); padding: 14px 36px; font-size: 0.95rem; font-weight: 700; color: white; border: none; border-radius: 60px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: transform 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 6px 20px rgba(13,27,62,0.25);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 25px rgba(13,27,62,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(13,27,62,0.25)';">
+            <i class="fas fa-pen-to-square"></i> অভিযোগ দাখিল করুন
+          </button>
+          <button onclick="navigateTo('complaint'); setTimeout(() => window.scrollTo({top: 0, behavior: 'smooth'}), 150);" style="background: white; padding: 14px 36px; font-size: 0.95rem; font-weight: 700; color: #0D1B3E; border: 2px solid #E8EBF4; border-radius: 60px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: all 0.2s ease;" onmouseover="this.style.borderColor='#F5A623'; this.style.background='rgba(245,166,35,0.05)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='#E8EBF4'; this.style.background='white'; this.style.transform='translateY(0)';">
+            <i class="fas fa-ticket-alt"></i> টিকেট ট্র্যাক করুন
+          </button>
+        </div>
+        
+        <!-- Trust Badges -->
+        <div style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: #A0ABBE;">
+            <i class="fas fa-shield-alt" style="color: #1E8A4A;"></i> <span>নিরাপদ</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: #A0ABBE;">
+            <i class="fas fa-clock" style="color: #F5A623;"></i> <span>দ্রুত প্রতিক্রিয়া</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: #A0ABBE;">
+            <i class="fas fa-check-circle" style="color: #1E8A4A;"></i> <span>সমাধানের গ্যারান্টি</span>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
       </div>
       <!-- end homePage -->
 
@@ -691,6 +755,11 @@
         </div>
         <div id="profileContainer"></div>
       </div>
+
+      <!-- ── COMPLAINT PAGE ──────────────────────────────────── -->
+<div class="page-content" id="complaintPage">
+  <div id="complaintSectionContainer"></div>
+</div>
     </main>
 
     <!-- ═══ CART SIDEBAR ═════════════════════════════════════ -->
@@ -1294,6 +1363,8 @@
       </div>
     </div>
 
+
+    
     <!-- ═══ FOOTER ════════════════════════════════════════════ -->
     <footer class="site-footer">
       <div class="footer-trust-bar">
@@ -1630,6 +1701,8 @@
     </div>
   </div>
 </div>
+
+
 
 
 <!-- ═══ PREMIUM GLASS BOTTOM NAV ════════════════════════════ -->
@@ -2198,5 +2271,6 @@
     <script src="js/reviews-section.js"></script>
     <script src="js/blog.js"></script>
     <script src="js/beetransfer.js"></script>
+    <script src="js/complaint.js"></script>
   </body>
 </html>
