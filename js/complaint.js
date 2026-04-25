@@ -546,7 +546,7 @@ function formatFileSize(bytes) {
             <i class="fas fa-arrow-left"></i> পিছনে
           </button>
           <button class="complaint-btn-next" onclick="ComplaintModule.next3()">
-            পর্যালোচনা করুন <i class="fas fa-eye"></i>
+            পর্যালোচনা করুন
           </button>
         </div>
       `;
