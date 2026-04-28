@@ -1134,6 +1134,33 @@ function formatFileSize(bytes) {
   })();
   
   // Auto-init when DOM is ready
-  document.addEventListener("DOMContentLoaded", () => {
-    ComplaintModule.init("complaintSectionContainer");
-  });
+  // Auto-init when DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  ComplaintModule.init("complaintSectionContainer");
+
+  // ── Auto-track from URL param (?ticket=TKT-XXXX) ─────────
+  const urlParams = new URLSearchParams(window.location.search);
+  const ticketFromUrl = urlParams.get("ticket");
+
+  if (ticketFromUrl) {
+    // Small delay to let the section render fully
+    setTimeout(() => {
+      // 1. Scroll to the track card
+      const trackCard = document.getElementById("complaintTrackCard");
+      if (trackCard) trackCard.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      // 2. Pre-fill the ticket number input
+      const ticketInput = document.getElementById("cTrackTicket");
+      if (ticketInput) ticketInput.value = ticketFromUrl.trim().toUpperCase();
+
+      // 3. Focus the email field so user just types email and hits Enter
+      setTimeout(() => {
+        const emailInput = document.getElementById("cTrackEmail");
+        if (emailInput) {
+          emailInput.focus();
+          emailInput.placeholder = "ইমেইল দিন এবং Enter চাপুন";
+        }
+      }, 600);
+    }, 400);
+  }
+});
